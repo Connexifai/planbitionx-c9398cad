@@ -5,6 +5,8 @@ import {
   Sparkles,
   Settings2,
   FileJson,
+  PanelLeftClose,
+  PanelLeftOpen,
 } from "lucide-react";
 import {
   Sidebar,
@@ -229,6 +231,7 @@ export function PlannerSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const [activeSection, setActiveSection] = useState<SectionId>("json");
+  const [contentCollapsed, setContentCollapsed] = useState(false);
 
   if (collapsed) return (
     <Sidebar collapsible="icon">
@@ -246,7 +249,7 @@ export function PlannerSidebar() {
   };
 
   return (
-    <Sidebar collapsible="icon" className="border-r-0" style={{ "--sidebar-width": "360px" } as React.CSSProperties}>
+    <Sidebar collapsible="icon" className="border-r-0" style={{ "--sidebar-width": contentCollapsed ? "56px" : "360px" } as React.CSSProperties}>
       <SidebarContent className="p-0 flex-row h-full">
         {/* Icon strip */}
         <div className="flex flex-col items-center gap-1 border-r bg-muted/30 px-1.5 py-3 shrink-0">
@@ -257,10 +260,13 @@ export function PlannerSidebar() {
               <Tooltip key={section.id}>
                 <TooltipTrigger asChild>
                   <button
-                    onClick={() => setActiveSection(section.id)}
+                    onClick={() => {
+                      setActiveSection(section.id);
+                      if (contentCollapsed) setContentCollapsed(false);
+                    }}
                     className={cn(
                       "flex items-center justify-center w-10 h-10 rounded-lg transition-all",
-                      isActive
+                      isActive && !contentCollapsed
                         ? "bg-primary text-primary-foreground shadow-md"
                         : "text-muted-foreground hover:bg-accent hover:text-foreground"
                     )}
@@ -274,33 +280,54 @@ export function PlannerSidebar() {
               </Tooltip>
             );
           })}
+
+          {/* Collapse toggle */}
+          <div className="mt-auto">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => setContentCollapsed(prev => !prev)}
+                  className="flex items-center justify-center w-10 h-10 rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground transition-all"
+                >
+                  {contentCollapsed ? <PanelLeftOpen className="h-5 w-5" /> : <PanelLeftClose className="h-5 w-5" />}
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="right">
+                {contentCollapsed ? "Paneel openen" : "Paneel sluiten"}
+              </TooltipContent>
+            </Tooltip>
+          </div>
         </div>
 
         {/* Content panel */}
-        <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-          <div className="px-4 py-3 border-b">
-            <h3 className="text-sm font-semibold flex items-center gap-2">
-              <activeDef.icon className="h-4 w-4 text-primary" />
-              {activeDef.label}
-            </h3>
+        {!contentCollapsed && (
+          <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+            <div className="px-4 py-3 border-b">
+              <h3 className="text-sm font-semibold flex items-center gap-2">
+                <activeDef.icon className="h-4 w-4 text-primary" />
+                {activeDef.label}
+              </h3>
+            </div>
+            <div className="flex-1 overflow-y-auto roster-scroll px-4 py-3">
+              {contentMap[activeSection]}
+            </div>
           </div>
-          <div className="flex-1 overflow-y-auto roster-scroll px-4 py-3">
-            {contentMap[activeSection]}
-          </div>
-        </div>
+        )}
       </SidebarContent>
 
-      <SidebarFooter className="p-3 border-t">
-        <div className="flex gap-2">
-          <Button className="flex-1" size="sm" style={{ background: "hsl(var(--kpi-assignments))" }}>
-            ▶ Oplossen
-          </Button>
-          <Button variant="default" size="sm" className="flex-1">
-            Stuur naar API
-          </Button>
-        </div>
-        <p className="text-[10px] text-muted-foreground text-center mt-1">Klaar in 16s</p>
-      </SidebarFooter>
+      {!contentCollapsed && (
+        <SidebarFooter className="p-3 border-t">
+          <div className="flex gap-2">
+            <Button className="flex-1" size="sm" style={{ background: "hsl(var(--kpi-assignments))" }}>
+              ▶ Oplossen
+            </Button>
+            <Button variant="default" size="sm" className="flex-1">
+              Stuur naar API
+            </Button>
+          </div>
+          <p className="text-[10px] text-muted-foreground text-center mt-1">Klaar in 16s</p>
+        </SidebarFooter>
+      )}
     </Sidebar>
   );
 }
