@@ -5,7 +5,9 @@ import { RosterGrid } from "@/components/planner/RosterGrid";
 import { RosterTabs } from "@/components/planner/RosterTabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Download, Settings, Key } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Download, Settings, Key, Moon, Sun } from "lucide-react";
+import { useEffect, useState } from "react";
 
 export default function Index() {
   return (
