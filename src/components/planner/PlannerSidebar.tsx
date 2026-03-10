@@ -5,6 +5,8 @@ import {
   Sparkles,
   Settings2,
   FileJson,
+  PanelLeftClose,
+  PanelLeftOpen,
 } from "lucide-react";
 import {
   Sidebar,
