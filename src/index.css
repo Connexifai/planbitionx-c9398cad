@@ -134,7 +134,6 @@
     color: hsl(var(--shift-night));
     border: 1px solid hsl(var(--shift-night) / 0.2);
   }
-  }
 
   .roster-scroll {
     scrollbar-width: thin;
