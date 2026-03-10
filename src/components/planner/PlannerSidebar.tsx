@@ -2,6 +2,7 @@ import { Upload, ChevronDown, Settings2, ShieldCheck, Sparkles } from "lucide-re
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -150,27 +151,18 @@ export function PlannerSidebar() {
             </div>
           </div>
         </CollapsibleSection>
-
-        <Separator />
-
-        {/* Actions */}
-        <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <div className="flex gap-2 pt-2">
-                  <Button className="flex-1" size="sm">
-                    ▶ Oplossen
-                  </Button>
-                  <Button variant="outline" size="sm" className="flex-1">
-                    Stuur naar API
-                  </Button>
-                </div>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
       </SidebarContent>
+
+      <SidebarFooter className="p-4 border-t">
+        <div className="flex gap-2">
+          <Button className="flex-1" size="sm">
+            ▶ Oplossen
+          </Button>
+          <Button variant="outline" size="sm" className="flex-1">
+            Stuur naar API
+          </Button>
+        </div>
+      </SidebarFooter>
     </Sidebar>
   );
 }
