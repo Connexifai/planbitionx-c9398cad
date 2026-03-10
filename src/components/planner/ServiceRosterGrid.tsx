@@ -343,12 +343,12 @@ const employees: Employee[] = [
 
 // Shift group definitions for grouping
 const shiftGroups = [
-  { label: "Night Pick", type: "nacht" as ShiftType, matchLabel: "Night Pick", time: "22:00-06:00", target: 25 },
-  { label: "Night Pack", type: "nacht" as ShiftType, matchLabel: "Night Pack", time: "22:00-06:00", target: 25 },
   { label: "Early pick", type: "vroeg" as ShiftType, matchLabel: "Early pick", time: "06:00-14:00", target: 25 },
   { label: "Day Pick", type: "dag" as ShiftType, matchLabel: "Day Pick", time: "09:00-18:00", target: 25 },
   { label: "Late pick", type: "laat" as ShiftType, matchLabel: "Late pick", time: "14:00-22:00", target: 25 },
   { label: "Late pack", type: "laat" as ShiftType, matchLabel: "Late pack", time: "14:00-22:00", target: 25 },
+  { label: "Night Pick", type: "nacht" as ShiftType, matchLabel: "Night Pick", time: "22:00-06:00", target: 25 },
+  { label: "Night Pack", type: "nacht" as ShiftType, matchLabel: "Night Pack", time: "22:00-06:00", target: 25 },
 ];
 
 const shiftClassMap: Record<string, string> = {
