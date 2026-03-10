@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { SendHorizontal, Bot, User, ArrowRightLeft, Lightbulb } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import robotImg from "@/assets/robot-assistant.png";
 
 interface Message {
   id: number;
