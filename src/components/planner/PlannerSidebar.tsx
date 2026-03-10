@@ -2,6 +2,7 @@ import { Upload, ChevronDown, Settings2, ShieldCheck, Sparkles } from "lucide-re
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
