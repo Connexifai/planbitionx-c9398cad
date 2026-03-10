@@ -475,9 +475,8 @@ export function RosterGrid() {
             >
               {/* Employee info */}
               <div className="flex flex-col justify-center gap-1.5 px-4 py-3 border-r">
-                <div className="flex items-center justify-between">
+                <div>
                   <p className="text-sm font-semibold leading-tight truncate">{emp.name}</p>
-                  <FillRateIndicator percent={fillRate} />
                 </div>
                 <div className="flex flex-wrap gap-1">
                   {emp.tags.map(tag => (
