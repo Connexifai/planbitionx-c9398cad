@@ -63,8 +63,8 @@ export default function Login() {
           </p>
           <div className="mt-12 grid grid-cols-3 gap-8 text-center">
             <div>
-              <div className="text-3xl font-bold">98%</div>
-              <div className="text-xs text-primary-foreground/60 mt-1">Bezettingsgraad</div>
+              <div className="text-3xl font-bold">AI</div>
+              <div className="text-xs text-primary-foreground/60 mt-1">Slimme planning</div>
             </div>
             <div>
               <div className="text-3xl font-bold">2min</div>
