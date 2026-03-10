@@ -449,7 +449,7 @@ export function RosterGrid() {
     <div className="roster-scroll w-full rounded-xl border border-border/50 bg-card shadow-sm overflow-auto max-h-[calc(100vh-280px)]">
       <div className="min-w-[1800px]">
         {/* Header */}
-        <div className="sticky top-0 z-10 grid grid-cols-[260px_repeat(14,minmax(110px,1fr))] border-b bg-card shadow-sm">
+        <div className="sticky top-0 z-[5] grid grid-cols-[260px_repeat(14,minmax(110px,1fr))] border-b bg-card shadow-sm">
           <div className="flex items-center gap-2 px-4 py-3 border-r">
             <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Medewerker</span>
           </div>
