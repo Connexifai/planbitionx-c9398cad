@@ -50,6 +50,11 @@ export default function Index() {
                 <Download className="h-3.5 w-3.5" />
                 Download JSON
               </Button>
+              <div className="flex items-center gap-1.5 ml-1">
+                <Sun className="h-3.5 w-3.5 text-muted-foreground" />
+                <Switch checked={dark} onCheckedChange={setDark} className="scale-75" />
+                <Moon className="h-3.5 w-3.5 text-muted-foreground" />
+              </div>
             </div>
           </header>
 
