@@ -154,6 +154,7 @@ export function AiBriefingChat() {
           Klik op <strong>▶ Oplossen</strong> in de sidebar om het rooster te genereren met deze constraints
         </p>
       </div>
+      </div>
     </div>
   );
 }
