@@ -155,6 +155,9 @@ export function AiBriefingChat() {
           Klik op <strong>▶ Oplossen</strong> in de sidebar om het rooster te genereren met deze constraints
         </p>
       </div>
+      {/* Robot */}
+      <div className="shrink-0 pt-8 px-4">
+        <img src={robotImg} alt="AI Briefing" className="w-56 h-56 object-contain drop-shadow-2xl animate-[orbit_180s_ease-in-out_infinite] hover:scale-110 transition-transform duration-500 cursor-pointer" />
       </div>
     </div>
   );
