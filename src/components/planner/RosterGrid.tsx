@@ -471,7 +471,7 @@ export function RosterGrid() {
           return (
             <div
               key={emp.id}
-              className={`grid grid-cols-[280px_repeat(14,1fr)] border-b last:border-b-0 transition-colors hover:bg-accent/30 ${rowIdx % 2 === 0 ? "" : "bg-accent/10"}`}
+              className={`grid grid-cols-[260px_repeat(14,minmax(110px,1fr))] border-b last:border-b-0 transition-colors hover:bg-accent/30 ${rowIdx % 2 === 0 ? "" : "bg-accent/10"}`}
             >
               {/* Employee info */}
               <div className="flex flex-col justify-center gap-1.5 px-4 py-3 border-r">
