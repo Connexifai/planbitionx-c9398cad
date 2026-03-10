@@ -5,9 +5,17 @@ import { RosterGrid } from "@/components/planner/RosterGrid";
 import { RosterTabs } from "@/components/planner/RosterTabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Download, Settings, Key } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Download, Settings, Key, Moon, Sun } from "lucide-react";
+import { useEffect, useState } from "react";
 
 export default function Index() {
+  const [dark, setDark] = useState(() => document.documentElement.classList.contains("dark"));
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", dark);
+  }, [dark]);
+
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
@@ -42,6 +50,11 @@ export default function Index() {
                 <Download className="h-3.5 w-3.5" />
                 Download JSON
               </Button>
+              <div className="flex items-center gap-1.5 ml-1">
+                <Sun className="h-3.5 w-3.5 text-muted-foreground" />
+                <Switch checked={dark} onCheckedChange={setDark} className="scale-75" />
+                <Moon className="h-3.5 w-3.5 text-muted-foreground" />
+              </div>
             </div>
           </header>
 
