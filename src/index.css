@@ -137,7 +137,8 @@
 
   .roster-scroll {
     scrollbar-width: thin;
-    scrollbar-color: hsl(var(--border)) transparent;
+    scrollbar-color: hsl(var(--muted-foreground) / 0.3) transparent;
+    overflow-x: auto;
   }
   .roster-scroll::-webkit-scrollbar {
     width: 8px;
