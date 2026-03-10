@@ -99,7 +99,7 @@ export function AiBriefingChat() {
               )}
             >
               {msg.role === "assistant" ? (
-                <Bot className="h-4 w-4 text-primary" />
+                <img src={robotImg} alt="AI" className="w-5 h-5 object-contain" />
               ) : (
                 <User className="h-4 w-4 text-muted-foreground" />
               )}
