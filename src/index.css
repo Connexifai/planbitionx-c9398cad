@@ -2,12 +2,21 @@
 @tailwind components;
 @tailwind utilities;
 
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0px);
+@keyframes orbit {
+  0% {
+    transform: translate(0px, 0px) rotate(0deg);
+  }
+  25% {
+    transform: translate(10px, -15px) rotate(2deg);
   }
   50% {
-    transform: translateY(-12px);
+    transform: translate(0px, -25px) rotate(0deg);
+  }
+  75% {
+    transform: translate(-10px, -15px) rotate(-2deg);
+  }
+  100% {
+    transform: translate(0px, 0px) rotate(0deg);
   }
 }
 
