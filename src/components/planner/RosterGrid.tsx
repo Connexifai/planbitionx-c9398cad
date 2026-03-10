@@ -482,7 +482,6 @@ export function RosterGrid() {
           </div>
         ))}
       </div>
-      <ScrollBar orientation="horizontal" />
-    </ScrollArea>
+    </div>
   );
 }
