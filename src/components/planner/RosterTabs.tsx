@@ -1,5 +1,5 @@
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { LayoutGrid, BarChart3, BookOpen, CalendarDays } from "lucide-react";
+import { LayoutGrid, BarChart3, BookOpen, CalendarDays, MessageCircle } from "lucide-react";
 
 interface RosterTabsProps {
   value: string;
