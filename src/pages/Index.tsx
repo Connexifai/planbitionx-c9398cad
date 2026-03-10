@@ -99,14 +99,17 @@ export default function Index() {
           {/* AI Chat side panel (only after solve) */}
           {solved && (
             <>
-              {!chatOpen && (
-                <img
-                  src={robotImg}
-                  alt="AI Assistent"
-                  onClick={() => setChatOpen(true)}
-                  className="fixed bottom-8 right-8 z-50 w-56 h-56 object-contain drop-shadow-2xl animate-[orbit_180s_ease-in-out_infinite] hover:scale-110 transition-transform duration-500 cursor-pointer"
-                />
-              )}
+              {/* Robot - positioned left of the chat panel */}
+              <img
+                src={robotImg}
+                alt="AI Assistent"
+                onClick={() => !chatOpen && setChatOpen(true)}
+                className={cn(
+                  "fixed bottom-8 z-50 w-44 h-44 object-contain drop-shadow-2xl animate-[orbit_180s_ease-in-out_infinite] hover:scale-110 transition-all duration-500",
+                  !chatOpen && "cursor-pointer",
+                  chatOpen ? "right-[416px]" : "right-8"
+                )}
+              />
 
               <div
                 className={cn(
