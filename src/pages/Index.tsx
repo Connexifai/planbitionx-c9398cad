@@ -2,6 +2,7 @@ import { PlannerSidebar } from "@/components/planner/PlannerSidebar";
 import { KpiCards } from "@/components/planner/KpiCards";
 import { RosterGrid } from "@/components/planner/RosterGrid";
 import { ServiceRosterGrid } from "@/components/planner/ServiceRosterGrid";
+import { StatsDashboard } from "@/components/planner/StatsDashboard";
 import { RosterTabs } from "@/components/planner/RosterTabs";
 import { AiBriefingChat } from "@/components/planner/AiBriefingChat";
 import { Button } from "@/components/ui/button";
