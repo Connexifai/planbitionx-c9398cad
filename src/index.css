@@ -7,13 +7,13 @@
     transform: translate(0px, 0px) rotate(0deg);
   }
   25% {
-    transform: translate(10px, -15px) rotate(2deg);
+    transform: translate(6px, -10px) rotate(1deg);
   }
   50% {
-    transform: translate(0px, -25px) rotate(0deg);
+    transform: translate(0px, -18px) rotate(0deg);
   }
   75% {
-    transform: translate(-10px, -15px) rotate(-2deg);
+    transform: translate(-6px, -10px) rotate(-1deg);
   }
   100% {
     transform: translate(0px, 0px) rotate(0deg);
