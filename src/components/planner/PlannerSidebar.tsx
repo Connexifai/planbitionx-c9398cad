@@ -290,7 +290,7 @@ export function PlannerSidebar({ onSolve, hideFooter }: { onSolve?: () => void; 
         </div>
 
         {/* Content panel */}
-        {!contentCollapsed && (
+        {!contentCollapsed && !hideFooter && (
           <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
             <div className="px-4 py-3 border-b flex items-center justify-between">
               <h3 className="text-sm font-semibold flex items-center gap-2">
