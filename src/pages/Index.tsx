@@ -79,19 +79,19 @@ export default function Index() {
                 {activeTab === "uitleg" && <ExplanationView />}
               </main>
             ) : (
-              <div className="flex-1 flex min-h-0 overflow-visible">
-                <div className="flex-1 flex flex-col min-h-0">
-                  <div className="p-5 pb-0">
-                    <KpiCards />
-                  </div>
-                  <div className="flex-1 min-h-0 overflow-visible">
-                    <AiBriefingChat />
-                  </div>
+              <div className="flex-1 flex flex-col min-h-0">
+                <div className="p-5 pb-0">
+                  <KpiCards />
                 </div>
-                {/* Robot rechts van content, buiten sidebar */}
-                <div className="shrink-0 flex items-start pt-8 px-4">
-                  <img src={robotImg} alt="AI Briefing" className="w-56 h-56 object-contain drop-shadow-2xl animate-[orbit_180s_ease-in-out_infinite] hover:scale-110 transition-transform duration-500 cursor-pointer" />
+                <div className="flex-1 min-h-0 overflow-visible">
+                  <AiBriefingChat />
                 </div>
+                {/* Robot fixed rechtsonder */}
+                <img
+                  src={robotImg}
+                  alt="AI Briefing"
+                  className="fixed bottom-8 right-8 w-56 h-56 object-contain drop-shadow-2xl animate-[orbit_180s_ease-in-out_infinite] hover:scale-110 transition-transform duration-500 cursor-pointer z-50"
+                />
               </div>
             )}
           </div>
