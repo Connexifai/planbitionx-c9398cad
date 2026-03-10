@@ -68,7 +68,7 @@ export default function Index() {
         {/* Main content area */}
         <div className="flex-1 flex min-h-0">
           {/* Content */}
-          <div className="flex-1 flex flex-col min-w-0">
+          <div className="flex-1 flex flex-col min-w-0 overflow-visible">
             {solved ? (
               <main className="flex-1 overflow-y-auto overflow-x-hidden p-5 space-y-5">
                 <KpiCards />
