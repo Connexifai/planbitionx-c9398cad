@@ -18,65 +18,70 @@ export default function Index() {
   }, [dark]);
 
   return (
-    <div className="min-h-screen flex w-full">
-      <PlannerSidebar onSolve={() => setSolved(true)} />
+    <div className="min-h-screen flex flex-col w-full">
+      <div className="flex flex-1 min-h-0">
+        <PlannerSidebar onSolve={() => setSolved(true)} />
 
-      <div className="flex-1 flex flex-col min-w-0">
-        {/* Top bar */}
-        <header className="flex items-center justify-between gap-4 border-b bg-card px-4 py-2.5 shadow-sm">
-          <div className="flex items-center gap-3">
-            <h1 className="text-lg font-bold tracking-tight">Planbition</h1>
-            <span className="text-xs text-muted-foreground">AI Solver</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1.5 rounded-lg border bg-background px-3 py-1.5 text-xs">
-              <Settings className="h-3.5 w-3.5 text-muted-foreground" />
-              <span className="text-muted-foreground">API:</span>
-              <Input
-                defaultValue="http://localhost:8080"
-                className="h-6 w-40 border-0 bg-transparent p-0 text-xs shadow-none focus-visible:ring-0"
-              />
+        <div className="flex-1 flex flex-col min-w-0">
+          {/* Top bar */}
+          <header className="flex items-center justify-between gap-4 border-b bg-card px-4 py-2.5 shadow-sm">
+            <div className="flex items-center gap-3">
+              <h1 className="text-lg font-bold tracking-tight">Planbition</h1>
+              <span className="text-xs text-muted-foreground">AI Solver</span>
             </div>
-            <div className="flex items-center gap-1.5 rounded-lg border bg-background px-3 py-1.5 text-xs">
-              <Key className="h-3.5 w-3.5 text-muted-foreground" />
-              <span className="text-muted-foreground">Key:</span>
-              <Input
-                defaultValue="test-2024"
-                className="h-6 w-24 border-0 bg-transparent p-0 text-xs shadow-none focus-visible:ring-0"
-              />
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 rounded-lg border bg-background px-3 py-1.5 text-xs">
+                <Settings className="h-3.5 w-3.5 text-muted-foreground" />
+                <span className="text-muted-foreground">API:</span>
+                <Input
+                  defaultValue="http://localhost:8080"
+                  className="h-6 w-40 border-0 bg-transparent p-0 text-xs shadow-none focus-visible:ring-0"
+                />
+              </div>
+              <div className="flex items-center gap-1.5 rounded-lg border bg-background px-3 py-1.5 text-xs">
+                <Key className="h-3.5 w-3.5 text-muted-foreground" />
+                <span className="text-muted-foreground">Key:</span>
+                <Input
+                  defaultValue="test-2024"
+                  className="h-6 w-24 border-0 bg-transparent p-0 text-xs shadow-none focus-visible:ring-0"
+                />
+              </div>
+              <Button variant="outline" size="sm" className="gap-1.5 text-xs">
+                <Download className="h-3.5 w-3.5" />
+                Download JSON
+              </Button>
+              <div className="flex items-center gap-1.5 ml-1">
+                <Sun className="h-3.5 w-3.5 text-muted-foreground" />
+                <Switch checked={dark} onCheckedChange={setDark} className="scale-75" />
+                <Moon className="h-3.5 w-3.5 text-muted-foreground" />
+              </div>
             </div>
-            <Button variant="outline" size="sm" className="gap-1.5 text-xs">
-              <Download className="h-3.5 w-3.5" />
-              Download JSON
-            </Button>
-            <div className="flex items-center gap-1.5 ml-1">
-              <Sun className="h-3.5 w-3.5 text-muted-foreground" />
-              <Switch checked={dark} onCheckedChange={setDark} className="scale-75" />
-              <Moon className="h-3.5 w-3.5 text-muted-foreground" />
-            </div>
-          </div>
-        </header>
+          </header>
 
-        {/* Main content */}
-        {solved ? (
-          <main className="flex-1 overflow-auto p-5 space-y-5">
-            <KpiCards />
-            <RosterTabs />
-            <RosterGrid />
-          </main>
-        ) : (
-          <div className="flex-1 flex flex-col min-h-0">
-            <div className="p-5 pb-0">
+          {/* Main content */}
+          {solved ? (
+            <main className="flex-1 overflow-auto p-5 space-y-5">
               <KpiCards />
-            </div>
-            <div className="flex-1 min-h-0 flex flex-col">
+              <RosterTabs />
+              <RosterGrid />
+            </main>
+          ) : (
+            <div className="flex-1 flex flex-col min-h-0">
+              <div className="p-5 pb-0">
+                <KpiCards />
+              </div>
               <div className="flex-1 min-h-0 overflow-hidden">
                 <AiBriefingChat />
               </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
+
+      {/* Full-width bottom bar - only when not solved */}
+      {!solved && (
+        <div className="border-t border-border" />
+      )}
     </div>
   );
 }
