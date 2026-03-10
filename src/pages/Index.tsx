@@ -10,6 +10,12 @@ import { Download, Settings, Key, Moon, Sun } from "lucide-react";
 import { useEffect, useState } from "react";
 
 export default function Index() {
+  const [dark, setDark] = useState(() => document.documentElement.classList.contains("dark"));
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", dark);
+  }, [dark]);
+
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
