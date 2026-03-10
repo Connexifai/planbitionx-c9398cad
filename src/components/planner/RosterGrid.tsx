@@ -204,12 +204,16 @@ function ShiftCell({ shift }: { shift: ShiftData }) {
 
   const cls = shiftClassMap[shift.type] || "";
 
+  // Extract role from label (e.g. "Late pick" → "pick", "Night Pack" → "pack")
+  const role = shift.label?.split(" ").slice(1).join(" ") || "";
+
   return (
     <Tooltip>
       <TooltipTrigger asChild>
         <div className={`shift-badge ${cls} cursor-default flex-col items-start w-full`}>
           <span className="font-semibold capitalize text-[11px]">{shift.type === "vroeg" ? "Vroeg" : shift.type === "dag" ? "Dag" : shift.type === "laat" ? "Laat" : "Nacht"}</span>
           <span className="text-[10px] opacity-75">{shift.time}</span>
+          {role && <span className="text-[9px] opacity-60 capitalize font-medium mt-0.5">{role}</span>}
         </div>
       </TooltipTrigger>
       <TooltipContent side="top">
