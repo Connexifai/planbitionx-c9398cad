@@ -9,6 +9,7 @@ import { Eye, EyeOff, LogIn, UserPlus, ArrowRight } from "lucide-react";
 import robotImg from "@/assets/robot-assistant.png";
 
 export default function Login() {
+  const navigate = useNavigate();
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
