@@ -99,7 +99,7 @@ export default function Index() {
                   src={robotImg}
                   alt="AI Assistent"
                   onClick={() => setChatOpen(true)}
-                  className="fixed bottom-8 right-8 z-50 w-56 h-56 object-contain drop-shadow-2xl animate-[orbit_16s_ease-in-out_infinite] hover:scale-110 transition-transform duration-300 cursor-pointer"
+                  className="fixed bottom-8 right-8 z-50 w-56 h-56 object-contain drop-shadow-2xl animate-[orbit_30s_ease-in-out_infinite] hover:scale-110 transition-transform duration-300 cursor-pointer"
                 />
               )}
 
