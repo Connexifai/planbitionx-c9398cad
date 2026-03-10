@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { SendHorizontal, Sparkles, Bot, User } from "lucide-react";
+import { SendHorizontal, Sparkles, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import robotImg from "@/assets/robot-assistant.png";
 
 interface Message {
   id: number;
