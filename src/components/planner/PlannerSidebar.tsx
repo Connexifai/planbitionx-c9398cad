@@ -303,7 +303,7 @@ export function PlannerSidebar({ onSolve }: { onSolve?: () => void }) {
       </div>
 
       {!contentCollapsed && (
-        <div className="p-4 border-t shadow-[0_-1px_3px_0_hsl(var(--border)/0.5)]">
+        <div className="p-4 border-t border-border">
           <div className="flex gap-2 mb-2">
             <Button className="flex-1 h-10" style={{ background: "hsl(var(--kpi-assignments))" }} onClick={onSolve}>
               ▶ Oplossen
