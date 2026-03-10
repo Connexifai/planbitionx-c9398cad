@@ -66,8 +66,7 @@ export function AiBriefingChat() {
   };
 
   return (
-    <div className="h-full flex items-start justify-center">
-      {/* Chat column */}
+    <div className="h-full flex justify-center">
       <div className="flex flex-col h-full min-w-0 max-w-3xl w-full px-5 pt-4">
         {/* Header */}
         <div className="flex items-center gap-3 mb-4">
