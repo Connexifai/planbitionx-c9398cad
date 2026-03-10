@@ -108,7 +108,7 @@ export function PostSolveChat() {
     <div className="flex h-full">
       {/* Robot column */}
       <div className="flex items-start justify-center pt-8 px-4 shrink-0">
-        <img src={robotImg} alt="AI Assistant" className="w-56 h-56 object-contain drop-shadow-2xl animate-[orbit_40s_ease-in-out_infinite] hover:scale-110 transition-transform duration-500 cursor-pointer" />
+        <img src={robotImg} alt="AI Assistant" className="w-56 h-56 object-contain drop-shadow-2xl animate-[orbit_125s_ease-in-out_infinite] hover:scale-110 transition-transform duration-500 cursor-pointer" />
       </div>
 
       <div className="flex flex-col h-full flex-1 min-w-0 max-w-3xl">
