@@ -292,7 +292,7 @@ export function PlannerSidebar() {
 
       <SidebarFooter className="p-3 border-t">
         <div className="flex gap-2">
-          <Button className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white" size="sm">
+          <Button className="flex-1" size="sm" style={{ background: "hsl(var(--kpi-assignments))" }}>
             ▶ Oplossen
           </Button>
           <Button variant="default" size="sm" className="flex-1">
