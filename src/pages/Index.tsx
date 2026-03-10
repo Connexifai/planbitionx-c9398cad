@@ -95,21 +95,20 @@ export default function Index() {
           {solved && (
             <>
               {!chatOpen && (
-                <div className="flex flex-col items-center py-3 px-1.5 border-l bg-muted/30">
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button
-                        onClick={() => setChatOpen(true)}
-                        className="flex items-center justify-center w-12 h-12 rounded-xl bg-card border shadow-md hover:shadow-lg hover:scale-105 transition-all"
-                      >
-                        <img src={robotImg} alt="AI Assistent" className="w-9 h-9 object-contain" />
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent side="left">AI Assistent openen</TooltipContent>
-                  </Tooltip>
-                  <span className="text-[10px] text-muted-foreground mt-2 [writing-mode:vertical-lr] rotate-180">
-                    AI Assistent
-                  </span>
+                <div className="flex flex-col items-center justify-center px-3 border-l bg-muted/30 w-[100px]">
+                  <button
+                    onClick={() => setChatOpen(true)}
+                    className="group flex flex-col items-center gap-2 transition-all"
+                  >
+                    <img
+                      src={robotImg}
+                      alt="AI Assistent"
+                      className="w-24 h-24 object-contain drop-shadow-lg animate-[float_3s_ease-in-out_infinite] group-hover:scale-110 transition-transform duration-300"
+                    />
+                    <span className="text-xs font-semibold text-primary opacity-90 group-hover:opacity-100 transition-opacity">
+                      AI Assistent
+                    </span>
+                  </button>
                 </div>
               )}
 
