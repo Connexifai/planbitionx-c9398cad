@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { SendHorizontal, User, ArrowRightLeft, Lightbulb } from "lucide-react";
-import robotImg from "@/assets/robot-assistant.png";
+import { SendHorizontal, Bot, User, ArrowRightLeft, Lightbulb } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
