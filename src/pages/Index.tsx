@@ -71,6 +71,11 @@ export default function Index() {
             {activeTab === "dienst" && <ServiceRosterGrid />}
             {activeTab === "stats" && <StatsDashboard />}
             {activeTab === "uitleg" && <ExplanationView />}
+            {activeTab === "chat" && (
+              <div className="flex-1 min-h-0 -mt-5 -mx-5 h-[calc(100vh-180px)]">
+                <PostSolveChat />
+              </div>
+            )}
           </main>
         ) : (
           <div className="flex-1 flex flex-col min-h-0">
