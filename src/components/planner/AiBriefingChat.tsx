@@ -73,7 +73,7 @@ export function AiBriefingChat() {
       </div>
 
       {/* Chat column */}
-      <div className="flex flex-col h-full flex-1 min-w-0 px-5 pt-4">
+      <div className="flex flex-col h-full flex-1 min-w-0 max-w-3xl px-5 pt-4">
         {/* Header */}
         <div className="flex items-center gap-3 mb-4">
           <div>
