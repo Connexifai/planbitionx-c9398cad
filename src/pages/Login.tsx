@@ -55,7 +55,7 @@ export default function Login() {
           <img
             src={robotImg}
             alt="Planbition X"
-            className="w-64 h-64 object-contain drop-shadow-2xl animate-[orbit_18s_ease-in-out_infinite] hover:scale-110 transition-transform duration-500 cursor-pointer mb-8"
+            className="w-64 h-64 object-contain drop-shadow-2xl animate-[orbit_25s_ease-in-out_infinite] hover:scale-110 transition-transform duration-500 cursor-pointer mb-8"
           />
           <h1 className="text-5xl font-black tracking-tight mb-3">Planbition X</h1>
           <p className="text-lg text-primary-foreground/80 text-center max-w-md leading-relaxed">
@@ -86,7 +86,7 @@ export default function Login() {
             <img
               src={robotImg}
               alt="Planbition X"
-              className="w-32 h-32 object-contain drop-shadow-xl animate-[orbit_18s_ease-in-out_infinite] hover:scale-110 transition-transform duration-500 cursor-pointer mb-4"
+              className="w-32 h-32 object-contain drop-shadow-xl animate-[orbit_25s_ease-in-out_infinite] hover:scale-110 transition-transform duration-500 cursor-pointer mb-4"
             />
             <h1 className="text-3xl font-black tracking-tight">Planbition X</h1>
           </div>
