@@ -86,7 +86,7 @@ export default function Login() {
             <img
               src={robotImg}
               alt="Planbition X"
-              className="w-32 h-32 object-contain drop-shadow-xl animate-[orbit_25s_ease-in-out_infinite] hover:scale-110 transition-transform duration-500 cursor-pointer mb-4"
+              className="w-32 h-32 object-contain drop-shadow-xl animate-[orbit_40s_ease-in-out_infinite] hover:scale-110 transition-transform duration-500 cursor-pointer mb-4"
             />
             <h1 className="text-3xl font-black tracking-tight">Planbition X</h1>
           </div>
