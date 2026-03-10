@@ -221,7 +221,7 @@ function SolverSection() {
 
 /* ── Main sidebar ─────────────────────────────────────── */
 
-export function PlannerSidebar() {
+export function PlannerSidebar({ onSolve }: { onSolve?: () => void }) {
   const [activeSection, setActiveSection] = useState<SectionId>("json");
   const [contentCollapsed, setContentCollapsed] = useState(false);
 
