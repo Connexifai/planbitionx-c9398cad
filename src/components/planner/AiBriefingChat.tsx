@@ -131,7 +131,7 @@ export function AiBriefingChat() {
       {/* Input */}
       <div className="bg-background pt-4 pb-3 px-4 border-t border-border">
         <div className="flex items-center gap-1 mb-2">
-          <Bot className="h-3.5 w-3.5 text-primary" />
+          <img src={robotImg} alt="AI" className="w-4 h-4 object-contain" />
           <span className="text-xs font-medium text-muted-foreground">Stuur een bericht naar de AI-assistent</span>
         </div>
         <div className="flex items-center gap-2 rounded-xl border-2 border-primary/20 bg-card px-4 py-3 shadow-md focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/10 transition-all">
