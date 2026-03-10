@@ -271,25 +271,6 @@ export function PlannerSidebar() {
               </Tooltip>
             );
           })}
-
-          {/* Collapse toggle - only show in icon strip when collapsed */}
-          {contentCollapsed && (
-            <div className="mt-auto">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    onClick={() => setContentCollapsed(false)}
-                    className="flex items-center justify-center w-10 h-10 rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground transition-all"
-                  >
-                    <PanelLeftOpen className="h-5 w-5" />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent side="right">
-                  Paneel openen
-                </TooltipContent>
-              </Tooltip>
-            </div>
-          )}
         </div>
 
         {/* Content panel */}
