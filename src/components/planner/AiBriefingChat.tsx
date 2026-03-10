@@ -70,7 +70,7 @@ export function AiBriefingChat() {
       {/* Header */}
       <div className="flex items-center gap-3 mb-4">
         <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-primary/10">
-          <Bot className="h-5 w-5 text-primary" />
+          <img src={robotImg} alt="AI" className="w-7 h-7 object-contain" />
         </div>
         <div>
           <h2 className="text-lg font-semibold">AI Briefing</h2>
