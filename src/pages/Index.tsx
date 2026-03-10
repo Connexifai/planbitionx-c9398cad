@@ -83,7 +83,7 @@ export default function Index() {
                 <div className="p-5 pb-0">
                   <KpiCards />
                 </div>
-                <div className="flex-1 min-h-0 overflow-y-auto overflow-x-visible">
+                <div className="flex-1 min-h-0 overflow-visible">
                   <AiBriefingChat />
                 </div>
               </div>
