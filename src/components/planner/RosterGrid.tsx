@@ -446,7 +446,7 @@ export function RosterGrid() {
   const dayFillRates = getDayFillRates();
 
   return (
-    <div className="w-full rounded-xl border border-border/50 bg-card shadow-sm overflow-auto max-h-[calc(100vh-280px)]">
+    <div className="roster-scroll w-full rounded-xl border border-border/50 bg-card shadow-sm overflow-auto max-h-[calc(100vh-280px)]">
       <div className="min-w-[1200px]">
         {/* Header */}
         <div className="sticky top-0 z-10 grid grid-cols-[280px_repeat(14,1fr)] border-b bg-card shadow-sm">
