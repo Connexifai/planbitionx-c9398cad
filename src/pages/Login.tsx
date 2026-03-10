@@ -18,30 +18,7 @@ export default function Login() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.trim() || !password.trim()) return;
-
-    setLoading(true);
-    try {
-      if (isSignUp) {
-        const { error } = await supabase.auth.signUp({
-          email: email.trim(),
-          password,
-          options: { emailRedirectTo: window.location.origin },
-        });
-        if (error) throw error;
-        toast.success("Account aangemaakt! Controleer je e-mail om te bevestigen.");
-      } else {
-        const { error } = await supabase.auth.signInWithPassword({
-          email: email.trim(),
-          password,
-        });
-        if (error) throw error;
-      }
-    } catch (error: any) {
-      toast.error(error.message || "Er is iets misgegaan");
-    } finally {
-      setLoading(false);
-    }
+    navigate("/");
   };
 
   return (
