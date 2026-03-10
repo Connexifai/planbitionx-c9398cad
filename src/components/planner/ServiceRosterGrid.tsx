@@ -424,66 +424,73 @@ export function ServiceRosterGrid() {
 
   return (
     <div className="roster-scroll w-full max-w-full rounded-xl border border-border/50 bg-card shadow-sm overflow-x-auto overflow-y-auto max-h-[calc(100vh-280px)]">
-      <div style={{ minWidth: "1200px" }} className="grid grid-cols-7">
-        {/* Day headers */}
-        {days.map((d, i) => (
-          <div
-            key={i}
-            className={`sticky top-0 z-[5] flex flex-col items-center gap-0.5 py-3 border-b border-r last:border-r-0 bg-card shadow-sm ${
-              d.day === "Za" || d.day === "Zo" ? "bg-weekend" : ""
-            }`}
-          >
-            <span className="text-sm font-bold text-foreground">{d.day}</span>
-            <span className="text-[11px] text-muted-foreground">{d.date}</span>
-            <DayFillRate dayGroups={dayData[i]} totalTarget={totalTarget} />
-          </div>
-        ))}
-
-        {/* Day columns with shift groups */}
-        {days.map((d, dayIdx) => (
-          <div
-            key={dayIdx}
-            className={`border-r last:border-r-0 min-h-[200px] ${
-              d.day === "Za" || d.day === "Zo" ? "bg-weekend" : ""
-            }`}
-          >
-            {dayData[dayIdx].map((group, gIdx) => (
-              <div key={gIdx} className="border-b last:border-b-0">
-                {/* Group header */}
-                <div className="flex items-center justify-between px-3 py-2 bg-accent/30">
-                  <CountBadge count={group.employees.length} target={group.target} />
+      <table style={{ minWidth: "1200px" }} className="w-full border-collapse">
+        <thead>
+          <tr className="sticky top-0 z-[5]">
+            {/* Empty top-left corner */}
+            <th className="sticky left-0 z-[6] bg-card border-b border-r w-[180px] min-w-[180px]" />
+            {days.map((d, i) => (
+              <th
+                key={i}
+                className={`border-b border-r last:border-r-0 py-3 px-2 bg-card shadow-sm ${
+                  d.day === "Za" || d.day === "Zo" ? "bg-weekend" : ""
+                }`}
+              >
+                <div className="flex flex-col items-center gap-0.5">
+                  <span className="text-sm font-bold text-foreground">{d.day}</span>
+                  <span className="text-[11px] text-muted-foreground">{d.date}</span>
+                  <DayFillRate dayGroups={dayData[i]} totalTarget={totalTarget} />
                 </div>
-
-                {/* Employee names */}
-                <div className="px-3 py-1.5">
-                  {group.employees.map((name, nIdx) => (
-                    <div
-                      key={nIdx}
-                      className="text-[12px] leading-relaxed text-foreground py-0.5 truncate hover:text-primary transition-colors cursor-default"
-                    >
-                      {name},
-                    </div>
-                  ))}
-                </div>
-              </div>
+              </th>
             ))}
-          </div>
-        ))}
-      </div>
-
-      {/* Shift legend at the bottom-left */}
-      <div className="sticky left-0 border-t bg-card px-4 py-3 flex flex-wrap gap-3">
-        {shiftGroups.map((g, i) => (
-          <div key={i} className="flex items-center gap-2">
-            <div className={`shift-badge ${shiftClassMap[g.type!]} text-[10px] px-2 py-1`}>
-              {shiftTypeLabel[g.type!]}
-            </div>
-            <span className="text-[11px] text-muted-foreground">
-              {g.label} · {g.time}
-            </span>
-          </div>
-        ))}
-      </div>
+          </tr>
+        </thead>
+        <tbody>
+          {shiftGroups.map((group, gIdx) => (
+            <tr key={gIdx} className="border-b last:border-b-0">
+              {/* Sticky left column with shift info */}
+              <td className="sticky left-0 z-[3] bg-card border-r w-[180px] min-w-[180px] px-3 py-3 align-top">
+                <div className="flex flex-col gap-1.5">
+                  <span className="text-[12px] font-semibold text-foreground">{group.label}</span>
+                  <div className={`shift-badge ${shiftClassMap[group.type!]} text-[10px] px-2 py-0.5 w-fit`}>
+                    {shiftTypeLabel[group.type!]}
+                  </div>
+                  <span className="text-[11px] text-muted-foreground">{group.time}</span>
+                </div>
+              </td>
+              {/* Day cells */}
+              {days.map((d, dayIdx) => {
+                const emps = employees
+                  .filter((emp) => {
+                    const s = emp.shifts[dayIdx];
+                    return s && s.type === group.type && s.label === group.matchLabel;
+                  })
+                  .map((emp) => emp.name);
+                return (
+                  <td
+                    key={dayIdx}
+                    className={`border-r last:border-r-0 px-3 py-2 align-top ${
+                      d.day === "Za" || d.day === "Zo" ? "bg-weekend" : ""
+                    }`}
+                  >
+                    <div className="mb-1">
+                      <CountBadge count={emps.length} target={group.target} />
+                    </div>
+                    {emps.map((name, nIdx) => (
+                      <div
+                        key={nIdx}
+                        className="text-[12px] leading-relaxed text-foreground py-0.5 truncate hover:text-primary transition-colors cursor-default"
+                      >
+                        {name}
+                      </div>
+                    ))}
+                  </td>
+                );
+              })}
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
