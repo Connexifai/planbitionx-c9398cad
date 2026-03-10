@@ -128,23 +128,27 @@ export function AiBriefingChat() {
       </div>
 
       {/* Input - sticky bottom */}
-      <div className="sticky bottom-0 bg-background pt-3 pb-1 px-2">
-        <div className="flex items-center gap-2 rounded-xl border bg-card px-4 py-2 shadow-sm focus-within:ring-1 focus-within:ring-ring">
+      <div className="sticky bottom-0 bg-background pt-4 pb-1 px-2 border-t">
+        <div className="flex items-center gap-1 mb-2">
+          <Sparkles className="h-3.5 w-3.5 text-primary" />
+          <span className="text-xs font-medium text-muted-foreground">Stuur een bericht naar de AI-assistent</span>
+        </div>
+        <div className="flex items-center gap-2 rounded-xl border-2 border-primary/20 bg-card px-4 py-3 shadow-md focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/10 transition-all">
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSend()}
-            placeholder="Geef extra instructies voor de solver..."
-            className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+            placeholder="Bijv. 'Jan mag geen nachtdiensten draaien volgende week...'"
+            className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground/60"
           />
           <Button
-            size="icon"
-            variant="ghost"
-            className="h-8 w-8 shrink-0"
+            size="sm"
+            className="shrink-0 gap-1.5"
             onClick={handleSend}
             disabled={!input.trim()}
           >
             <SendHorizontal className="h-4 w-4" />
+            Verstuur
           </Button>
         </div>
         <p className="text-[10px] text-muted-foreground mt-2 text-center">
