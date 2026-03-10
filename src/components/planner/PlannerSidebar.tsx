@@ -212,7 +212,7 @@ function SolverSection() {
       <div>
         <p className="text-sm font-medium mb-1">Callback URL</p>
         <div className="flex items-center gap-1.5 rounded-lg border bg-background px-3 py-1.5 text-xs">
-          <span className="text-green-600">🔒</span>
+          <span className="text-kpi-assignments">🔒</span>
           <Input
             defaultValue="https://jouw-server.nl/webhook"
             className="h-6 border-0 bg-transparent p-0 text-xs shadow-none focus-visible:ring-0"
