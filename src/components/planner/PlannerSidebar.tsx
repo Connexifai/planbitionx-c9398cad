@@ -318,8 +318,8 @@ export function PlannerSidebar({ onSolve, hideFooter }: { onSolve?: () => void; 
         )}
       </div>
 
-      {!contentCollapsed && (
-        <div className="p-4 pt-4 pb-3 min-h-[108px] flex flex-col justify-center">
+      {!contentCollapsed && !hideFooter && (
+        <div className="p-4 pt-4 pb-3 border-t border-border flex flex-col justify-center">
           <div className="flex gap-2 mb-2">
             <Button className="flex-1 h-10" style={{ background: "hsl(var(--kpi-assignments))" }} onClick={onSolve}>
               ▶ Oplossen
