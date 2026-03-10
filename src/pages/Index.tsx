@@ -14,6 +14,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { Download, Settings, Key, Moon, Sun, MessageCircle, PanelRightClose, PanelRightOpen } from "lucide-react";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
+import robotImg from "@/assets/robot-assistant.png";
 
 export default function Index() {
   const [dark, setDark] = useState(() => document.documentElement.classList.contains("dark"));
@@ -99,9 +100,9 @@ export default function Index() {
                     <TooltipTrigger asChild>
                       <button
                         onClick={() => setChatOpen(true)}
-                        className="flex items-center justify-center w-10 h-10 rounded-lg bg-primary text-primary-foreground shadow-md hover:bg-primary/90 transition-all"
+                        className="flex items-center justify-center w-12 h-12 rounded-xl bg-card border shadow-md hover:shadow-lg hover:scale-105 transition-all"
                       >
-                        <MessageCircle className="h-5 w-5" />
+                        <img src={robotImg} alt="AI Assistent" className="w-9 h-9 object-contain" />
                       </button>
                     </TooltipTrigger>
                     <TooltipContent side="left">AI Assistent openen</TooltipContent>
