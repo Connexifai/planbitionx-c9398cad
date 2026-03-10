@@ -67,15 +67,13 @@ export function AiBriefingChat() {
 
   return (
     <div className="h-full flex justify-center">
-      {/* Chat column with robot - centered as one unit */}
-      <div className="flex h-full min-w-0">
-        {/* Robot */}
-        <div className="flex items-start justify-center pt-8 px-4 shrink-0">
+      {/* Chat centered, robot attached to its left */}
+      <div className="relative flex flex-col h-full min-w-0 max-w-3xl w-full px-5 pt-4">
+        {/* Robot - anchored to left edge of chat */}
+        <div className="absolute right-full top-8 pr-2">
           <img src={robotImg} alt="AI Briefing" className="w-56 h-56 object-contain drop-shadow-2xl animate-[orbit_96s_ease-in-out_infinite] hover:scale-110 transition-transform duration-500 cursor-pointer" />
         </div>
 
-        {/* Chat column */}
-        <div className="flex flex-col h-full min-w-0 max-w-3xl px-5 pt-4">
         {/* Header */}
         <div className="flex items-center gap-3 mb-4">
           <div>
@@ -161,7 +159,6 @@ export function AiBriefingChat() {
         <p className="text-[10px] text-muted-foreground mt-2 text-center">
           Klik op <strong>▶ Oplossen</strong> in de sidebar om het rooster te genereren met deze constraints
         </p>
-      </div>
       </div>
       </div>
     </div>
