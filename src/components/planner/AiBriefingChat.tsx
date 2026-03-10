@@ -128,7 +128,7 @@ export function AiBriefingChat() {
       </div>
 
       {/* Input - sticky bottom */}
-      <div className="bg-background pt-4 pb-2 px-2 border-t border-border">
+      <div className="bg-background pt-4 pb-3 px-2 border-t border-border min-h-[108px]">
         <div className="flex items-center gap-1 mb-2">
           <Bot className="h-3.5 w-3.5 text-primary" />
           <span className="text-xs font-medium text-muted-foreground">Stuur een bericht naar de AI-assistent</span>
