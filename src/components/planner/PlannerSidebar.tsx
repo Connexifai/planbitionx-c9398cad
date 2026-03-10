@@ -221,7 +221,7 @@ function SolverSection() {
 
 /* ── Main sidebar ─────────────────────────────────────── */
 
-export function PlannerSidebar({ onSolve }: { onSolve?: () => void }) {
+export function PlannerSidebar({ onSolve, hideFooter }: { onSolve?: () => void; hideFooter?: boolean }) {
   const [activeSection, setActiveSection] = useState<SectionId>("json");
   const [contentCollapsed, setContentCollapsed] = useState(false);
 
@@ -274,7 +274,7 @@ export function PlannerSidebar({ onSolve }: { onSolve?: () => void }) {
         </div>
 
         {/* Content panel */}
-        {!contentCollapsed && (
+        {!contentCollapsed && !hideFooter && (
           <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
             <div className="px-4 py-3 border-b flex items-center justify-between">
               <h3 className="text-sm font-semibold flex items-center gap-2">
@@ -302,8 +302,8 @@ export function PlannerSidebar({ onSolve }: { onSolve?: () => void }) {
         )}
       </div>
 
-      {!contentCollapsed && (
-        <div className="p-4 pt-4 pb-3 border-t border-border min-h-[108px] flex flex-col justify-center">
+      {!contentCollapsed && !hideFooter && (
+        <div className="p-4 pt-4 pb-3 flex flex-col justify-center">
           <div className="flex gap-2 mb-2">
             <Button className="flex-1 h-10" style={{ background: "hsl(var(--kpi-assignments))" }} onClick={onSolve}>
               ▶ Oplossen
