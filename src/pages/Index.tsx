@@ -5,6 +5,7 @@ import { ServiceRosterGrid } from "@/components/planner/ServiceRosterGrid";
 import { StatsDashboard } from "@/components/planner/StatsDashboard";
 import { ExplanationView } from "@/components/planner/ExplanationView";
 import { RosterTabs } from "@/components/planner/RosterTabs";
+import { PostSolveChat } from "@/components/planner/PostSolveChat";
 import { AiBriefingChat } from "@/components/planner/AiBriefingChat";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -70,6 +71,11 @@ export default function Index() {
             {activeTab === "dienst" && <ServiceRosterGrid />}
             {activeTab === "stats" && <StatsDashboard />}
             {activeTab === "uitleg" && <ExplanationView />}
+            {activeTab === "chat" && (
+              <div className="flex-1 min-h-0 -mt-5 -mx-5 h-[calc(100vh-180px)]">
+                <PostSolveChat />
+              </div>
+            )}
           </main>
         ) : (
           <div className="flex-1 flex flex-col min-h-0">

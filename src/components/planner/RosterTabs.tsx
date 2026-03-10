@@ -1,5 +1,5 @@
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { LayoutGrid, BarChart3, BookOpen, CalendarDays } from "lucide-react";
+import { LayoutGrid, BarChart3, BookOpen, CalendarDays, MessageCircle } from "lucide-react";
 
 interface RosterTabsProps {
   value: string;
@@ -25,6 +25,10 @@ export function RosterTabs({ value, onChange }: RosterTabsProps) {
         <TabsTrigger value="uitleg" className="gap-1.5 text-xs">
           <BookOpen className="h-3.5 w-3.5" />
           Uitleg
+        </TabsTrigger>
+        <TabsTrigger value="chat" className="gap-1.5 text-xs">
+          <MessageCircle className="h-3.5 w-3.5" />
+          AI Assistent
         </TabsTrigger>
       </TabsList>
     </Tabs>
