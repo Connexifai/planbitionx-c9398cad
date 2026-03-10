@@ -65,9 +65,9 @@ export function AiBriefingChat() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center h-full max-w-3xl mx-auto py-6">
+    <div className="flex flex-col h-[calc(100vh-280px)] max-w-3xl mx-auto">
       {/* Header */}
-      <div className="flex items-center gap-3 mb-6">
+      <div className="flex items-center gap-3 mb-4">
         <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-primary/10">
           <Sparkles className="h-5 w-5 text-primary" />
         </div>
@@ -80,7 +80,7 @@ export function AiBriefingChat() {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 w-full overflow-y-auto roster-scroll space-y-4 mb-4 px-2">
+      <div className="flex-1 overflow-y-auto roster-scroll space-y-4 px-2 min-h-0">
         {messages.map((msg) => (
           <div
             key={msg.id}
@@ -127,9 +127,9 @@ export function AiBriefingChat() {
         ))}
       </div>
 
-      {/* Input */}
-      <div className="w-full flex gap-2 px-2">
-        <div className="flex-1 flex items-center gap-2 rounded-xl border bg-card px-4 py-2 shadow-sm focus-within:ring-1 focus-within:ring-ring">
+      {/* Input - sticky bottom */}
+      <div className="sticky bottom-0 bg-background pt-3 pb-1 px-2">
+        <div className="flex items-center gap-2 rounded-xl border bg-card px-4 py-2 shadow-sm focus-within:ring-1 focus-within:ring-ring">
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
@@ -147,12 +147,10 @@ export function AiBriefingChat() {
             <SendHorizontal className="h-4 w-4" />
           </Button>
         </div>
+        <p className="text-[10px] text-muted-foreground mt-2 text-center">
+          Klik op <strong>▶ Oplossen</strong> in de sidebar om het rooster te genereren met deze constraints
+        </p>
       </div>
-
-      {/* Hint */}
-      <p className="text-[10px] text-muted-foreground mt-3 text-center">
-        Klik op <strong>▶ Oplossen</strong> in de sidebar om het rooster te genereren met deze constraints
-      </p>
     </div>
   );
 }
