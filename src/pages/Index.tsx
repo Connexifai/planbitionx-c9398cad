@@ -1,6 +1,7 @@
 import { PlannerSidebar } from "@/components/planner/PlannerSidebar";
 import { KpiCards } from "@/components/planner/KpiCards";
 import { RosterGrid } from "@/components/planner/RosterGrid";
+import { ServiceRosterGrid } from "@/components/planner/ServiceRosterGrid";
 import { RosterTabs } from "@/components/planner/RosterTabs";
 import { AiBriefingChat } from "@/components/planner/AiBriefingChat";
 import { Button } from "@/components/ui/button";
@@ -12,6 +13,7 @@ import { useEffect, useState } from "react";
 export default function Index() {
   const [dark, setDark] = useState(() => document.documentElement.classList.contains("dark"));
   const [solved, setSolved] = useState(false);
+  const [activeTab, setActiveTab] = useState("roster");
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
@@ -61,8 +63,9 @@ export default function Index() {
         {solved ? (
           <main className="flex-1 overflow-y-auto overflow-x-hidden p-5 space-y-5">
             <KpiCards />
-            <RosterTabs />
-            <RosterGrid />
+            <RosterTabs value={activeTab} onChange={setActiveTab} />
+            {activeTab === "roster" && <RosterGrid />}
+            {activeTab === "dienst" && <ServiceRosterGrid />}
           </main>
         ) : (
           <div className="flex-1 flex flex-col min-h-0">
