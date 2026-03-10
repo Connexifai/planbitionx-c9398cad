@@ -215,6 +215,7 @@ export function PostSolveChat() {
           </Button>
         </div>
       </div>
+      </div>
     </div>
   );
 }
