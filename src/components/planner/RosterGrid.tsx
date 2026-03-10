@@ -265,7 +265,6 @@ export function RosterGrid() {
             <div className="flex flex-col justify-center gap-1.5 px-4 py-3 border-r">
               <div>
                 <p className="text-sm font-semibold leading-tight truncate">{emp.name}</p>
-                <p className="text-[10px] text-muted-foreground">ID: {emp.id}</p>
               </div>
               <div className="flex flex-wrap gap-1">
                 {emp.tags.map(tag => (
