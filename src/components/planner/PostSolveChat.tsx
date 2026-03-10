@@ -125,7 +125,7 @@ export function PostSolveChat() {
               )}
             >
               {msg.role === "assistant" ? (
-                <img src={robotImg} alt="AI" className="w-5 h-5 object-contain" />
+                <Bot className="h-4 w-4 text-primary" />
               ) : (
                 <User className="h-4 w-4 text-muted-foreground" />
               )}
