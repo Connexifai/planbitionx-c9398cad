@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { SendHorizontal, Sparkles, User } from "lucide-react";
+import { SendHorizontal, Sparkles, Bot, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import robotImg from "@/assets/robot-assistant.png";
@@ -69,8 +69,8 @@ export function AiBriefingChat() {
     <div className="flex flex-col h-full max-w-3xl mx-auto px-5 pt-4">
       {/* Header */}
       <div className="flex items-center gap-3 mb-4">
-        <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-primary/10">
-          <img src={robotImg} alt="AI" className="w-7 h-7 object-contain" />
+        <div className="flex items-center justify-center w-10 h-10">
+          <img src={robotImg} alt="AI Briefing" className="w-10 h-10 object-contain animate-[orbit_70s_ease-in-out_infinite]" />
         </div>
         <div>
           <h2 className="text-lg font-semibold">AI Briefing</h2>
@@ -99,7 +99,7 @@ export function AiBriefingChat() {
               )}
             >
               {msg.role === "assistant" ? (
-                <img src={robotImg} alt="AI" className="w-5 h-5 object-contain" />
+                <Bot className="h-4 w-4 text-primary" />
               ) : (
                 <User className="h-4 w-4 text-muted-foreground" />
               )}
@@ -131,7 +131,7 @@ export function AiBriefingChat() {
       {/* Input */}
       <div className="bg-background pt-4 pb-3 px-4 border-t border-border">
         <div className="flex items-center gap-1 mb-2">
-          <img src={robotImg} alt="AI" className="w-4 h-4 object-contain" />
+          <Bot className="h-3.5 w-3.5 text-primary" />
           <span className="text-xs font-medium text-muted-foreground">Stuur een bericht naar de AI-assistent</span>
         </div>
         <div className="flex items-center gap-2 rounded-xl border-2 border-primary/20 bg-card px-4 py-3 shadow-md focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/10 transition-all">
