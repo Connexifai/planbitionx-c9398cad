@@ -2,6 +2,7 @@ import { PlannerSidebar } from "@/components/planner/PlannerSidebar";
 import { KpiCards } from "@/components/planner/KpiCards";
 import { RosterGrid } from "@/components/planner/RosterGrid";
 import { RosterTabs } from "@/components/planner/RosterTabs";
+import { AiBriefingChat } from "@/components/planner/AiBriefingChat";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
@@ -10,6 +11,7 @@ import { useEffect, useState } from "react";
 
 export default function Index() {
   const [dark, setDark] = useState(() => document.documentElement.classList.contains("dark"));
+  const [solved, setSolved] = useState(false);
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
@@ -17,7 +19,7 @@ export default function Index() {
 
   return (
     <div className="min-h-screen flex w-full">
-      <PlannerSidebar />
+      <PlannerSidebar onSolve={() => setSolved(true)} />
 
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top bar */}
@@ -58,8 +60,14 @@ export default function Index() {
         {/* Main content */}
         <main className="flex-1 overflow-auto p-5 space-y-5">
           <KpiCards />
-          <RosterTabs />
-          <RosterGrid />
+          {solved ? (
+            <>
+              <RosterTabs />
+              <RosterGrid />
+            </>
+          ) : (
+            <AiBriefingChat />
+          )}
         </main>
       </div>
     </div>
