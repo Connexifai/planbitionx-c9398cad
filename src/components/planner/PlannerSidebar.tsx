@@ -9,19 +9,13 @@ import {
   PanelLeftOpen,
 } from "lucide-react";
 import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  useSidebar,
-} from "@/components/ui/sidebar";
-import { Switch } from "@/components/ui/switch";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Switch } from "@/components/ui/switch";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 type SectionId = "json" | "atw" | "zachte" | "solver";
@@ -228,16 +222,8 @@ function SolverSection() {
 /* ── Main sidebar ─────────────────────────────────────── */
 
 export function PlannerSidebar() {
-  const { state } = useSidebar();
-  const collapsed = state === "collapsed";
   const [activeSection, setActiveSection] = useState<SectionId>("json");
   const [contentCollapsed, setContentCollapsed] = useState(false);
-
-  if (collapsed) return (
-    <Sidebar collapsible="icon">
-      <SidebarContent />
-    </Sidebar>
-  );
 
   const activeDef = sections.find(s => s.id === activeSection)!;
 
@@ -249,8 +235,13 @@ export function PlannerSidebar() {
   };
 
   return (
-    <Sidebar collapsible="icon" className="border-r-0" style={{ "--sidebar-width": contentCollapsed ? "56px" : "360px" } as React.CSSProperties}>
-      <SidebarContent className="p-0 flex-row h-full">
+    <div
+      className={cn(
+        "flex flex-col border-r bg-sidebar shrink-0 transition-all duration-300 h-screen sticky top-0",
+        contentCollapsed ? "w-[52px]" : "w-[360px]"
+      )}
+    >
+      <div className="flex flex-row flex-1 min-h-0">
         {/* Icon strip */}
         <div className="flex flex-col items-center gap-1 border-r bg-muted/30 px-1.5 py-3 shrink-0">
           {sections.map((section) => {
@@ -313,10 +304,10 @@ export function PlannerSidebar() {
             </div>
           </div>
         )}
-      </SidebarContent>
+      </div>
 
       {!contentCollapsed && (
-        <SidebarFooter className="p-3 border-t">
+        <div className="p-3 border-t">
           <div className="flex gap-2">
             <Button className="flex-1" size="sm" style={{ background: "hsl(var(--kpi-assignments))" }}>
               ▶ Oplossen
@@ -326,8 +317,8 @@ export function PlannerSidebar() {
             </Button>
           </div>
           <p className="text-[10px] text-muted-foreground text-center mt-1">Klaar in 16s</p>
-        </SidebarFooter>
+        </div>
       )}
-    </Sidebar>
+    </div>
   );
 }
