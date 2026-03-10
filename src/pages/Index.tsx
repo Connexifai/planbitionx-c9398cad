@@ -69,8 +69,10 @@ export default function Index() {
             <div className="p-5 pb-0">
               <KpiCards />
             </div>
-            <div className="flex-1 min-h-0">
-              <AiBriefingChat />
+            <div className="flex-1 min-h-0 flex flex-col">
+              <div className="flex-1 min-h-0 overflow-hidden">
+                <AiBriefingChat />
+              </div>
             </div>
           </div>
         )}
