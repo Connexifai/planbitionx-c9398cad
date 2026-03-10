@@ -5,7 +5,6 @@ import {
   Sparkles,
   Settings2,
   FileJson,
-  Tooltip as LucideTooltip,
 } from "lucide-react";
 import {
   Sidebar,
