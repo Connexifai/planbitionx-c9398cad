@@ -161,7 +161,6 @@ export function AiBriefingChat() {
         </p>
       </div>
       </div>
-      </div>
     </div>
   );
 }
