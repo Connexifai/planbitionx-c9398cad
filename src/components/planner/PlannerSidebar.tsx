@@ -305,7 +305,7 @@ export function PlannerSidebar({ onSolve }: { onSolve?: () => void }) {
       {!contentCollapsed && (
         <div className="p-3 border-t">
           <div className="flex gap-2">
-            <Button className="flex-1" size="sm" style={{ background: "hsl(var(--kpi-assignments))" }}>
+            <Button className="flex-1" size="sm" style={{ background: "hsl(var(--kpi-assignments))" }} onClick={onSolve}>
               ▶ Oplossen
             </Button>
             <Button variant="default" size="sm" className="flex-1">
