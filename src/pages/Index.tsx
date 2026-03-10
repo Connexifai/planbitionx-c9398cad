@@ -14,6 +14,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { Download, Settings, Key, Moon, Sun, MessageCircle, PanelRightClose, PanelRightOpen } from "lucide-react";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
+import robotImg from "@/assets/robot-assistant.png";
 
 export default function Index() {
   const [dark, setDark] = useState(() => document.documentElement.classList.contains("dark"));
