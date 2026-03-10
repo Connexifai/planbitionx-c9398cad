@@ -18,9 +18,10 @@ export default function Index() {
   }, [dark]);
 
   return (
-    <div className="min-h-screen flex flex-col w-full">
+    <div className="h-screen flex flex-col">
+      {/* Top row: sidebar + main content */}
       <div className="flex flex-1 min-h-0">
-        <PlannerSidebar onSolve={() => setSolved(true)} />
+        <PlannerSidebar onSolve={() => setSolved(true)} hideFooter={!solved} />
 
         <div className="flex-1 flex flex-col min-w-0">
           {/* Top bar */}
@@ -78,9 +79,16 @@ export default function Index() {
         </div>
       </div>
 
-      {/* Full-width bottom bar - only when not solved */}
+      {/* Full-width bottom bar */}
       {!solved && (
-        <div className="border-t border-border" />
+        <div className="flex border-t border-border shrink-0">
+          {/* Sidebar footer */}
+          <PlannerSidebarFooter onSolve={() => setSolved(true)} />
+          {/* Chat input */}
+          <div className="flex-1">
+            <AiBriefingInput />
+          </div>
+        </div>
       )}
     </div>
   );
