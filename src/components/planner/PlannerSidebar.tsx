@@ -221,7 +221,23 @@ function SolverSection() {
 
 /* ── Main sidebar ─────────────────────────────────────── */
 
-export function PlannerSidebar({ onSolve }: { onSolve?: () => void }) {
+export function PlannerSidebarFooter({ onSolve }: { onSolve?: () => void }) {
+  return (
+    <div className="w-[360px] shrink-0 border-r bg-sidebar p-4 flex flex-col justify-center">
+      <div className="flex gap-2 mb-2">
+        <Button className="flex-1 h-10" style={{ background: "hsl(var(--kpi-assignments))" }} onClick={onSolve}>
+          ▶ Oplossen
+        </Button>
+        <Button variant="default" className="flex-1 h-10">
+          Stuur naar API
+        </Button>
+      </div>
+      <p className="text-[10px] text-muted-foreground text-center">Klaar in 16s</p>
+    </div>
+  );
+}
+
+export function PlannerSidebar({ onSolve, hideFooter }: { onSolve?: () => void; hideFooter?: boolean }) {
   const [activeSection, setActiveSection] = useState<SectionId>("json");
   const [contentCollapsed, setContentCollapsed] = useState(false);
 
