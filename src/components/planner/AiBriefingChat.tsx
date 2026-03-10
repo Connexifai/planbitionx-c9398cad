@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { SendHorizontal, Sparkles, Bot, User } from "lucide-react";
+import { SendHorizontal, Sparkles, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import robotImg from "@/assets/robot-assistant.png";
 
 interface Message {
   id: number;
@@ -69,7 +70,7 @@ export function AiBriefingChat() {
       {/* Header */}
       <div className="flex items-center gap-3 mb-4">
         <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-primary/10">
-          <Bot className="h-5 w-5 text-primary" />
+          <img src={robotImg} alt="AI" className="w-7 h-7 object-contain" />
         </div>
         <div>
           <h2 className="text-lg font-semibold">AI Briefing</h2>
@@ -98,7 +99,7 @@ export function AiBriefingChat() {
               )}
             >
               {msg.role === "assistant" ? (
-                <Bot className="h-4 w-4 text-primary" />
+                <img src={robotImg} alt="AI" className="w-5 h-5 object-contain" />
               ) : (
                 <User className="h-4 w-4 text-muted-foreground" />
               )}
@@ -130,7 +131,7 @@ export function AiBriefingChat() {
       {/* Input */}
       <div className="bg-background pt-4 pb-3 px-4 border-t border-border">
         <div className="flex items-center gap-1 mb-2">
-          <Bot className="h-3.5 w-3.5 text-primary" />
+          <img src={robotImg} alt="AI" className="w-4 h-4 object-contain" />
           <span className="text-xs font-medium text-muted-foreground">Stuur een bericht naar de AI-assistent</span>
         </div>
         <div className="flex items-center gap-2 rounded-xl border-2 border-primary/20 bg-card px-4 py-3 shadow-md focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/10 transition-all">
