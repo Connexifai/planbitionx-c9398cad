@@ -66,21 +66,23 @@ export function AiBriefingChat() {
   };
 
   return (
-    <div className="relative flex flex-col h-full max-w-3xl mx-auto px-5 pt-4">
-      {/* Floating robot */}
-      <div className="absolute -top-16 right-0 z-50 pointer-events-auto">
+    <div className="flex h-full">
+      {/* Robot column */}
+      <div className="flex items-start justify-center pt-8 px-4 shrink-0">
         <img src={robotImg} alt="AI Briefing" className="w-56 h-56 object-contain drop-shadow-2xl animate-[orbit_18s_ease-in-out_infinite] hover:scale-110 transition-transform duration-500 cursor-pointer" />
       </div>
 
-      {/* Header */}
-      <div className="flex items-center gap-3 mb-4">
-        <div>
-          <h2 className="text-lg font-semibold">AI Briefing</h2>
-          <p className="text-xs text-muted-foreground">
-            Geef instructies mee voor de solver voordat je op Oplossen klikt
-          </p>
+      {/* Chat column */}
+      <div className="flex flex-col h-full flex-1 min-w-0 px-5 pt-4">
+        {/* Header */}
+        <div className="flex items-center gap-3 mb-4">
+          <div>
+            <h2 className="text-lg font-semibold">AI Briefing</h2>
+            <p className="text-xs text-muted-foreground">
+              Geef instructies mee voor de solver voordat je op Oplossen klikt
+            </p>
+          </div>
         </div>
-      </div>
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto roster-scroll space-y-4 px-2 min-h-0">
