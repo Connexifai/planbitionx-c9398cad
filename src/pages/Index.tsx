@@ -95,19 +95,12 @@ export default function Index() {
           {solved && (
             <>
               {!chatOpen && (
-                <button
+                <img
+                  src={robotImg}
+                  alt="AI Assistent"
                   onClick={() => setChatOpen(true)}
-                  className="fixed bottom-6 right-6 z-50 group flex flex-col items-center gap-1 transition-all"
-                >
-                  <img
-                    src={robotImg}
-                    alt="AI Assistent"
-                    className="w-28 h-28 object-contain drop-shadow-2xl animate-[float_3s_ease-in-out_infinite] group-hover:scale-110 transition-transform duration-300 cursor-pointer"
-                  />
-                  <span className="text-xs font-semibold text-primary bg-card/90 backdrop-blur-sm px-3 py-1 rounded-full shadow-md border opacity-90 group-hover:opacity-100 transition-opacity">
-                    AI Assistent
-                  </span>
-                </button>
+                  className="fixed bottom-8 right-8 z-50 w-56 h-56 object-contain drop-shadow-2xl animate-[orbit_8s_ease-in-out_infinite] hover:scale-110 transition-transform duration-300 cursor-pointer"
+                />
               )}
 
               <div
