@@ -128,7 +128,7 @@ export function AiBriefingChat() {
       </div>
 
       {/* Input - sticky bottom */}
-      <div className="sticky bottom-0 bg-background pt-4 pb-1 px-2 border-t">
+      <div className="sticky bottom-0 bg-background pt-4 pb-2 px-2 border-t shadow-[0_-1px_3px_0_hsl(var(--border)/0.5)]">
         <div className="flex items-center gap-1 mb-2">
           <Sparkles className="h-3.5 w-3.5 text-primary" />
           <span className="text-xs font-medium text-muted-foreground">Stuur een bericht naar de AI-assistent</span>
