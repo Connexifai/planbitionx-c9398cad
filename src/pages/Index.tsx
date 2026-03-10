@@ -1,4 +1,3 @@
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { PlannerSidebar } from "@/components/planner/PlannerSidebar";
 import { KpiCards } from "@/components/planner/KpiCards";
 import { RosterGrid } from "@/components/planner/RosterGrid";
@@ -17,55 +16,52 @@ export default function Index() {
   }, [dark]);
 
   return (
-    <SidebarProvider>
-      <div className="min-h-screen flex w-full">
-        <PlannerSidebar />
+    <div className="min-h-screen flex w-full">
+      <PlannerSidebar />
 
-        <div className="flex-1 flex flex-col min-w-0">
-          {/* Top bar */}
-          <header className="flex items-center justify-between gap-4 border-b bg-card px-4 py-2.5 shadow-sm">
-            <div className="flex items-center gap-3">
-              <SidebarTrigger />
-              <h1 className="text-lg font-bold tracking-tight">Planbition</h1>
-              <span className="text-xs text-muted-foreground">AI Solver</span>
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* Top bar */}
+        <header className="flex items-center justify-between gap-4 border-b bg-card px-4 py-2.5 shadow-sm">
+          <div className="flex items-center gap-3">
+            <h1 className="text-lg font-bold tracking-tight">Planbition</h1>
+            <span className="text-xs text-muted-foreground">AI Solver</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 rounded-lg border bg-background px-3 py-1.5 text-xs">
+              <Settings className="h-3.5 w-3.5 text-muted-foreground" />
+              <span className="text-muted-foreground">API:</span>
+              <Input
+                defaultValue="http://localhost:8080"
+                className="h-6 w-40 border-0 bg-transparent p-0 text-xs shadow-none focus-visible:ring-0"
+              />
             </div>
-            <div className="flex items-center gap-2">
-              <div className="flex items-center gap-1.5 rounded-lg border bg-background px-3 py-1.5 text-xs">
-                <Settings className="h-3.5 w-3.5 text-muted-foreground" />
-                <span className="text-muted-foreground">API:</span>
-                <Input
-                  defaultValue="http://localhost:8080"
-                  className="h-6 w-40 border-0 bg-transparent p-0 text-xs shadow-none focus-visible:ring-0"
-                />
-              </div>
-              <div className="flex items-center gap-1.5 rounded-lg border bg-background px-3 py-1.5 text-xs">
-                <Key className="h-3.5 w-3.5 text-muted-foreground" />
-                <span className="text-muted-foreground">Key:</span>
-                <Input
-                  defaultValue="test-2024"
-                  className="h-6 w-24 border-0 bg-transparent p-0 text-xs shadow-none focus-visible:ring-0"
-                />
-              </div>
-              <Button variant="outline" size="sm" className="gap-1.5 text-xs">
-                <Download className="h-3.5 w-3.5" />
-                Download JSON
-              </Button>
-              <div className="flex items-center gap-1.5 ml-1">
-                <Sun className="h-3.5 w-3.5 text-muted-foreground" />
-                <Switch checked={dark} onCheckedChange={setDark} className="scale-75" />
-                <Moon className="h-3.5 w-3.5 text-muted-foreground" />
-              </div>
+            <div className="flex items-center gap-1.5 rounded-lg border bg-background px-3 py-1.5 text-xs">
+              <Key className="h-3.5 w-3.5 text-muted-foreground" />
+              <span className="text-muted-foreground">Key:</span>
+              <Input
+                defaultValue="test-2024"
+                className="h-6 w-24 border-0 bg-transparent p-0 text-xs shadow-none focus-visible:ring-0"
+              />
             </div>
-          </header>
+            <Button variant="outline" size="sm" className="gap-1.5 text-xs">
+              <Download className="h-3.5 w-3.5" />
+              Download JSON
+            </Button>
+            <div className="flex items-center gap-1.5 ml-1">
+              <Sun className="h-3.5 w-3.5 text-muted-foreground" />
+              <Switch checked={dark} onCheckedChange={setDark} className="scale-75" />
+              <Moon className="h-3.5 w-3.5 text-muted-foreground" />
+            </div>
+          </div>
+        </header>
 
-          {/* Main content */}
-          <main className="flex-1 overflow-auto p-5 space-y-5">
-            <KpiCards />
-            <RosterTabs />
-            <RosterGrid />
-          </main>
-        </div>
+        {/* Main content */}
+        <main className="flex-1 overflow-auto p-5 space-y-5">
+          <KpiCards />
+          <RosterTabs />
+          <RosterGrid />
+        </main>
       </div>
-    </SidebarProvider>
+    </div>
   );
 }

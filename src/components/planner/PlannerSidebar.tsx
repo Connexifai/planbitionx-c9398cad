@@ -9,15 +9,6 @@ import {
   PanelLeftOpen,
 } from "lucide-react";
 import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  useSidebar,
-} from "@/components/ui/sidebar";
-import { Switch } from "@/components/ui/switch";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
