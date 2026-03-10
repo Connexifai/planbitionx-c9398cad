@@ -231,6 +231,7 @@ export function PlannerSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const [activeSection, setActiveSection] = useState<SectionId>("json");
+  const [contentCollapsed, setContentCollapsed] = useState(false);
 
   if (collapsed) return (
     <Sidebar collapsible="icon">
@@ -248,7 +249,7 @@ export function PlannerSidebar() {
   };
 
   return (
-    <Sidebar collapsible="icon" className="border-r-0" style={{ "--sidebar-width": "360px" } as React.CSSProperties}>
+    <Sidebar collapsible="icon" className="border-r-0" style={{ "--sidebar-width": contentCollapsed ? "56px" : "360px" } as React.CSSProperties}>
       <SidebarContent className="p-0 flex-row h-full">
         {/* Icon strip */}
         <div className="flex flex-col items-center gap-1 border-r bg-muted/30 px-1.5 py-3 shrink-0">
