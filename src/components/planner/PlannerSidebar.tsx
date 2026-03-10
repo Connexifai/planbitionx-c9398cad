@@ -272,32 +272,47 @@ export function PlannerSidebar() {
             );
           })}
 
-          {/* Collapse toggle */}
-          <div className="mt-auto">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  onClick={() => setContentCollapsed(prev => !prev)}
-                  className="flex items-center justify-center w-10 h-10 rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground transition-all"
-                >
-                  {contentCollapsed ? <PanelLeftOpen className="h-5 w-5" /> : <PanelLeftClose className="h-5 w-5" />}
-                </button>
-              </TooltipTrigger>
-              <TooltipContent side="right">
-                {contentCollapsed ? "Paneel openen" : "Paneel sluiten"}
-              </TooltipContent>
-            </Tooltip>
-          </div>
+          {/* Collapse toggle - only show in icon strip when collapsed */}
+          {contentCollapsed && (
+            <div className="mt-auto">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={() => setContentCollapsed(false)}
+                    className="flex items-center justify-center w-10 h-10 rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground transition-all"
+                  >
+                    <PanelLeftOpen className="h-5 w-5" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="right">
+                  Paneel openen
+                </TooltipContent>
+              </Tooltip>
+            </div>
+          )}
         </div>
 
         {/* Content panel */}
         {!contentCollapsed && (
           <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-            <div className="px-4 py-3 border-b">
+            <div className="px-4 py-3 border-b flex items-center justify-between">
               <h3 className="text-sm font-semibold flex items-center gap-2">
                 <activeDef.icon className="h-4 w-4 text-primary" />
                 {activeDef.label}
               </h3>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={() => setContentCollapsed(true)}
+                    className="flex items-center justify-center w-7 h-7 rounded-md text-muted-foreground hover:bg-accent hover:text-foreground transition-all"
+                  >
+                    <PanelLeftClose className="h-4 w-4" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="right">
+                  Paneel sluiten
+                </TooltipContent>
+              </Tooltip>
             </div>
             <div className="flex-1 overflow-y-auto roster-scroll px-4 py-3">
               {contentMap[activeSection]}
