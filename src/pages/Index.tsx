@@ -145,6 +145,7 @@ export default function Index() {
   const [scheduleData, setScheduleData] = useState<JsonScheduleData | null>(null);
   const [rosterData, setRosterData] = useState<RosterData | null>(null);
   const [requestData, setRequestData] = useState<any>(null);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
 
   useEffect(() => {
     if (jsonLoaded && !scheduleData) {
@@ -185,13 +186,19 @@ export default function Index() {
       }
       setSolving(false);
       setSolved(true);
+      setSidebarCollapsed(true); // Sidebar inklappen na solven
     }, 36000);
   };
 
   return (
     <div className="h-screen flex w-full">
       {solving && <SolvingOverlay />}
-      <PlannerSidebar onSolve={handleSolve} onJsonLoaded={() => setJsonLoaded(true)} />
+      <PlannerSidebar 
+        onSolve={handleSolve} 
+        onJsonLoaded={() => setJsonLoaded(true)} 
+        collapsed={sidebarCollapsed}
+        onCollapsedChange={setSidebarCollapsed}
+      />
 
       <div className="flex-1 flex flex-col min-w-0">
         <header className="flex items-center justify-between gap-4 border-b bg-card px-4 py-2.5 shadow-sm">

@@ -227,10 +227,30 @@ function SolverSection() {
 
 /* ── Main sidebar ─────────────────────────────────────── */
 
-export function PlannerSidebar({ onSolve, hideFooter, onJsonLoaded }: { onSolve?: () => void; hideFooter?: boolean; onJsonLoaded?: () => void }) {
+export function PlannerSidebar({ 
+  onSolve, 
+  hideFooter, 
+  onJsonLoaded,
+  collapsed: collapsedProp,
+  onCollapsedChange 
+}: { 
+  onSolve?: () => void; 
+  hideFooter?: boolean; 
+  onJsonLoaded?: () => void;
+  collapsed?: boolean;
+  onCollapsedChange?: (collapsed: boolean) => void;
+}) {
   const { t } = useTranslation();
   const [activeSection, setActiveSection] = useState<SectionId>("json");
-  const [contentCollapsed, setContentCollapsed] = useState(true);
+  const [internalCollapsed, setInternalCollapsed] = useState(true);
+  
+  const contentCollapsed = collapsedProp !== undefined ? collapsedProp : internalCollapsed;
+  const setContentCollapsed = (value: boolean) => {
+    if (collapsedProp === undefined) {
+      setInternalCollapsed(value);
+    }
+    onCollapsedChange?.(value);
+  };
 
   const sections: { id: SectionId; icon: React.ElementType; label: string }[] = [
     { id: "json", icon: FileJson, label: t("sidebar.jsonInput") },
