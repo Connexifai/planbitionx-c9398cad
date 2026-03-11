@@ -7,6 +7,11 @@
   50% { transform: translateY(-12px); }
 }
 
+@keyframes orbit-small {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-5px); }
+}
+
 @keyframes float1 {
   0%, 100% { transform: translate(0, 0) scale(1); }
   33% { transform: translate(80px, -60px) scale(1.1); }
