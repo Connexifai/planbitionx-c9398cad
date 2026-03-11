@@ -7,6 +7,7 @@ import {
   FileJson,
   PanelLeftClose,
   PanelLeftOpen,
+  Play,
 } from "lucide-react";
 import {
   Tooltip,
