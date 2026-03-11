@@ -8,12 +8,14 @@ import { toast } from "sonner";
 import { Eye, EyeOff, LogIn, UserPlus, ArrowRight } from "lucide-react";
 import robotImg from "@/assets/robot-assistant.png";
 
-function FloatingOrbs() {
+function AnimatedBackground() {
   return (
     <div className="fixed inset-0 overflow-hidden pointer-events-none">
-      {/* Large slow orbs */}
-      <div className="absolute w-[600px] h-[600px] rounded-full bg-primary/15 blur-3xl animate-[float1_20s_ease-in-out_infinite] -top-40 -left-40" />
-      <div className="absolute w-[500px] h-[500px] rounded-full bg-primary/10 blur-3xl animate-[float2_25s_ease-in-out_infinite] -bottom-32 -right-32" />
+      <img
+        src="/images/login-bg.gif"
+        alt=""
+        className="absolute inset-0 w-full h-full object-cover"
+      />
       <div className="absolute w-[400px] h-[400px] rounded-full bg-ring/10 blur-3xl animate-[float3_18s_ease-in-out_infinite] top-1/3 right-1/4" />
       
       {/* Smaller accent orbs */}
