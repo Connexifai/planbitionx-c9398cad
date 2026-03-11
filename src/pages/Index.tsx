@@ -132,6 +132,16 @@ export default function Index() {
   const [chatOpen, setChatOpen] = useState(false);
   const [jsonLoaded, setJsonLoaded] = useState(false);
   const [robotLanded, setRobotLanded] = useState(false);
+  const [scheduleData, setScheduleData] = useState<JsonScheduleData | null>(null);
+
+  useEffect(() => {
+    if (jsonLoaded && !scheduleData) {
+      fetch("/data/schedule-request.json")
+        .then((r) => r.json())
+        .then((raw) => setScheduleData(parseRawScheduleJson(raw)))
+        .catch(console.error);
+    }
+  }, [jsonLoaded, scheduleData]);
 
   useEffect(() => {
     if (jsonLoaded) {
