@@ -25,119 +25,18 @@ const solvePhases = [
   { label: "Laatste controles", icon: "✅" },
 ];
 
-// ── Variant 1: Stappen-tijdlijn ──
-function TimelineOverlay({ elapsed, phase }: { elapsed: number; phase: number }) {
-  return (
-    <div className="flex flex-col items-center gap-8">
-      <img src={robotImg} alt="Solving..." className="w-32 h-32 object-contain drop-shadow-2xl animate-[orbit_180s_ease-in-out_infinite]" />
-      <h2 className="text-2xl font-bold text-foreground">Rooster wordt opgelost</h2>
-      <div className="flex flex-col gap-1 w-72">
-        {solvePhases.map((step, i) => {
-          const status = i < phase ? "done" : i === phase ? "active" : "pending";
-          return (
-            <div key={i} className="flex items-center gap-3">
-              <div className="flex flex-col items-center">
-                <div className={cn(
-                  "w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold border-2 transition-all duration-500",
-                  status === "done" ? "bg-primary border-primary text-primary-foreground" :
-                  status === "active" ? "border-primary text-primary animate-pulse bg-primary/10" :
-                  "border-border text-muted-foreground bg-muted"
-                )}>
-                  {status === "done" ? "✓" : step.icon}
-                </div>
-                {i < solvePhases.length - 1 && (
-                  <div className={cn("w-0.5 h-4 transition-all duration-500", status === "done" ? "bg-primary" : "bg-border")} />
-                )}
-              </div>
-              <span className={cn("text-sm transition-all duration-300", status === "active" ? "text-foreground font-semibold" : status === "done" ? "text-muted-foreground line-through" : "text-muted-foreground")}>
-                {step.label}
-              </span>
-            </div>
-          );
-        })}
-      </div>
-      <span className="text-xs text-muted-foreground font-mono">{elapsed}s</span>
-    </div>
-  );
-}
-
-// ── Variant 2: Rooster dat zich vult ──
-function GridFillOverlay({ elapsed, phase }: { elapsed: number; phase: number }) {
-  const totalCells = 35;
-  const filledCells = Math.min(Math.floor((elapsed / 45) * totalCells), totalCells);
-  const shiftColors = ["bg-shift-early", "bg-shift-day", "bg-shift-late", "bg-shift-night"];
-
-  return (
-    <div className="flex flex-col items-center gap-6">
-      <img src={robotImg} alt="Solving..." className="w-28 h-28 object-contain drop-shadow-2xl animate-[orbit_180s_ease-in-out_infinite]" />
-      <h2 className="text-2xl font-bold text-foreground">Rooster wordt opgebouwd</h2>
-      <p className="text-sm text-muted-foreground animate-pulse">{solvePhases[phase]?.label}…</p>
-      <div className="grid grid-cols-7 gap-1.5 p-4 rounded-xl bg-card/50 border border-border/50">
-        {Array.from({ length: totalCells }).map((_, i) => (
-          <div
-            key={i}
-            className={cn(
-              "w-10 h-7 rounded-md transition-all duration-500",
-              i < filledCells
-                ? `${shiftColors[i % shiftColors.length]} opacity-80 shadow-sm`
-                : "bg-muted/50"
-            )}
-            style={{ transitionDelay: `${(i % 7) * 50}ms` }}
-          />
-        ))}
-      </div>
-      <div className="flex items-center gap-3">
-        <div className="w-48 h-2 rounded-full bg-muted overflow-hidden">
-          <div className="h-full rounded-full bg-primary transition-all duration-1000 ease-out" style={{ width: `${Math.min((elapsed / 45) * 100, 95)}%` }} />
-        </div>
-        <span className="text-xs text-muted-foreground font-mono w-8">{elapsed}s</span>
-      </div>
-    </div>
-  );
-}
-
-// ── Variant 3: Pulserend dashboard ──
-function PulsingDashboardOverlay({ elapsed }: { elapsed: number }) {
-  const progress = Math.min(elapsed / 45, 0.95);
-  const kpis = [
-    { label: "Bezetting", target: 79.7, unit: "%", color: "text-kpi-occupancy", bg: "bg-kpi-occupancy" },
-    { label: "Toewijzingen", target: 1396, unit: "", color: "text-kpi-assignments", bg: "bg-kpi-assignments" },
-    { label: "Overtredingen", target: 0, unit: "", color: "text-kpi-violations", bg: "bg-kpi-violations" },
-    { label: "Niet ingevuld", target: 53, unit: "", color: "text-kpi-unfilled", bg: "bg-kpi-unfilled" },
-  ];
-
-  return (
-    <div className="flex flex-col items-center gap-8">
-      {/* Circular progress with robot */}
-      <div className="relative w-44 h-44">
-        <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
-          <circle cx="50" cy="50" r="42" fill="none" strokeWidth="4" className="stroke-muted" />
-          <circle cx="50" cy="50" r="42" fill="none" strokeWidth="4" className="stroke-primary" strokeLinecap="round"
-            strokeDasharray={`${2 * Math.PI * 42}`}
-            strokeDashoffset={`${2 * Math.PI * 42 * (1 - progress)}`}
-            style={{ transition: "stroke-dashoffset 1s ease-out" }}
-          />
-        </svg>
-        <img src={robotImg} alt="Solving..." className="absolute inset-4 object-contain drop-shadow-xl animate-[orbit_180s_ease-in-out_infinite]" />
-      </div>
-      <h2 className="text-2xl font-bold text-foreground">Rooster wordt opgelost</h2>
-      <div className="grid grid-cols-4 gap-4">
-        {kpis.map((kpi) => (
-          <div key={kpi.label} className={cn("flex flex-col items-center gap-1 p-4 rounded-xl bg-card border border-border/50 animate-pulse")}>
-            <span className="text-[10px] text-muted-foreground uppercase tracking-wide">{kpi.label}</span>
-            <span className={cn("text-xl font-bold", kpi.color)}>—</span>
-          </div>
-        ))}
-      </div>
-      <span className="text-xs text-muted-foreground font-mono">{elapsed}s</span>
-    </div>
-  );
-}
-
 function SolvingOverlay() {
   const [elapsed, setElapsed] = useState(0);
   const [phase, setPhase] = useState(0);
-  const [variant, setVariant] = useState<1 | 2 | 3>(1);
+
+  const progress = Math.min(elapsed / 45, 0.95);
+
+  const kpis = [
+    { label: "Bezetting", color: "text-kpi-occupancy", bg: "bg-kpi-occupancy" },
+    { label: "Toewijzingen", color: "text-kpi-assignments", bg: "bg-kpi-assignments" },
+    { label: "Overtredingen", color: "text-kpi-violations", bg: "bg-kpi-violations" },
+    { label: "Niet ingevuld", color: "text-kpi-unfilled", bg: "bg-kpi-unfilled" },
+  ];
 
   useEffect(() => {
     const timer = setInterval(() => setElapsed((e) => e + 1), 1000);
@@ -151,18 +50,64 @@ function SolvingOverlay() {
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-background/80 backdrop-blur-sm">
-      <div className="animate-[fade-in_0.3s_ease-out]">
-        {variant === 1 && <TimelineOverlay elapsed={elapsed} phase={phase} />}
-        {variant === 2 && <GridFillOverlay elapsed={elapsed} phase={phase} />}
-        {variant === 3 && <PulsingDashboardOverlay elapsed={elapsed} />}
+      <div className="animate-[fade-in_0.3s_ease-out] flex flex-col items-center gap-6">
+        {/* Circular progress with robot */}
+        <div className="relative w-44 h-44">
+          <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="42" fill="none" strokeWidth="4" className="stroke-muted" />
+            <circle cx="50" cy="50" r="42" fill="none" strokeWidth="4" className="stroke-primary" strokeLinecap="round"
+              strokeDasharray={`${2 * Math.PI * 42}`}
+              strokeDashoffset={`${2 * Math.PI * 42 * (1 - progress)}`}
+              style={{ transition: "stroke-dashoffset 1s ease-out" }}
+            />
+          </svg>
+          <img src={robotImg} alt="Solving..." className="absolute inset-4 object-contain drop-shadow-xl animate-[orbit_180s_ease-in-out_infinite]" />
+        </div>
 
-        {/* Variant switcher */}
-        <div className="flex justify-center gap-2 mt-8">
-          {([1, 2, 3] as const).map((v) => (
-            <button
-              key={v}
-              onClick={() => setVariant(v)}
-              className={cn(
+        <h2 className="text-2xl font-bold text-foreground">Rooster wordt opgelost</h2>
+
+        {/* Timeline steps */}
+        <div className="flex items-center gap-2">
+          {solvePhases.map((step, i) => {
+            const status = i < phase ? "done" : i === phase ? "active" : "pending";
+            return (
+              <div key={i} className="flex items-center gap-2">
+                <div className={cn(
+                  "w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold border-2 transition-all duration-500",
+                  status === "done" ? "bg-primary border-primary text-primary-foreground scale-90" :
+                  status === "active" ? "border-primary text-primary animate-pulse bg-primary/10 scale-110" :
+                  "border-border text-muted-foreground bg-muted scale-90 opacity-50"
+                )} title={step.label}>
+                  {status === "done" ? "✓" : step.icon}
+                </div>
+                {i < solvePhases.length - 1 && (
+                  <div className={cn("w-6 h-0.5 rounded-full transition-all duration-500", status === "done" ? "bg-primary" : "bg-border")} />
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Active phase label */}
+        <p className="text-sm text-muted-foreground font-medium animate-pulse">
+          {solvePhases[phase]?.label}…
+        </p>
+
+        {/* KPI cards pulsing */}
+        <div className="grid grid-cols-4 gap-3">
+          {kpis.map((kpi) => (
+            <div key={kpi.label} className="flex flex-col items-center gap-1 px-5 py-3 rounded-xl bg-card border border-border/50 animate-pulse">
+              <span className="text-[10px] text-muted-foreground uppercase tracking-wide">{kpi.label}</span>
+              <span className={cn("text-lg font-bold", kpi.color)}>—</span>
+            </div>
+          ))}
+        </div>
+
+        <span className="text-xs text-muted-foreground font-mono">{elapsed}s</span>
+      </div>
+    </div>
+  );
+}
                 "px-3 py-1.5 rounded-lg text-xs font-medium transition-all",
                 variant === v ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-accent"
               )}
