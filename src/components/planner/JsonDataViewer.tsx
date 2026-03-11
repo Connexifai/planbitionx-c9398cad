@@ -128,7 +128,7 @@ function EmployeeTable({ data }: { data: JsonScheduleData }) {
               <tbody>
                 {data.employees.map((emp, i) => (
                   <tr key={i} className="border-t border-border/30 hover:bg-accent/30 transition-colors">
-                    <td className="px-4 py-2 font-medium">{emp.name}</td>
+                    <td className="px-4 py-2 font-medium">{toTitleCase(emp.name)}</td>
                     <td className="px-4 py-2 text-muted-foreground">{emp.location || "–"}</td>
                     <td className="px-4 py-2 text-muted-foreground">{emp.contractHours ? `${emp.contractHours}u` : "–"}</td>
                     <td className="px-4 py-2">
