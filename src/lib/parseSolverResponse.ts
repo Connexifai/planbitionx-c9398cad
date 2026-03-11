@@ -154,9 +154,19 @@ export function parseSolverResponse(request: RawSchedule, response: SolverRespon
 
   // Map shiftId → shift name from request (deduplicated)
   const shiftNameMap = new Map<string, string>();
+  const shiftMetaMap: ShiftMetaMap = new Map();
   for (const s of request.Shifts) {
     if (!shiftNameMap.has(s.Id)) {
       shiftNameMap.set(s.Id, s.Name);
+    }
+
+    if (!shiftMetaMap.has(s.Name)) {
+      const start = parseISO(s.Start);
+      const end = parseISO(s.End);
+      shiftMetaMap.set(s.Name, {
+        type: classifyShiftType(s.Name, start.getHours()),
+        time: `${format(start, "HH:mm")}-${format(end, "HH:mm")}`,
+      });
     }
   }
 
