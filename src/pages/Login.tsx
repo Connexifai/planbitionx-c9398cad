@@ -8,27 +8,15 @@ import { toast } from "sonner";
 import { Eye, EyeOff, LogIn, UserPlus, ArrowRight } from "lucide-react";
 import robotImg from "@/assets/robot-assistant.png";
 
-function FloatingOrbs() {
+function AnimatedBackground() {
   return (
     <div className="fixed inset-0 overflow-hidden pointer-events-none">
-      {/* Large slow orbs */}
-      <div className="absolute w-[600px] h-[600px] rounded-full bg-primary/15 blur-3xl animate-[float1_20s_ease-in-out_infinite] -top-40 -left-40" />
-      <div className="absolute w-[500px] h-[500px] rounded-full bg-primary/10 blur-3xl animate-[float2_25s_ease-in-out_infinite] -bottom-32 -right-32" />
-      <div className="absolute w-[400px] h-[400px] rounded-full bg-ring/10 blur-3xl animate-[float3_18s_ease-in-out_infinite] top-1/3 right-1/4" />
-      
-      {/* Smaller accent orbs */}
-      <div className="absolute w-48 h-48 rounded-full bg-primary/20 blur-2xl animate-[float4_12s_ease-in-out_infinite] top-1/4 left-1/3" />
-      <div className="absolute w-32 h-32 rounded-full bg-destructive/10 blur-2xl animate-[float5_15s_ease-in-out_infinite] bottom-1/4 left-1/4" />
-      <div className="absolute w-40 h-40 rounded-full bg-ring/15 blur-2xl animate-[float1_22s_ease-in-out_infinite_reverse] top-2/3 right-1/3" />
-
-      {/* Grid overlay */}
-      <div
-        className="absolute inset-0 opacity-[0.03]"
-        style={{
-          backgroundImage: `linear-gradient(hsl(var(--foreground)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--foreground)) 1px, transparent 1px)`,
-          backgroundSize: "60px 60px",
-        }}
+      <img
+        src="/images/login-bg.gif"
+        alt=""
+        className="absolute inset-0 w-full h-full object-cover"
       />
+      <div className="absolute inset-0 bg-background/60" />
     </div>
   );
 }
@@ -48,7 +36,7 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background relative">
-      <FloatingOrbs />
+      <AnimatedBackground />
 
       {/* Centered card */}
       <div className="relative z-10 w-full max-w-md mx-4">
