@@ -222,7 +222,7 @@ export default function Index() {
                 <RosterTabs value={activeTab} onChange={setActiveTab} />
                 {activeTab === "roster" && <RosterGrid data={rosterData ?? undefined} />}
                 {activeTab === "dienst" && <ServiceRosterGrid data={rosterData ?? undefined} />}
-                {activeTab === "stats" && <StatsDashboard />}
+                {activeTab === "stats" && <StatsDashboard data={rosterData ?? undefined} />}
                 {activeTab === "uitleg" && <ExplanationView />}
               </main>
             ) : (
