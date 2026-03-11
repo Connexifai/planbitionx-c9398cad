@@ -101,7 +101,7 @@ function SolvingOverlay() {
               style={{ transition: "stroke-dashoffset 1s ease-out" }}
             />
           </svg>
-          <img src={robotImg} alt="Solving..." className="absolute inset-4 object-contain drop-shadow-xl animate-[orbit_180s_ease-in-out_infinite]" />
+          <img src={robotImg} alt="Solving..." className="absolute inset-4 object-contain drop-shadow-xl animate-[orbit_360s_ease-in-out_infinite]" />
         </div>
 
         <h2 className="text-2xl font-bold text-foreground">Rooster wordt opgelost</h2>
@@ -216,7 +216,7 @@ export default function Index() {
                       <img
                         src={robotImg}
                         alt="AI Assistent"
-                        className="w-[420px] h-[420px] object-contain drop-shadow-2xl animate-[orbit_180s_ease-in-out_infinite]"
+                        className="w-[420px] h-[420px] object-contain drop-shadow-2xl animate-[orbit_360s_ease-in-out_infinite]"
                       />
                       <div className="absolute right-[95%] top-[20%]">
                         <RobotQuoteBubble />
@@ -236,7 +236,7 @@ export default function Index() {
                     <img
                       src={robotImg}
                       alt="AI Briefing"
-                      className="w-56 h-56 object-contain drop-shadow-2xl animate-[orbit_180s_ease-in-out_infinite] hover:scale-110 transition-transform duration-500"
+                      className="w-56 h-56 object-contain drop-shadow-2xl animate-[orbit_360s_ease-in-out_infinite] hover:scale-110 transition-transform duration-500"
                     />
                   </div>
                 )}
@@ -256,7 +256,7 @@ export default function Index() {
                   <img
                     src={robotImg}
                     alt="AI Assistent"
-                    className="w-56 h-56 object-contain drop-shadow-2xl animate-[orbit_180s_ease-in-out_infinite] hover:scale-110 transition-transform duration-500"
+                    className="w-56 h-56 object-contain drop-shadow-2xl animate-[orbit_360s_ease-in-out_infinite] hover:scale-110 transition-transform duration-500"
                   />
                 </div>
               )}
