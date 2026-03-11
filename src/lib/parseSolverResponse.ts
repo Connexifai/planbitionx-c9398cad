@@ -77,6 +77,8 @@ export interface RosterData {
   employees: RosterEmployee[];
   /** demand per shift label per day index */
   demandMap: DemandMap;
+  /** unique planned employees per day index */
+  plannedByDay: number[];
 }
 
 function classifyShiftType(name: string, startHour: number): ShiftType {
@@ -119,6 +121,22 @@ export function parseSolverResponse(request: RawSchedule, response: SolverRespon
     dayIndexMap.set(format(d, "yyyy-MM-dd"), i);
   });
 
+  // Fallback map for mismatched request/response date ranges: align by request day order
+  const requestDayOrder = Array.from(
+    new Set(request.Shifts.map((s) => format(parseISO(s.Start), "yyyy-MM-dd")))
+  ).sort((a, b) => a.localeCompare(b));
+  const requestDayOrderMap = new Map<string, number>(requestDayOrder.map((d, i) => [d, i]));
+
+  const resolveDayIndex = (dateKey: string): number | undefined => {
+    const direct = dayIndexMap.get(dateKey);
+    if (direct !== undefined) return direct;
+
+    const fallbackIdx = requestDayOrderMap.get(dateKey);
+    if (fallbackIdx !== undefined && fallbackIdx < days.length) return fallbackIdx;
+
+    return undefined;
+  };
+
   // Map shiftId → shift name from request (deduplicated)
   const shiftNameMap = new Map<string, string>();
   for (const s of request.Shifts) {
@@ -144,6 +162,7 @@ export function parseSolverResponse(request: RawSchedule, response: SolverRespon
 
   // Build employee rows
   const employees: RosterEmployee[] = [];
+  const plannedContractsByDay = days.map(() => new Set<string>());
 
   for (const emp of request.Employees) {
     const assignments = assignmentsByContract.get(emp.ContractId) || [];
@@ -153,8 +172,10 @@ export function parseSolverResponse(request: RawSchedule, response: SolverRespon
 
     for (const a of assignments) {
       const dateKey = format(parseISO(a.scheduleDate), "yyyy-MM-dd");
-      const dayIdx = dayIndexMap.get(dateKey);
+      const dayIdx = resolveDayIndex(dateKey);
       if (dayIdx === undefined) continue;
+
+      plannedContractsByDay[dayIdx].add(a.contractId);
 
       const start = parseISO(a.startTime);
       const end = parseISO(a.endTime);
@@ -204,14 +225,16 @@ export function parseSolverResponse(request: RawSchedule, response: SolverRespon
   const demandMap: DemandMap = new Map();
   for (const s of request.Shifts) {
     const sDate = format(parseISO(s.Start), "yyyy-MM-dd");
-    const dayIdx = dayIndexMap.get(sDate);
+    const dayIdx = resolveDayIndex(sDate);
     if (dayIdx === undefined) continue;
     const shiftName = s.Name;
     if (!demandMap.has(shiftName)) {
       demandMap.set(shiftName, new Array(days.length).fill(0));
     }
-    demandMap.get(shiftName)![dayIdx] = s.Demand;
+    demandMap.get(shiftName)![dayIdx] += s.Demand;
   }
 
-  return { days, employees, demandMap };
+  const plannedByDay = plannedContractsByDay.map((contracts) => contracts.size);
+
+  return { days, employees, demandMap, plannedByDay };
 }
