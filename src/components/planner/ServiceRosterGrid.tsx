@@ -140,8 +140,8 @@ export function ServiceRosterGrid({ data }: ServiceRosterGridProps) {
               <td className="sticky left-0 z-[3] bg-card border-r w-[180px] min-w-[180px] px-3 py-3 align-top">
                 <div className="flex flex-col gap-1.5">
                   <span className="text-[12px] font-semibold text-foreground">{group.label}</span>
-                  <div className={`shift-badge ${shiftClassMap[group.type!]} text-[10px] px-2 py-0.5 w-fit`}>
-                    {shiftTypeLabel[group.type!]}
+                  <div className={`shift-badge ${group.type ? shiftClassMap[group.type] : "shift-day"} text-[10px] px-2 py-0.5 w-fit`}>
+                    {group.type ? shiftTypeLabel[group.type] : t("grid.shift", "Dienst")}
                   </div>
                   <span className="text-[11px] text-muted-foreground">{group.time}</span>
                 </div>
