@@ -161,14 +161,22 @@ export default function Index() {
               <div className="flex-1 flex flex-col min-h-0">
                 <div className="flex-1 overflow-y-auto roster-scroll p-5 space-y-5">
                   <KpiCards solved={false} />
-                  {jsonLoaded && <JsonDataViewer data={demoScheduleData} />}
+                {jsonLoaded && <JsonDataViewer data={demoScheduleData} />}
                 </div>
-                {/* Robot fixed rechtsonder */}
-                <img
-                  src={robotImg}
-                  alt="AI Briefing"
-                  className="fixed bottom-8 right-8 w-56 h-56 object-contain drop-shadow-2xl animate-[orbit_180s_ease-in-out_infinite] hover:scale-110 transition-transform duration-500 cursor-pointer z-50"
-                />
+                {/* Robot fixed rechtsonder — alleen als JSON geladen */}
+                {jsonLoaded && (
+                  <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2 cursor-pointer" onClick={() => setChatOpen(true)}>
+                    <div className="relative bg-primary text-primary-foreground shadow-xl rounded-2xl px-4 py-3 max-w-[230px] animate-[bounce_2s_ease-in-out_3] mr-4">
+                      <p className="text-sm font-semibold leading-snug">Hey! 👋 Klik op mij om je roosterwensen door te geven in de chat!</p>
+                      <div className="absolute -bottom-2 right-6 w-4 h-4 bg-primary rotate-45 rounded-sm" />
+                    </div>
+                    <img
+                      src={robotImg}
+                      alt="AI Briefing"
+                      className="w-56 h-56 object-contain drop-shadow-2xl animate-[orbit_180s_ease-in-out_infinite] hover:scale-110 transition-transform duration-500"
+                    />
+                  </div>
+                )}
               </div>
             )}
           </div>
