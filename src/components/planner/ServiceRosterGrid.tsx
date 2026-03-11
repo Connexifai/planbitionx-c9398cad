@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { toTitleCase } from "@/lib/utils";
-import type { RosterData, ShiftData, DayColumn, RosterEmployee, DemandMap } from "@/lib/parseSolverResponse";
+import type { RosterData, DemandMap } from "@/lib/parseSolverResponse";
 
 type ShiftType = "vroeg" | "dag" | "laat" | "nacht" | null;
 
