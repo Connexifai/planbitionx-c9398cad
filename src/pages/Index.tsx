@@ -87,15 +87,6 @@ function SolvingOverlay() {
           {solvePhases[phase]?.label}…
         </p>
 
-        {/* KPI cards pulsing */}
-        <div className="grid grid-cols-4 gap-3">
-          {kpis.map((kpi) => (
-            <div key={kpi.label} className="flex flex-col items-center gap-1 px-5 py-3 rounded-xl bg-card border border-border/50 animate-pulse">
-              <span className="text-[10px] text-muted-foreground uppercase tracking-wide">{kpi.label}</span>
-              <span className={cn("text-lg font-bold", kpi.color)}>—</span>
-            </div>
-          ))}
-        </div>
 
         <span className="text-xs text-muted-foreground font-mono">{elapsed}s</span>
       </div>
