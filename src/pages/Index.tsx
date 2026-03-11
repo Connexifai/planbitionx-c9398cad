@@ -103,7 +103,8 @@ export default function Index() {
   const [solving, setSolving] = useState(false);
   const [activeTab, setActiveTab] = useState("roster");
   const [chatOpen, setChatOpen] = useState(false);
-  const [jsonLoaded, setJsonLoaded] = useState(true); // demo: loaded by default
+  const [jsonLoaded, setJsonLoaded] = useState(true);
+  const [showChat, setShowChat] = useState(false);
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
@@ -157,13 +158,41 @@ export default function Index() {
                 {activeTab === "stats" && <StatsDashboard />}
                 {activeTab === "uitleg" && <ExplanationView />}
               </main>
+            ) : showChat ? (
+              <div className="flex-1 flex flex-col min-h-0">
+                <div className="p-5 pb-0">
+                  <KpiCards solved={false} />
+                </div>
+                <div className="flex-1 min-h-0 overflow-hidden">
+                  <AiBriefingChat />
+                </div>
+                <img
+                  src={robotImg}
+                  alt="AI Briefing"
+                  className="fixed bottom-8 right-8 w-56 h-56 object-contain drop-shadow-2xl animate-[orbit_180s_ease-in-out_infinite] hover:scale-110 transition-transform duration-500 cursor-pointer z-50"
+                />
+              </div>
             ) : (
               <div className="flex-1 flex flex-col min-h-0">
                 <div className="flex-1 overflow-y-auto roster-scroll p-5 space-y-5">
                   <KpiCards solved={false} />
-                  {jsonLoaded && <JsonDataViewer data={demoScheduleData} />}
+                  {jsonLoaded && (
+                    <>
+                      <JsonDataViewer data={demoScheduleData} />
+                      <div className="flex justify-center pt-2 pb-8">
+                        <Button
+                          size="lg"
+                          className="gap-2 px-8 text-sm font-semibold"
+                          style={{ background: "hsl(var(--kpi-assignments))" }}
+                          onClick={() => setShowChat(true)}
+                        >
+                          <MessageCircle className="h-4 w-4" />
+                          Ga verder naar AI Briefing
+                        </Button>
+                      </div>
+                    </>
+                  )}
                 </div>
-                {/* Robot fixed rechtsonder */}
                 <img
                   src={robotImg}
                   alt="AI Briefing"
