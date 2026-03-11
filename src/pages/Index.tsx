@@ -181,15 +181,13 @@ export default function Index() {
             )}
           </div>
 
-          {/* AI Chat side panel (only after solve) */}
-          {solved && (
+          {/* AI Chat side panel — works both pre-solve (AiBriefingChat) and post-solve (PostSolveChat) */}
+          {(solved || (jsonLoaded && !solved)) && (
             <>
-              {!chatOpen && (
+              {solved && !chatOpen && (
                 <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2 cursor-pointer" onClick={() => setChatOpen(true)}>
-                  {/* Speech bubble with tail */}
                   <div className="relative bg-primary text-primary-foreground shadow-xl rounded-2xl px-4 py-3 max-w-[230px] animate-[bounce_2s_ease-in-out_3] mr-4">
                     <p className="text-sm font-semibold leading-snug">Hey! 👋 Klik op mij, dan help ik je met het rooster!</p>
-                    {/* Tail pointing down-right toward robot */}
                     <div className="absolute -bottom-2 right-6 w-4 h-4 bg-primary rotate-45 rounded-sm" />
                   </div>
                   <img
@@ -211,7 +209,7 @@ export default function Index() {
                     <div className="flex items-center justify-between px-4 py-3 border-b">
                       <div className="flex items-center gap-2">
                         <MessageCircle className="h-4 w-4 text-primary" />
-                        <h3 className="text-sm font-semibold">AI Assistent</h3>
+                        <h3 className="text-sm font-semibold">{solved ? "AI Assistent" : "AI Briefing"}</h3>
                       </div>
                       <Tooltip>
                         <TooltipTrigger asChild>
@@ -226,7 +224,7 @@ export default function Index() {
                       </Tooltip>
                     </div>
                     <div className="flex-1 min-h-0">
-                      <PostSolveChat />
+                      {solved ? <PostSolveChat /> : <AiBriefingChat />}
                     </div>
                   </>
                 )}
