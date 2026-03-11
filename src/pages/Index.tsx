@@ -7,6 +7,7 @@ import { ExplanationView } from "@/components/planner/ExplanationView";
 import { RosterTabs } from "@/components/planner/RosterTabs";
 import { PostSolveChat } from "@/components/planner/PostSolveChat";
 import { AiBriefingChat } from "@/components/planner/AiBriefingChat";
+import { JsonDataViewer, demoScheduleData } from "@/components/planner/JsonDataViewer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
