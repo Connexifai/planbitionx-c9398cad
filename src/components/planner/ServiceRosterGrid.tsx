@@ -18,24 +18,28 @@ interface ShiftGroup {
 }
 
 function deriveShiftGroups(data: RosterData): ShiftGroup[] {
-  const groupMap = new Map<string, ShiftGroup>();
+  const labels = new Set<string>();
+  data.demandMap.forEach((_, label) => labels.add(label));
+  data.assignedByShiftDay?.forEach((_, label) => labels.add(label));
 
-  for (const emp of data.employees) {
-    for (const shift of emp.shifts) {
-      if (!shift.type || !shift.label) continue;
-      const key = `${shift.label}`;
-      if (!groupMap.has(key)) {
-        groupMap.set(key, {
-          label: shift.label,
-          type: shift.type,
-          time: shift.time || "",
-        });
+  const groups: ShiftGroup[] = Array.from(labels).map((label) => {
+    const meta = data.shiftMetaMap?.get(label);
+    if (meta) {
+      return { label, type: meta.type, time: meta.time };
+    }
+
+    for (const emp of data.employees) {
+      const found = emp.shifts.find((s) => s.label === label && s.type);
+      if (found) {
+        return { label, type: found.type, time: found.time || "" };
       }
     }
-  }
+
+    return { label, type: null, time: "" };
+  });
 
   const typeOrder: Record<string, number> = { vroeg: 0, dag: 1, laat: 2, nacht: 3 };
-  return Array.from(groupMap.values()).sort((a, b) => {
+  return groups.sort((a, b) => {
     const oa = typeOrder[a.type || ""] ?? 9;
     const ob = typeOrder[b.type || ""] ?? 9;
     if (oa !== ob) return oa - ob;
