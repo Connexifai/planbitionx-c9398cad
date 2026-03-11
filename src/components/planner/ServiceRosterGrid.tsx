@@ -148,12 +148,15 @@ export function ServiceRosterGrid({ data }: ServiceRosterGridProps) {
               </td>
               {days.map((d, dayIdx) => {
                 const target = getDemand(demandMap, group.label, dayIdx);
-                const emps = employees
+                const assignedNames = getAssignmentNames(assignmentNamesByShiftDay, group.label, dayIdx);
+                const fallbackNames = employees
                   .filter((emp) => {
                     const s = emp.shifts[dayIdx];
                     return s && s.type === group.type && s.label === group.label;
                   })
                   .map((emp) => emp.name);
+                const emps = assignedNames.length > 0 ? assignedNames : fallbackNames;
+                const count = getDemand(assignedByShiftDay, group.label, dayIdx) || emps.length;
                 return (
                   <td
                     key={dayIdx}
@@ -162,7 +165,7 @@ export function ServiceRosterGrid({ data }: ServiceRosterGridProps) {
                     }`}
                   >
                     <div className="mb-1">
-                      <CountBadge count={emps.length} target={target} />
+                      <CountBadge count={count} target={target} />
                     </div>
                     {emps.map((name, nIdx) => (
                       <div
