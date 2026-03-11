@@ -36,12 +36,12 @@ i18n
 export default i18n;
 
 export const languages = [
-  { code: 'nl', label: 'Nederlands', flag: '🇳🇱' },
-  { code: 'en', label: 'English', flag: '🇬🇧' },
-  { code: 'de', label: 'Deutsch', flag: '🇩🇪' },
-  { code: 'fr', label: 'Français', flag: '🇫🇷' },
-  { code: 'pt', label: 'Português', flag: '🇵🇹' },
-  { code: 'pl', label: 'Polski', flag: '🇵🇱' },
-  { code: 'it', label: 'Italiano', flag: '🇮🇹' },
-  { code: 'es', label: 'Español', flag: '🇪🇸' },
+  { code: 'nl', label: 'Nederlands', countryCode: 'nl' },
+  { code: 'en', label: 'English', countryCode: 'gb' },
+  { code: 'de', label: 'Deutsch', countryCode: 'de' },
+  { code: 'fr', label: 'Français', countryCode: 'fr' },
+  { code: 'pt', label: 'Português', countryCode: 'pt' },
+  { code: 'pl', label: 'Polski', countryCode: 'pl' },
+  { code: 'it', label: 'Italiano', countryCode: 'it' },
+  { code: 'es', label: 'Español', countryCode: 'es' },
 ];
