@@ -77,6 +77,8 @@ export interface RosterData {
   employees: RosterEmployee[];
   /** demand per shift label per day index */
   demandMap: DemandMap;
+  /** unique planned employees per day index */
+  plannedByDay: number[];
 }
 
 function classifyShiftType(name: string, startHour: number): ShiftType {
