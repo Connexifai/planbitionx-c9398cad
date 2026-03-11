@@ -102,11 +102,17 @@ function computeStats(data: RosterData, t: (key: string) => string) {
   const underEmployees = employeeHours.filter((e) => e.delta < -8).length;
   const scheduledEmployees = employees.filter((e) => e.shifts.some((s) => s.type !== null)).length;
 
-  // Daily fill rate
+  // Daily fill rate based on actual demand
   const dailyFillRate = days.map((d, dayIdx) => {
     const filled = employees.filter((emp) => emp.shifts[dayIdx]?.type !== null).length;
-    const pct = employees.length > 0 ? Math.round((filled / employees.length) * 100) : 0;
-    return { dag: t(`days.${d.dayKey}`), bezet: filled, target: employees.length, pct };
+    // Sum demand for this day across all shifts
+    let dayDemand = 0;
+    data.demandMap.forEach((dayDemands) => {
+      dayDemand += dayDemands[dayIdx] || 0;
+    });
+    const target = dayDemand > 0 ? dayDemand : filled; // fallback
+    const pct = target > 0 ? Math.round((filled / target) * 100) : 0;
+    return { dag: t(`days.${d.dayKey}`), bezet: filled, target, pct };
   });
 
   const avgFillRate = dailyFillRate.length > 0
