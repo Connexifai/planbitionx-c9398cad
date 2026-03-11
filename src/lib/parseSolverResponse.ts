@@ -188,14 +188,36 @@ export function parseSolverResponse(request: RawSchedule, response: SolverRespon
   // Build employee rows
   const employees: RosterEmployee[] = [];
 
-  // Count planned contracts per day from the full solver output
+  // Count planned contracts per day + true assigned shifts from full solver output
   // (also contracts that may not be present in the request employee list)
   const plannedContractsByDay = days.map(() => new Set<string>());
+  const assignedByDay = new Array(days.length).fill(0);
+  const assignedByShiftDay: DemandMap = new Map();
+  const assignmentNamesByShiftDay: AssignmentNamesMap = new Map();
+
   for (const a of response.assignedShifts) {
     const dateKey = format(parseISO(a.scheduleDate), "yyyy-MM-dd");
     const dayIdx = resolveDayIndex(dateKey);
     if (dayIdx === undefined) continue;
+
     plannedContractsByDay[dayIdx].add(a.contractId);
+    assignedByDay[dayIdx] += 1;
+
+    const shiftLabel = shiftNameMap.get(a.shiftId) || "Shift";
+    if (!assignedByShiftDay.has(shiftLabel)) {
+      assignedByShiftDay.set(shiftLabel, new Array(days.length).fill(0));
+    }
+    assignedByShiftDay.get(shiftLabel)![dayIdx] += 1;
+
+    if (!assignmentNamesByShiftDay.has(shiftLabel)) {
+      assignmentNamesByShiftDay.set(
+        shiftLabel,
+        Array.from({ length: days.length }, () => [])
+      );
+    }
+
+    const displayName = employeeMap.get(a.contractId)?.Name || a.contractId;
+    assignmentNamesByShiftDay.get(shiftLabel)![dayIdx].push(displayName);
   }
 
   for (const emp of request.Employees) {
