@@ -223,7 +223,7 @@ export default function Index() {
                 {activeTab === "roster" && <RosterGrid data={rosterData ?? undefined} />}
                 {activeTab === "dienst" && <ServiceRosterGrid data={rosterData ?? undefined} />}
                 {activeTab === "stats" && <StatsDashboard data={rosterData ?? undefined} />}
-                {activeTab === "uitleg" && <ExplanationView />}
+                {activeTab === "uitleg" && <ExplanationView data={rosterData ?? undefined} />}
               </main>
             ) : (
               <div className="flex-1 flex flex-col min-h-0">
