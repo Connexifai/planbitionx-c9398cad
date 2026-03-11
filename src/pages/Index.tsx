@@ -56,15 +56,14 @@ function SolvingOverlay() {
   const { t } = useTranslation();
   const [elapsed, setElapsed] = useState(0);
   const [phase, setPhase] = useState(0);
-  const progress = Math.min(elapsed / 15, 0.95);
 
   const solvePhases = [
-    { label: t("solving.loadConstraints"), icon: "📋" },
-    { label: t("solving.assignEmployees"), icon: "👥" },
-    { label: t("solving.checkAtw"), icon: "⚖️" },
-    { label: t("solving.resolveConflicts"), icon: "🔧" },
-    { label: t("solving.optimizeRoster"), icon: "✨" },
-    { label: t("solving.finalChecks"), icon: "✅" },
+    { label: t("solving.loadConstraints"), icon: "📋", duration: 4 },
+    { label: t("solving.assignEmployees"), icon: "👥", duration: 6 },
+    { label: t("solving.checkAtw"), icon: "⚖️", duration: 8 },
+    { label: t("solving.resolveConflicts"), icon: "🔧", duration: 10 },
+    { label: t("solving.optimizeRoster"), icon: "✨", duration: 0 },
+    { label: t("solving.finalChecks"), icon: "✅", duration: 0 },
   ];
 
   useEffect(() => {
@@ -72,24 +71,31 @@ function SolvingOverlay() {
     return () => clearInterval(timer);
   }, []);
 
+  // Advance phases: first few are timed, then "optimizing" stays until solved
   useEffect(() => {
-    const phaseTimer = setInterval(() => setPhase((p) => (p + 1) % solvePhases.length), 2500);
-    return () => clearInterval(phaseTimer);
-  }, []);
+    const thresholds = [4, 8, 14, 22]; // cumulative seconds for phases 0-3
+    const newPhase = thresholds.filter((t) => elapsed >= t).length;
+    if (newPhase <= 4) setPhase(Math.min(newPhase, 4));
+  }, [elapsed]);
+
+  const formatTime = (s: number) => {
+    const m = Math.floor(s / 60);
+    const sec = s % 60;
+    return m > 0 ? `${m}:${sec.toString().padStart(2, "0")}` : `${sec}s`;
+  };
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-background/80 backdrop-blur-sm">
       <div className="animate-[fade-in_0.3s_ease-out] flex flex-col items-center gap-6">
         <div className="relative w-44 h-44">
-          <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
+          {/* Indeterminate spinning ring */}
+          <svg className="w-full h-full animate-spin" style={{ animationDuration: "3s" }} viewBox="0 0 100 100">
             <circle cx="50" cy="50" r="42" fill="none" strokeWidth="4" className="stroke-muted" />
             <circle cx="50" cy="50" r="42" fill="none" strokeWidth="4" className="stroke-primary" strokeLinecap="round"
-              strokeDasharray={`${2 * Math.PI * 42}`}
-              strokeDashoffset={`${2 * Math.PI * 42 * (1 - progress)}`}
-              style={{ transition: "stroke-dashoffset 1s ease-out" }}
+              strokeDasharray={`${2 * Math.PI * 42 * 0.3} ${2 * Math.PI * 42 * 0.7}`}
             />
           </svg>
-          <img src={robotImg} alt="Solving..." className="absolute inset-4 object-contain drop-shadow-xl animate-[orbit_360s_ease-in-out_infinite]" />
+          <img src={robotImg} alt="Solving..." className="absolute inset-4 object-contain drop-shadow-xl" />
         </div>
 
         <h2 className="text-2xl font-bold text-foreground">{t("solving.title")}</h2>
@@ -119,7 +125,7 @@ function SolvingOverlay() {
           {solvePhases[phase]?.label}…
         </p>
 
-        <span className="text-xs text-muted-foreground font-mono">{elapsed}s</span>
+        <span className="text-xs text-muted-foreground font-mono">{formatTime(elapsed)}</span>
       </div>
     </div>
   );
