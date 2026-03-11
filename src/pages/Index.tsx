@@ -103,6 +103,7 @@ export default function Index() {
   const [solving, setSolving] = useState(false);
   const [activeTab, setActiveTab] = useState("roster");
   const [chatOpen, setChatOpen] = useState(false);
+  const [jsonLoaded, setJsonLoaded] = useState(true); // demo: loaded by default
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
