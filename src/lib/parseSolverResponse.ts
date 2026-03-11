@@ -290,5 +290,14 @@ export function parseSolverResponse(request: RawSchedule, response: SolverRespon
 
   const plannedByDay = plannedContractsByDay.map((contracts) => contracts.size);
 
-  return { days, employees, demandMap, plannedByDay };
+  return {
+    days,
+    employees,
+    demandMap,
+    plannedByDay,
+    assignedByDay,
+    assignedByShiftDay,
+    assignmentNamesByShiftDay,
+    shiftMetaMap,
+  };
 }

@@ -94,7 +94,7 @@ export function RosterGrid({ data }: RosterGridProps) {
   });
 
   const dayFillRates = days.map((_, dayIdx) => {
-    const filled = plannedByDay?.[dayIdx] ?? employees.filter(emp => emp.shifts[dayIdx]?.type !== null).length;
+    const filled = assignedByDay?.[dayIdx] ?? plannedByDay?.[dayIdx] ?? employees.filter(emp => emp.shifts[dayIdx]?.type !== null).length;
     const demandTarget = dayDemands[dayIdx];
     const target = demandTarget > 0 ? demandTarget : filled;
     return { filled, target, pct: target > 0 ? Math.round((filled / target) * 100) : 0 };
