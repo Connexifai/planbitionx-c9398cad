@@ -116,12 +116,7 @@ export function ServiceRosterGrid({ data }: ServiceRosterGridProps) {
             <th className="sticky left-0 z-[6] bg-card border-b border-r w-[180px] min-w-[180px]" />
             {days.map((d, i) => {
               const dayTotalDemand = shiftGroups.reduce((s, g) => s + getDemand(demandMap, g.label, i), 0);
-              const dayFilled = shiftGroups.reduce((s, g) => {
-                return s + employees.filter((emp) => {
-                  const sh = emp.shifts[i];
-                  return sh && sh.type === g.type && sh.label === g.label;
-                }).length;
-              }, 0);
+              const dayFilled = shiftGroups.reduce((s, g) => s + getDemand(assignedByShiftDay, g.label, i), 0);
               return (
                 <th
                   key={i}
