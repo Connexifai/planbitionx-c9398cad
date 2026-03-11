@@ -101,9 +101,11 @@ export default function Index() {
             <>
               {!chatOpen && (
                 <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2 cursor-pointer" onClick={() => setChatOpen(true)}>
-                  {/* Speech bubble */}
-                  <div className="relative bg-card border border-border shadow-lg rounded-2xl rounded-br-sm px-4 py-2.5 max-w-[220px] animate-[fade-in_0.5s_ease-out]">
-                    <p className="text-sm font-medium text-foreground">Klik op mij om je AI planner te worden! 🤖</p>
+                  {/* Speech bubble with tail */}
+                  <div className="relative bg-primary text-primary-foreground shadow-xl rounded-2xl px-4 py-3 max-w-[230px] animate-[bounce_2s_ease-in-out_3] mr-4">
+                    <p className="text-sm font-semibold leading-snug">Hey! 👋 Klik op mij, dan help ik je met het rooster!</p>
+                    {/* Tail pointing down-right toward robot */}
+                    <div className="absolute -bottom-2 right-6 w-4 h-4 bg-primary rotate-45 rounded-sm" />
                   </div>
                   <img
                     src={robotImg}
