@@ -100,12 +100,17 @@ export default function Index() {
           {solved && (
             <>
               {!chatOpen && (
-                <img
-                  src={robotImg}
-                  alt="AI Assistent"
-                  onClick={() => setChatOpen(true)}
-                  className="fixed bottom-6 right-6 z-50 w-56 h-56 object-contain drop-shadow-2xl animate-[orbit_180s_ease-in-out_infinite] hover:scale-110 transition-transform duration-500 cursor-pointer"
-                />
+                <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2 cursor-pointer" onClick={() => setChatOpen(true)}>
+                  {/* Speech bubble */}
+                  <div className="relative bg-card border border-border shadow-lg rounded-2xl rounded-br-sm px-4 py-2.5 max-w-[220px] animate-[fade-in_0.5s_ease-out]">
+                    <p className="text-sm font-medium text-foreground">Klik op mij om je AI planner te worden! 🤖</p>
+                  </div>
+                  <img
+                    src={robotImg}
+                    alt="AI Assistent"
+                    className="w-56 h-56 object-contain drop-shadow-2xl animate-[orbit_180s_ease-in-out_infinite] hover:scale-110 transition-transform duration-500"
+                  />
+                </div>
               )}
 
               <div
