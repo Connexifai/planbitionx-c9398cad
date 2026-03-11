@@ -126,12 +126,12 @@ function computeStats(data: RosterData, t: (key: string) => string) {
   const dayLabels = days.map((d) => t(`days.${d.dayKey}`));
   const heatmapData = Array.from(shiftLabels).map((label) => {
     const row: Record<string, any> = { dienst: label };
+    const demands = data.demandMap.get(label);
     days.forEach((d, dayIdx) => {
       const dayLabel = t(`days.${d.dayKey}`);
-      const total = employees.length;
+      const target = demands ? demands[dayIdx] : 0;
       const filled = employees.filter((emp) => emp.shifts[dayIdx]?.label === label).length;
-      // Use target of 25 as baseline for percentage
-      row[dayLabel] = total > 0 ? Math.round((filled / 25) * 100) : 0;
+      row[dayLabel] = target > 0 ? Math.round((filled / target) * 100) : 0;
     });
     return row;
   });
