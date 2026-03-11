@@ -169,12 +169,15 @@ export function ServiceRosterGrid({ data }: ServiceRosterGridProps) {
                     </div>
                     {emps.map((name, nIdx) => (
                       <div
-                        key={nIdx}
+                        key={`${name}-${nIdx}`}
                         className="text-[12px] leading-relaxed text-foreground py-0.5 truncate hover:text-primary transition-colors cursor-default"
                       >
                         {toTitleCase(name)}
                       </div>
                     ))}
+                    {count > emps.length && (
+                      <div className="text-[11px] text-muted-foreground">+{count - emps.length} {t("grid.otherAssignments", "overige")}</div>
+                    )}
                   </td>
                 );
               })}
