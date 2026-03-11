@@ -65,12 +65,18 @@ export interface RosterEmployee {
 export interface DayColumn {
   dayKey: string;
   date: string;
+  fullDate: string; // YYYY-MM-DD for demand lookup
   weekend: boolean;
 }
+
+/** Per-shift-label, per-day demand from the request */
+export type DemandMap = Map<string, number[]>;
 
 export interface RosterData {
   days: DayColumn[];
   employees: RosterEmployee[];
+  /** demand per shift label per day index */
+  demandMap: DemandMap;
 }
 
 function classifyShiftType(name: string, startHour: number): ShiftType {
@@ -103,6 +109,7 @@ export function parseSolverResponse(request: RawSchedule, response: SolverRespon
   const days: DayColumn[] = allDays.map((d) => ({
     dayKey: dayKeyMap[d.getDay()],
     date: format(d, "dd/MM"),
+    fullDate: format(d, "yyyy-MM-dd"),
     weekend: d.getDay() === 0 || d.getDay() === 6,
   }));
 
@@ -193,5 +200,18 @@ export function parseSolverResponse(request: RawSchedule, response: SolverRespon
     return a.name.localeCompare(b.name);
   });
 
-  return { days, employees };
+  // Build demand map: shift name → demand per day
+  const demandMap: DemandMap = new Map();
+  for (const s of request.Shifts) {
+    const sDate = format(parseISO(s.Start), "yyyy-MM-dd");
+    const dayIdx = dayIndexMap.get(sDate);
+    if (dayIdx === undefined) continue;
+    const shiftName = s.Name;
+    if (!demandMap.has(shiftName)) {
+      demandMap.set(shiftName, new Array(days.length).fill(0));
+    }
+    demandMap.get(shiftName)![dayIdx] = s.Demand;
+  }
+
+  return { days, employees, demandMap };
 }

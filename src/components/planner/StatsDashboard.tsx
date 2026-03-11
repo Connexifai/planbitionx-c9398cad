@@ -5,7 +5,7 @@ import {
 } from "recharts";
 import { Users, TrendingUp, AlertTriangle, Clock, Target, BarChart3 } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import type { RosterData } from "@/lib/parseSolverResponse";
+import type { RosterData, DayColumn } from "@/lib/parseSolverResponse";
 
 const CHART_COLORS = [
   "hsl(217, 91%, 53%)",
@@ -102,11 +102,17 @@ function computeStats(data: RosterData, t: (key: string) => string) {
   const underEmployees = employeeHours.filter((e) => e.delta < -8).length;
   const scheduledEmployees = employees.filter((e) => e.shifts.some((s) => s.type !== null)).length;
 
-  // Daily fill rate
+  // Daily fill rate based on actual demand
   const dailyFillRate = days.map((d, dayIdx) => {
     const filled = employees.filter((emp) => emp.shifts[dayIdx]?.type !== null).length;
-    const pct = employees.length > 0 ? Math.round((filled / employees.length) * 100) : 0;
-    return { dag: t(`days.${d.dayKey}`), bezet: filled, target: employees.length, pct };
+    // Sum demand for this day across all shifts
+    let dayDemand = 0;
+    data.demandMap.forEach((dayDemands) => {
+      dayDemand += dayDemands[dayIdx] || 0;
+    });
+    const target = dayDemand > 0 ? dayDemand : filled; // fallback
+    const pct = target > 0 ? Math.round((filled / target) * 100) : 0;
+    return { dag: t(`days.${d.dayKey}`), bezet: filled, target, pct };
   });
 
   const avgFillRate = dailyFillRate.length > 0
@@ -120,12 +126,12 @@ function computeStats(data: RosterData, t: (key: string) => string) {
   const dayLabels = days.map((d) => t(`days.${d.dayKey}`));
   const heatmapData = Array.from(shiftLabels).map((label) => {
     const row: Record<string, any> = { dienst: label };
+    const demands = data.demandMap.get(label);
     days.forEach((d, dayIdx) => {
       const dayLabel = t(`days.${d.dayKey}`);
-      const total = employees.length;
+      const target = demands ? demands[dayIdx] : 0;
       const filled = employees.filter((emp) => emp.shifts[dayIdx]?.label === label).length;
-      // Use target of 25 as baseline for percentage
-      row[dayLabel] = total > 0 ? Math.round((filled / 25) * 100) : 0;
+      row[dayLabel] = target > 0 ? Math.round((filled / target) * 100) : 0;
     });
     return row;
   });
@@ -157,24 +163,29 @@ function computeStats(data: RosterData, t: (key: string) => string) {
     value: totalQuals > 0 ? Math.round((count / totalQuals) * 100) : 0,
   }));
 
-  // Weekend vs weekday
+  // Weekend vs weekday using actual demand
   const weekdayDays = days.filter((d) => !d.weekend);
   const weekendDays = days.filter((d) => d.weekend);
-  const weekdayFilled = weekdayDays.reduce((sum, _, i) => {
-    const dayIdx = days.indexOf(weekdayDays[i]);
-    return sum + employees.filter((emp) => emp.shifts[dayIdx]?.type !== null).length;
-  }, 0);
-  const weekendFilled = weekendDays.reduce((sum, d) => {
-    const dayIdx = days.indexOf(d);
-    return sum + employees.filter((emp) => emp.shifts[dayIdx]?.type !== null).length;
-  }, 0);
 
-  const weekdayTarget = weekdayDays.length * employees.length;
-  const weekendTarget = weekendDays.length * employees.length;
+  const computeDayGroupStats = (daySubset: DayColumn[]) => {
+    let filled = 0;
+    let demand = 0;
+    for (const d of daySubset) {
+      const dayIdx = days.indexOf(d);
+      filled += employees.filter((emp) => emp.shifts[dayIdx]?.type !== null).length;
+      data.demandMap.forEach((dayDemands) => {
+        demand += dayDemands[dayIdx] || 0;
+      });
+    }
+    return { filled, demand };
+  };
+
+  const weekdayStats = computeDayGroupStats(weekdayDays);
+  const weekendStats = computeDayGroupStats(weekendDays);
 
   const weekdayWeekend = [
-    { type: t("stats.weekday"), bezetting: weekdayTarget > 0 ? Math.round((weekdayFilled / weekdayTarget) * 100) : 0, uren: Math.round(weekdayFilled * 8) },
-    { type: t("stats.weekend"), bezetting: weekendTarget > 0 ? Math.round((weekendFilled / weekendTarget) * 100) : 0, uren: Math.round(weekendFilled * 8) },
+    { type: t("stats.weekday"), bezetting: weekdayStats.demand > 0 ? Math.round((weekdayStats.filled / weekdayStats.demand) * 100) : 0, uren: Math.round(weekdayStats.filled * 8) },
+    { type: t("stats.weekend"), bezetting: weekendStats.demand > 0 ? Math.round((weekendStats.filled / weekendStats.demand) * 100) : 0, uren: Math.round(weekendStats.filled * 8) },
   ];
 
   return {
