@@ -189,7 +189,8 @@
     background: hsl(var(--muted-foreground) / 0.5);
   }
 
-  .robot-float {
-    animation: orbitsm 30s ease-in-out infinite;
-  }
+}
+
+.robot-float {
+  animation: orbitsm 30s ease-in-out infinite;
 }
