@@ -109,6 +109,7 @@ export function parseSolverResponse(request: RawSchedule, response: SolverRespon
   const days: DayColumn[] = allDays.map((d) => ({
     dayKey: dayKeyMap[d.getDay()],
     date: format(d, "dd/MM"),
+    fullDate: format(d, "yyyy-MM-dd"),
     weekend: d.getDay() === 0 || d.getDay() === 6,
   }));
 
