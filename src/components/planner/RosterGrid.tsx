@@ -83,7 +83,7 @@ export function RosterGrid({ data }: RosterGridProps) {
     );
   }
 
-  const { days, employees, demandMap, plannedByDay } = data;
+  const { days, employees, demandMap, plannedByDay, assignedByDay } = data;
   const numDays = days.length;
 
   // Compute total demand per day across all shifts

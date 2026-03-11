@@ -1,5 +1,4 @@
 import { format, parseISO, eachDayOfInterval } from "date-fns";
-import { nl } from "date-fns/locale";
 
 /**
  * Solver response format: { assignedShifts: AssignedShift[] }
