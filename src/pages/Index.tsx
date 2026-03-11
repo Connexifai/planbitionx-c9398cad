@@ -163,7 +163,7 @@ export default function Index() {
                   <KpiCards solved={false} />
                 {jsonLoaded && <JsonDataViewer data={demoScheduleData} />}
                 </div>
-                {/* Robot fixed rechtsonder — alleen als JSON geladen */}
+                {/* Robot fixed rechtsonder — verschijnt alleen als JSON geladen */}
                 {jsonLoaded && (
                   <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2 cursor-pointer" onClick={() => setChatOpen(true)}>
                     <div className="relative bg-primary text-primary-foreground shadow-xl rounded-2xl px-4 py-3 max-w-[230px] animate-[bounce_2s_ease-in-out_3] mr-4">
