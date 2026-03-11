@@ -16,21 +16,7 @@ function AnimatedBackground() {
         alt=""
         className="absolute inset-0 w-full h-full object-cover"
       />
-      <div className="absolute w-[400px] h-[400px] rounded-full bg-ring/10 blur-3xl animate-[float3_18s_ease-in-out_infinite] top-1/3 right-1/4" />
-      
-      {/* Smaller accent orbs */}
-      <div className="absolute w-48 h-48 rounded-full bg-primary/20 blur-2xl animate-[float4_12s_ease-in-out_infinite] top-1/4 left-1/3" />
-      <div className="absolute w-32 h-32 rounded-full bg-destructive/10 blur-2xl animate-[float5_15s_ease-in-out_infinite] bottom-1/4 left-1/4" />
-      <div className="absolute w-40 h-40 rounded-full bg-ring/15 blur-2xl animate-[float1_22s_ease-in-out_infinite_reverse] top-2/3 right-1/3" />
-
-      {/* Grid overlay */}
-      <div
-        className="absolute inset-0 opacity-[0.03]"
-        style={{
-          backgroundImage: `linear-gradient(hsl(var(--foreground)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--foreground)) 1px, transparent 1px)`,
-          backgroundSize: "60px 60px",
-        }}
-      />
+      <div className="absolute inset-0 bg-background/60" />
     </div>
   );
 }
