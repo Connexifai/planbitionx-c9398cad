@@ -143,6 +143,8 @@ export default function Index() {
   const [jsonLoaded, setJsonLoaded] = useState(false);
   const [robotLanded, setRobotLanded] = useState(false);
   const [scheduleData, setScheduleData] = useState<JsonScheduleData | null>(null);
+  const [rosterData, setRosterData] = useState<RosterData | null>(null);
+  const [requestData, setRequestData] = useState<any>(null);
 
   useEffect(() => {
     if (jsonLoaded && !scheduleData) {
