@@ -38,7 +38,7 @@ function SolvingOverlay() {
   }, []);
 
   useEffect(() => {
-    const phaseTimer = setInterval(() => setPhase((p) => (p + 1) % solvePhases.length), 5000);
+    const phaseTimer = setInterval(() => setPhase((p) => (p + 1) % solvePhases.length), 2500);
     return () => clearInterval(phaseTimer);
   }, []);
 
