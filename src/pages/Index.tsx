@@ -60,12 +60,13 @@ function RobotQuoteBubble() {
   const typed = useTypingText(quote, 45);
 
   return (
-    <div className="relative bg-card border shadow-xl rounded-2xl px-5 py-4 max-w-[380px] animate-fade-in">
+    <div className="relative bg-card border shadow-xl rounded-2xl px-5 py-4 max-w-[340px] animate-fade-in">
       <p className="text-sm font-medium text-foreground leading-relaxed">
         {typed}
         <span className="inline-block w-[2px] h-4 bg-primary ml-0.5 animate-pulse align-middle" />
       </p>
-      <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-card border-b border-r rotate-45 rounded-sm" />
+      {/* Speech bubble tail pointing left toward robot's mouth */}
+      <div className="absolute top-1/2 -left-2 -translate-y-1/2 w-4 h-4 bg-card border-l border-b -rotate-45 rounded-sm" />
     </div>
   );
 }
