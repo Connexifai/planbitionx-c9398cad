@@ -10,36 +10,12 @@ interface Message {
   content: string;
 }
 
-const mockMessages: Message[] = [
-  {
-    id: 1,
-    role: "assistant",
-    content:
-      "Hallo! Ik ben je AI-planningsassistent. Vertel me welke extra eisen of wensen je hebt voor het rooster, dan neem ik die mee bij het oplossen.\n\nBijvoorbeeld:\n- *\"Jan Bakker mag geen nachtdiensten draaien\"*\n- *\"Minimaal 3 medewerkers per shift op zaterdag\"*\n- *\"Probeer Marie en Thomas niet samen in te plannen\"*",
-  },
-  {
-    id: 2,
-    role: "user",
-    content: "Franz-Xaver mag volgende week geen nachtdiensten draaien vanwege een medische afspraak op dinsdag.",
-  },
-  {
-    id: 3,
-    role: "assistant",
-    content:
-      "Begrepen! Ik heb genoteerd:\n\n✅ **Franz-Xaver Bachmann** — geen nachtdiensten in de planningsperiode\n\nDit wordt als harde constraint meegenomen bij het oplossen. Heb je nog meer aanpassingen?",
-  },
-  {
-    id: 4,
-    role: "user",
-    content: "Zorg dat er op zaterdag en zondag minimaal 4 medewerkers ingepland staan per shift.",
-  },
-  {
-    id: 5,
-    role: "assistant",
-    content:
-      "Genoteerd!\n\n✅ **Weekend minimumbezetting** — ≥4 medewerkers per shift op za/zo\n\nJe hebt nu 2 extra constraints:\n1. Franz-Xaver: geen nachtdiensten\n2. Weekend: min. 4 per shift\n\nKlik op **▶ Oplossen** wanneer je klaar bent, dan worden deze meegenomen.",
-  },
-];
+const initialMessage: Message = {
+  id: 1,
+  role: "assistant",
+  content:
+    "Hallo! Ik ben je AI-planningsassistent. Vertel me welke extra eisen of wensen je hebt voor het rooster, dan neem ik die mee bij het oplossen.\n\nBijvoorbeeld:\n- *\"Jan Bakker mag geen nachtdiensten draaien\"*\n- *\"Minimaal 3 medewerkers per shift op zaterdag\"*\n- *\"Probeer Marie en Thomas niet samen in te plannen\"*",
+};
 
 export function AiBriefingChat() {
   const [messages, setMessages] = useState<Message[]>(mockMessages);
