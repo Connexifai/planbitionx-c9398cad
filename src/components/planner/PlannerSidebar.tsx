@@ -94,10 +94,17 @@ function LevelSelector({ levels, active }: { levels: string[]; active: number })
 
 /* ── Section content panels ───────────────────────────── */
 
-function JsonSection() {
+function JsonSection({ onJsonLoaded }: { onJsonLoaded?: () => void }) {
+  const [loaded, setLoaded] = useState(false);
+
+  const handleLoad = () => {
+    setLoaded(true);
+    onJsonLoaded?.();
+  };
+
   return (
     <div className="space-y-3">
-      <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-border bg-accent/50 px-4 py-6 text-center transition-colors hover:border-primary/30 hover:bg-accent cursor-pointer">
+      <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-border bg-accent/50 px-4 py-6 text-center transition-colors hover:border-primary/30 hover:bg-accent cursor-pointer" onClick={handleLoad}>
         <Upload className="mb-2 h-8 w-8 text-muted-foreground" />
         <p className="text-sm font-medium">Sleep een JSON-bestand</p>
         <p className="text-xs text-muted-foreground">of klik om te bladeren</p>
@@ -108,8 +115,8 @@ function JsonSection() {
         defaultValue={`{\n  "Start": "2026-03-30T00:00:00",\n  "End": "2026-04-05T00:00:00",\n  "Shifts": [\n    {\n`}
       />
       <div className="flex gap-2">
-        <Button variant="outline" size="sm" className="flex-1 text-xs">
-          ✓ Valideer
+        <Button variant={loaded ? "default" : "outline"} size="sm" className="flex-1 text-xs" onClick={handleLoad}>
+          {loaded ? "✓ Geladen" : "✓ Valideer & Laad"}
         </Button>
         <Button variant="outline" size="sm" className="flex-1 text-xs">
           {"{ } Format"}
