@@ -216,7 +216,7 @@ export default function Index() {
                       <img
                         src={robotImg}
                         alt="AI Assistent"
-                        className="w-[420px] h-[420px] object-contain drop-shadow-2xl animate-[orbit_180s_ease-in-out_infinite]"
+                        className="w-[420px] h-[420px] object-contain drop-shadow-2xl animate-[orbit_360s_ease-in-out_infinite]"
                       />
                       <div className="absolute right-[95%] top-[20%]">
                         <RobotQuoteBubble />
