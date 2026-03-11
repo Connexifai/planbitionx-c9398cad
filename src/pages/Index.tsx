@@ -7,6 +7,7 @@ import { ExplanationView } from "@/components/planner/ExplanationView";
 import { RosterTabs } from "@/components/planner/RosterTabs";
 import { PostSolveChat } from "@/components/planner/PostSolveChat";
 import { AiBriefingChat } from "@/components/planner/AiBriefingChat";
+import { JsonDataViewer, demoScheduleData } from "@/components/planner/JsonDataViewer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
@@ -102,6 +103,7 @@ export default function Index() {
   const [solving, setSolving] = useState(false);
   const [activeTab, setActiveTab] = useState("roster");
   const [chatOpen, setChatOpen] = useState(false);
+  const [jsonLoaded, setJsonLoaded] = useState(true); // demo: loaded by default
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
@@ -157,11 +159,9 @@ export default function Index() {
               </main>
             ) : (
               <div className="flex-1 flex flex-col min-h-0">
-                <div className="p-5 pb-0">
+                <div className="flex-1 overflow-y-auto roster-scroll p-5 space-y-5">
                   <KpiCards solved={false} />
-                </div>
-                <div className="flex-1 min-h-0 overflow-hidden">
-                  <AiBriefingChat />
+                  {jsonLoaded && <JsonDataViewer data={demoScheduleData} />}
                 </div>
                 {/* Robot fixed rechtsonder */}
                 <img
