@@ -8,6 +8,31 @@ import { toast } from "sonner";
 import { Eye, EyeOff, LogIn, UserPlus, ArrowRight } from "lucide-react";
 import robotImg from "@/assets/robot-assistant.png";
 
+function FloatingOrbs() {
+  return (
+    <div className="fixed inset-0 overflow-hidden pointer-events-none">
+      {/* Large slow orbs */}
+      <div className="absolute w-[600px] h-[600px] rounded-full bg-primary/15 blur-3xl animate-[float1_20s_ease-in-out_infinite] -top-40 -left-40" />
+      <div className="absolute w-[500px] h-[500px] rounded-full bg-primary/10 blur-3xl animate-[float2_25s_ease-in-out_infinite] -bottom-32 -right-32" />
+      <div className="absolute w-[400px] h-[400px] rounded-full bg-ring/10 blur-3xl animate-[float3_18s_ease-in-out_infinite] top-1/3 right-1/4" />
+      
+      {/* Smaller accent orbs */}
+      <div className="absolute w-48 h-48 rounded-full bg-primary/20 blur-2xl animate-[float4_12s_ease-in-out_infinite] top-1/4 left-1/3" />
+      <div className="absolute w-32 h-32 rounded-full bg-destructive/10 blur-2xl animate-[float5_15s_ease-in-out_infinite] bottom-1/4 left-1/4" />
+      <div className="absolute w-40 h-40 rounded-full bg-ring/15 blur-2xl animate-[float1_22s_ease-in-out_infinite_reverse] top-2/3 right-1/3" />
+
+      {/* Grid overlay */}
+      <div
+        className="absolute inset-0 opacity-[0.03]"
+        style={{
+          backgroundImage: `linear-gradient(hsl(var(--foreground)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--foreground)) 1px, transparent 1px)`,
+          backgroundSize: "60px 60px",
+        }}
+      />
+    </div>
+  );
+}
+
 export default function Login() {
   const navigate = useNavigate();
   const [isSignUp, setIsSignUp] = useState(false);
@@ -22,66 +47,52 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex bg-background">
-      {/* Left panel - branding */}
-      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-gradient-to-br from-primary via-primary/90 to-primary/70">
-        {/* Decorative circles */}
-        <div className="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-white/5" />
-        <div className="absolute bottom-20 -right-20 w-80 h-80 rounded-full bg-white/5" />
-        <div className="absolute top-1/3 left-1/4 w-48 h-48 rounded-full bg-white/5" />
+    <div className="min-h-screen flex items-center justify-center bg-background relative">
+      <FloatingOrbs />
 
-        <div className="relative z-10 flex flex-col justify-center items-center w-full px-16 text-primary-foreground">
-          <img
-            src={robotImg}
-            alt="Planbition X"
-            className="w-64 h-64 object-contain drop-shadow-2xl animate-[orbit_180s_ease-in-out_infinite] hover:scale-110 transition-transform duration-500 cursor-pointer mb-8"
-          />
-          <h1 className="text-5xl font-black tracking-tight mb-3">Planbition X</h1>
-          <p className="text-lg text-primary-foreground/80 text-center max-w-md leading-relaxed">
-            AI-gestuurde roosterplanning. Slimmer plannen, minder conflicten, gelukkiger medewerkers.
-          </p>
-          <div className="mt-12 grid grid-cols-3 gap-8 text-center">
-            <div>
-              <div className="text-3xl font-bold">AI</div>
-              <div className="text-xs text-primary-foreground/60 mt-1">Slimme planning</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold">2min</div>
-              <div className="text-xs text-primary-foreground/60 mt-1">Oplosstijd</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold">0</div>
-              <div className="text-xs text-primary-foreground/60 mt-1">ATW-overtredingen</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Right panel - form */}
-      <div className="flex-1 flex items-center justify-center p-8">
-        <div className="w-full max-w-md space-y-8">
-          {/* Mobile logo */}
-          <div className="lg:hidden flex flex-col items-center mb-4">
+      {/* Centered card */}
+      <div className="relative z-10 w-full max-w-md mx-4">
+        <div className="bg-card/80 backdrop-blur-xl border border-border/50 rounded-2xl shadow-2xl p-8 space-y-6">
+          {/* Logo & branding */}
+          <div className="flex flex-col items-center">
             <img
               src={robotImg}
               alt="Planbition X"
-              className="w-32 h-32 object-contain drop-shadow-xl animate-[orbit_180s_ease-in-out_infinite] hover:scale-110 transition-transform duration-500 cursor-pointer mb-4"
+              className="w-28 h-28 object-contain drop-shadow-2xl animate-[orbit_180s_ease-in-out_infinite] hover:scale-110 transition-transform duration-500 cursor-pointer mb-4"
             />
-            <h1 className="text-3xl font-black tracking-tight">Planbition X</h1>
+            <h1 className="text-3xl font-black tracking-tight text-foreground">Planbition X</h1>
+            <p className="text-muted-foreground text-sm mt-1">AI-gestuurde roosterplanning</p>
           </div>
 
-          <div>
-            <h2 className="text-2xl font-bold tracking-tight">
+          {/* Stats */}
+          <div className="grid grid-cols-3 gap-4 text-center py-3 border-y border-border/50">
+            <div>
+              <div className="text-lg font-bold text-primary">AI</div>
+              <div className="text-[10px] text-muted-foreground">Slimme planning</div>
+            </div>
+            <div>
+              <div className="text-lg font-bold text-primary">2min</div>
+              <div className="text-[10px] text-muted-foreground">Oplosstijd</div>
+            </div>
+            <div>
+              <div className="text-lg font-bold text-primary">0</div>
+              <div className="text-[10px] text-muted-foreground">ATW-overtredingen</div>
+            </div>
+          </div>
+
+          {/* Form header */}
+          <div className="text-center">
+            <h2 className="text-xl font-bold tracking-tight text-foreground">
               {isSignUp ? "Account aanmaken" : "Welkom terug"}
             </h2>
-            <p className="text-muted-foreground mt-1 text-sm">
+            <p className="text-muted-foreground mt-1 text-xs">
               {isSignUp
                 ? "Maak een account aan om te beginnen met plannen"
                 : "Log in om verder te gaan met je roosterplanning"}
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">E-mailadres</Label>
               <Input
@@ -92,7 +103,7 @@ export default function Login() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 autoComplete="email"
-                className="h-11"
+                className="h-11 bg-background/50"
               />
             </div>
 
@@ -108,7 +119,7 @@ export default function Login() {
                   required
                   minLength={6}
                   autoComplete={isSignUp ? "new-password" : "current-password"}
-                  className="h-11 pr-10"
+                  className="h-11 pr-10 bg-background/50"
                 />
                 <button
                   type="button"
