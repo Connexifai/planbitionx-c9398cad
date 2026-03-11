@@ -100,17 +100,12 @@ export default function Index() {
           {solved && (
             <>
               {!chatOpen && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button
-                      onClick={() => setChatOpen(true)}
-                      className="fixed bottom-6 right-6 z-50 flex items-center justify-center w-12 h-12 rounded-full bg-primary text-primary-foreground shadow-lg hover:scale-110 transition-transform"
-                    >
-                      <MessageCircle className="h-5 w-5" />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent side="left">AI Assistent openen</TooltipContent>
-                </Tooltip>
+                <img
+                  src={robotImg}
+                  alt="AI Assistent"
+                  onClick={() => setChatOpen(true)}
+                  className="fixed bottom-6 right-6 z-50 w-44 h-44 object-contain drop-shadow-2xl animate-[orbit_180s_ease-in-out_infinite] hover:scale-110 transition-transform duration-500 cursor-pointer"
+                />
               )}
 
               <div
