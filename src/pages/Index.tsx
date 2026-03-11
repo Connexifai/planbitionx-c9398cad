@@ -161,8 +161,23 @@ export default function Index() {
               <div className="flex-1 flex flex-col min-h-0">
                 <div className="flex-1 overflow-y-auto roster-scroll p-5 space-y-5">
                   <KpiCards solved={false} />
-                {jsonLoaded && <JsonDataViewer data={demoScheduleData} />}
+                  {jsonLoaded && <JsonDataViewer data={demoScheduleData} />}
                 </div>
+
+                {/* Grote robot gecentreerd — als JSON nog NIET geladen */}
+                {!jsonLoaded && (
+                  <div className="absolute inset-0 flex items-center justify-center z-40 pointer-events-none">
+                    <div className="flex flex-col items-center gap-4 pointer-events-auto">
+                      <img
+                        src={robotImg}
+                        alt="AI Assistent"
+                        className="w-[420px] h-[420px] object-contain drop-shadow-2xl animate-[orbit_180s_ease-in-out_infinite]"
+                      />
+                      <p className="text-lg font-semibold text-muted-foreground">Upload een JSON-bestand om te beginnen</p>
+                    </div>
+                  </div>
+                )}
+
                 {/* Robot fixed rechtsonder — verschijnt alleen als JSON geladen en chat dicht */}
                 {jsonLoaded && !chatOpen && (
                   <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2 cursor-pointer" onClick={() => setChatOpen(true)}>
