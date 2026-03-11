@@ -65,12 +65,18 @@ export interface RosterEmployee {
 export interface DayColumn {
   dayKey: string;
   date: string;
+  fullDate: string; // YYYY-MM-DD for demand lookup
   weekend: boolean;
 }
+
+/** Per-shift-label, per-day demand from the request */
+export type DemandMap = Map<string, number[]>;
 
 export interface RosterData {
   days: DayColumn[];
   employees: RosterEmployee[];
+  /** demand per shift label per day index */
+  demandMap: DemandMap;
 }
 
 function classifyShiftType(name: string, startHour: number): ShiftType {
