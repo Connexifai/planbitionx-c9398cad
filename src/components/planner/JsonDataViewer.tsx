@@ -5,6 +5,17 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 
+function toTitleCase(name: string): string {
+  return name
+    .split(/([,\s\-]+)/)
+    .map((part) =>
+      /^[,\s\-]+$/.test(part)
+        ? part
+        : part.charAt(0).toUpperCase() + part.slice(1).toLowerCase()
+    )
+    .join("");
+}
+
 export interface JsonScheduleData {
   start: string;
   end: string;
@@ -117,7 +128,7 @@ function EmployeeTable({ data }: { data: JsonScheduleData }) {
               <tbody>
                 {data.employees.map((emp, i) => (
                   <tr key={i} className="border-t border-border/30 hover:bg-accent/30 transition-colors">
-                    <td className="px-4 py-2 font-medium">{emp.name}</td>
+                    <td className="px-4 py-2 font-medium">{toTitleCase(emp.name)}</td>
                     <td className="px-4 py-2 text-muted-foreground">{emp.location || "–"}</td>
                     <td className="px-4 py-2 text-muted-foreground">{emp.contractHours ? `${emp.contractHours}u` : "–"}</td>
                     <td className="px-4 py-2">
