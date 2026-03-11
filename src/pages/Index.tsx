@@ -264,7 +264,7 @@ export default function Index() {
               <div
                 className={cn(
                   "flex flex-col border-l bg-sidebar shrink-0 transition-all duration-300 overflow-hidden",
-                  chatOpen ? "w-[400px]" : "w-0"
+                  chatOpen ? "w-[800px]" : "w-0"
                 )}
               >
                 {chatOpen && (
