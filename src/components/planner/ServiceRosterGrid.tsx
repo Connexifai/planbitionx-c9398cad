@@ -1,6 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useTranslation } from "react-i18next";
+import { toTitleCase } from "@/lib/utils";
 
 type ShiftType = "vroeg" | "dag" | "laat" | "nacht" | null;
 
@@ -473,7 +474,7 @@ export function ServiceRosterGrid() {
                         key={nIdx}
                         className="text-[12px] leading-relaxed text-foreground py-0.5 truncate hover:text-primary transition-colors cursor-default"
                       >
-                        {name}
+                        {toTitleCase(name)}
                       </div>
                     ))}
                   </td>
