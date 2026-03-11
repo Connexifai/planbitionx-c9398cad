@@ -216,7 +216,7 @@ export default function Index() {
                         src={robotImg}
                         alt="AI Assistent"
                         className={cn(
-                          "object-contain drop-shadow-2xl robot-float transition-all duration-1000 ease-in-out",
+                          "object-contain drop-shadow-2xl robot-float transition-all duration-[3000ms] ease-in-out",
                           jsonLoaded
                             ? "w-56 h-56 hover:scale-110"
                             : "w-[420px] h-[420px]"
