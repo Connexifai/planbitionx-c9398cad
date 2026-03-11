@@ -29,7 +29,7 @@ function SolvingOverlay() {
   const [elapsed, setElapsed] = useState(0);
   const [phase, setPhase] = useState(0);
 
-  const progress = Math.min(elapsed / 45, 0.95);
+  const progress = Math.min(elapsed / 15, 0.95);
 
 
   useEffect(() => {
