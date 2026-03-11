@@ -36,7 +36,7 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background relative">
-      <FloatingOrbs />
+      <AnimatedBackground />
 
       {/* Centered card */}
       <div className="relative z-10 w-full max-w-md mx-4">
