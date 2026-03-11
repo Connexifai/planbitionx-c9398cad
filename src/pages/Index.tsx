@@ -191,7 +191,7 @@ export default function Index() {
                 {!chatOpen && (
                   <div
                     className={cn(
-                      "fixed z-50 flex flex-col items-center transition-all duration-1000 ease-in-out pointer-events-none",
+                      "fixed z-50 flex flex-col items-center transition-all duration-[3000ms] ease-in-out pointer-events-none",
                       jsonLoaded
                         ? "bottom-6 right-6 items-end pointer-events-auto cursor-pointer"
                         : "inset-0 justify-center"
@@ -216,7 +216,7 @@ export default function Index() {
                         src={robotImg}
                         alt="AI Assistent"
                         className={cn(
-                          "object-contain drop-shadow-2xl robot-float transition-all duration-1000 ease-in-out",
+                          "object-contain drop-shadow-2xl robot-float transition-all duration-[3000ms] ease-in-out",
                           jsonLoaded
                             ? "w-56 h-56 hover:scale-110"
                             : "w-[420px] h-[420px]"
