@@ -186,6 +186,7 @@ export default function Index() {
       }
       setSolving(false);
       setSolved(true);
+      setSidebarCollapsed(true); // Sidebar inklappen na solven
     }, 36000);
   };
 
