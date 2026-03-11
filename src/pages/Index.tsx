@@ -145,6 +145,7 @@ export default function Index() {
   const [scheduleData, setScheduleData] = useState<JsonScheduleData | null>(null);
   const [rosterData, setRosterData] = useState<RosterData | null>(null);
   const [requestData, setRequestData] = useState<any>(null);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
 
   useEffect(() => {
     if (jsonLoaded && !scheduleData) {
