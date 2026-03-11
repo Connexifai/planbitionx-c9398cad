@@ -165,6 +165,7 @@
     "shiftsPerDay": "Services/jour",
     "days": "Jours",
     "locations": "Sites",
+    "totalShifts": "Total services",
     "name": "Nom",
     "location": "Site",
     "contract": "Contrat",
