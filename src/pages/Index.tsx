@@ -10,6 +10,8 @@ import { AiBriefingChat } from "@/components/planner/AiBriefingChat";
 import { JsonDataViewer } from "@/components/planner/JsonDataViewer";
 import type { JsonScheduleData } from "@/components/planner/JsonDataViewer";
 import { parseRawScheduleJson } from "@/lib/parseScheduleJson";
+import { parseSolverResponse } from "@/lib/parseSolverResponse";
+import type { RosterData, SolverResponse } from "@/lib/parseSolverResponse";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
