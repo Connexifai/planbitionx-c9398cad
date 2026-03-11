@@ -162,7 +162,16 @@ export function parseSolverResponse(request: RawSchedule, response: SolverRespon
 
   // Build employee rows
   const employees: RosterEmployee[] = [];
+
+  // Count planned contracts per day from the full solver output
+  // (also contracts that may not be present in the request employee list)
   const plannedContractsByDay = days.map(() => new Set<string>());
+  for (const a of response.assignedShifts) {
+    const dateKey = format(parseISO(a.scheduleDate), "yyyy-MM-dd");
+    const dayIdx = resolveDayIndex(dateKey);
+    if (dayIdx === undefined) continue;
+    plannedContractsByDay[dayIdx].add(a.contractId);
+  }
 
   for (const emp of request.Employees) {
     const assignments = assignmentsByContract.get(emp.ContractId) || [];
@@ -174,8 +183,6 @@ export function parseSolverResponse(request: RawSchedule, response: SolverRespon
       const dateKey = format(parseISO(a.scheduleDate), "yyyy-MM-dd");
       const dayIdx = resolveDayIndex(dateKey);
       if (dayIdx === undefined) continue;
-
-      plannedContractsByDay[dayIdx].add(a.contractId);
 
       const start = parseISO(a.startTime);
       const end = parseISO(a.endTime);
