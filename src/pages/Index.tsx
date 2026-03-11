@@ -159,11 +159,9 @@ export default function Index() {
               </main>
             ) : (
               <div className="flex-1 flex flex-col min-h-0">
-                <div className="p-5 pb-0">
+                <div className="flex-1 overflow-y-auto roster-scroll p-5 space-y-5">
                   <KpiCards solved={false} />
-                </div>
-                <div className="flex-1 min-h-0 overflow-hidden">
-                  <AiBriefingChat />
+                  {jsonLoaded && <JsonDataViewer data={demoScheduleData} />}
                 </div>
                 {/* Robot fixed rechtsonder */}
                 <img
