@@ -128,10 +128,12 @@ export default function Index() {
              <h1 className="text-lg font-bold tracking-tight">Planbition X</h1>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" className="gap-1.5 text-xs">
-              <Download className="h-3.5 w-3.5" />
-              Download JSON
-            </Button>
+            {solved && (
+              <Button variant="outline" size="sm" className="gap-1.5 text-xs">
+                <Download className="h-3.5 w-3.5" />
+                Download JSON
+              </Button>
+            )}
             <div className="flex items-center gap-1.5 ml-1">
               <Sun className="h-3.5 w-3.5 text-muted-foreground" />
               <Switch checked={dark} onCheckedChange={setDark} className="scale-75" />
