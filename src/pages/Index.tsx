@@ -99,6 +99,19 @@ export default function Index() {
           {/* AI Chat side panel (only after solve) */}
           {solved && (
             <>
+              {!chatOpen && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={() => setChatOpen(true)}
+                      className="fixed bottom-6 right-6 z-50 flex items-center justify-center w-12 h-12 rounded-full bg-primary text-primary-foreground shadow-lg hover:scale-110 transition-transform"
+                    >
+                      <MessageCircle className="h-5 w-5" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="left">AI Assistent openen</TooltipContent>
+                </Tooltip>
+              )}
 
               <div
                 className={cn(
