@@ -1,5 +1,4 @@
 import { format, parseISO, eachDayOfInterval } from "date-fns";
-import { nl } from "date-fns/locale";
 
 /**
  * Solver response format: { assignedShifts: AssignedShift[] }
@@ -72,6 +71,14 @@ export interface DayColumn {
 /** Per-shift-label, per-day demand from the request */
 export type DemandMap = Map<string, number[]>;
 
+export interface ShiftMeta {
+  type: ShiftType;
+  time: string;
+}
+
+export type ShiftMetaMap = Map<string, ShiftMeta>;
+export type AssignmentNamesMap = Map<string, string[][]>;
+
 export interface RosterData {
   days: DayColumn[];
   employees: RosterEmployee[];
@@ -79,6 +86,14 @@ export interface RosterData {
   demandMap: DemandMap;
   /** unique planned employees per day index */
   plannedByDay: number[];
+  /** total assigned shifts per day index */
+  assignedByDay: number[];
+  /** assigned shifts per shift label per day index */
+  assignedByShiftDay: DemandMap;
+  /** assigned employee names per shift label per day index */
+  assignmentNamesByShiftDay: AssignmentNamesMap;
+  /** shift metadata from request for correct grouping */
+  shiftMetaMap: ShiftMetaMap;
 }
 
 function classifyShiftType(name: string, startHour: number): ShiftType {
@@ -139,9 +154,19 @@ export function parseSolverResponse(request: RawSchedule, response: SolverRespon
 
   // Map shiftId → shift name from request (deduplicated)
   const shiftNameMap = new Map<string, string>();
+  const shiftMetaMap: ShiftMetaMap = new Map();
   for (const s of request.Shifts) {
     if (!shiftNameMap.has(s.Id)) {
       shiftNameMap.set(s.Id, s.Name);
+    }
+
+    if (!shiftMetaMap.has(s.Name)) {
+      const start = parseISO(s.Start);
+      const end = parseISO(s.End);
+      shiftMetaMap.set(s.Name, {
+        type: classifyShiftType(s.Name, start.getHours()),
+        time: `${format(start, "HH:mm")}-${format(end, "HH:mm")}`,
+      });
     }
   }
 
@@ -163,14 +188,36 @@ export function parseSolverResponse(request: RawSchedule, response: SolverRespon
   // Build employee rows
   const employees: RosterEmployee[] = [];
 
-  // Count planned contracts per day from the full solver output
+  // Count planned contracts per day + true assigned shifts from full solver output
   // (also contracts that may not be present in the request employee list)
   const plannedContractsByDay = days.map(() => new Set<string>());
+  const assignedByDay = new Array(days.length).fill(0);
+  const assignedByShiftDay: DemandMap = new Map();
+  const assignmentNamesByShiftDay: AssignmentNamesMap = new Map();
+
   for (const a of response.assignedShifts) {
     const dateKey = format(parseISO(a.scheduleDate), "yyyy-MM-dd");
     const dayIdx = resolveDayIndex(dateKey);
     if (dayIdx === undefined) continue;
+
     plannedContractsByDay[dayIdx].add(a.contractId);
+    assignedByDay[dayIdx] += 1;
+
+    const shiftLabel = shiftNameMap.get(a.shiftId) || "Shift";
+    if (!assignedByShiftDay.has(shiftLabel)) {
+      assignedByShiftDay.set(shiftLabel, new Array(days.length).fill(0));
+    }
+    assignedByShiftDay.get(shiftLabel)![dayIdx] += 1;
+
+    if (!assignmentNamesByShiftDay.has(shiftLabel)) {
+      assignmentNamesByShiftDay.set(
+        shiftLabel,
+        Array.from({ length: days.length }, () => [])
+      );
+    }
+
+    const displayName = employeeMap.get(a.contractId)?.Name || a.contractId;
+    assignmentNamesByShiftDay.get(shiftLabel)![dayIdx].push(displayName);
   }
 
   for (const emp of request.Employees) {
@@ -243,5 +290,14 @@ export function parseSolverResponse(request: RawSchedule, response: SolverRespon
 
   const plannedByDay = plannedContractsByDay.map((contracts) => contracts.size);
 
-  return { days, employees, demandMap, plannedByDay };
+  return {
+    days,
+    employees,
+    demandMap,
+    plannedByDay,
+    assignedByDay,
+    assignedByShiftDay,
+    assignmentNamesByShiftDay,
+    shiftMetaMap,
+  };
 }

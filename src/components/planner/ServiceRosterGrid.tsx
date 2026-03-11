@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { toTitleCase } from "@/lib/utils";
-import type { RosterData, ShiftData, DayColumn, RosterEmployee, DemandMap } from "@/lib/parseSolverResponse";
+import type { RosterData, DemandMap } from "@/lib/parseSolverResponse";
 
 type ShiftType = "vroeg" | "dag" | "laat" | "nacht" | null;
 
@@ -18,24 +18,28 @@ interface ShiftGroup {
 }
 
 function deriveShiftGroups(data: RosterData): ShiftGroup[] {
-  const groupMap = new Map<string, ShiftGroup>();
+  const labels = new Set<string>();
+  data.demandMap.forEach((_, label) => labels.add(label));
+  data.assignedByShiftDay?.forEach((_, label) => labels.add(label));
 
-  for (const emp of data.employees) {
-    for (const shift of emp.shifts) {
-      if (!shift.type || !shift.label) continue;
-      const key = `${shift.label}`;
-      if (!groupMap.has(key)) {
-        groupMap.set(key, {
-          label: shift.label,
-          type: shift.type,
-          time: shift.time || "",
-        });
+  const groups: ShiftGroup[] = Array.from(labels).map((label) => {
+    const meta = data.shiftMetaMap?.get(label);
+    if (meta) {
+      return { label, type: meta.type, time: meta.time };
+    }
+
+    for (const emp of data.employees) {
+      const found = emp.shifts.find((s) => s.label === label && s.type);
+      if (found) {
+        return { label, type: found.type, time: found.time || "" };
       }
     }
-  }
+
+    return { label, type: null, time: "" };
+  });
 
   const typeOrder: Record<string, number> = { vroeg: 0, dag: 1, laat: 2, nacht: 3 };
-  return Array.from(groupMap.values()).sort((a, b) => {
+  return groups.sort((a, b) => {
     const oa = typeOrder[a.type || ""] ?? 9;
     const ob = typeOrder[b.type || ""] ?? 9;
     if (oa !== ob) return oa - ob;
@@ -46,6 +50,11 @@ function deriveShiftGroups(data: RosterData): ShiftGroup[] {
 function getDemand(demandMap: DemandMap, label: string, dayIdx: number): number {
   const arr = demandMap.get(label);
   return arr ? arr[dayIdx] : 0;
+}
+
+function getAssignmentNames(assignmentNamesMap: RosterData["assignmentNamesByShiftDay"], label: string, dayIdx: number): string[] {
+  const days = assignmentNamesMap?.get(label);
+  return days?.[dayIdx] ?? [];
 }
 
 function CountBadge({ count, target }: { count: number; target: number }) {
@@ -90,7 +99,7 @@ export function ServiceRosterGrid({ data }: ServiceRosterGridProps) {
     );
   }
 
-  const { days, employees, demandMap } = data;
+  const { days, employees, demandMap, assignedByShiftDay, assignmentNamesByShiftDay } = data;
   const shiftGroups = deriveShiftGroups(data);
 
   const shiftTypeLabel: Record<string, string> = {
@@ -108,12 +117,7 @@ export function ServiceRosterGrid({ data }: ServiceRosterGridProps) {
             <th className="sticky left-0 z-[6] bg-card border-b border-r w-[180px] min-w-[180px]" />
             {days.map((d, i) => {
               const dayTotalDemand = shiftGroups.reduce((s, g) => s + getDemand(demandMap, g.label, i), 0);
-              const dayFilled = shiftGroups.reduce((s, g) => {
-                return s + employees.filter((emp) => {
-                  const sh = emp.shifts[i];
-                  return sh && sh.type === g.type && sh.label === g.label;
-                }).length;
-              }, 0);
+              const dayFilled = shiftGroups.reduce((s, g) => s + getDemand(assignedByShiftDay, g.label, i), 0);
               return (
                 <th
                   key={i}
@@ -137,20 +141,23 @@ export function ServiceRosterGrid({ data }: ServiceRosterGridProps) {
               <td className="sticky left-0 z-[3] bg-card border-r w-[180px] min-w-[180px] px-3 py-3 align-top">
                 <div className="flex flex-col gap-1.5">
                   <span className="text-[12px] font-semibold text-foreground">{group.label}</span>
-                  <div className={`shift-badge ${shiftClassMap[group.type!]} text-[10px] px-2 py-0.5 w-fit`}>
-                    {shiftTypeLabel[group.type!]}
+                  <div className={`shift-badge ${group.type ? shiftClassMap[group.type] : "shift-day"} text-[10px] px-2 py-0.5 w-fit`}>
+                    {group.type ? shiftTypeLabel[group.type] : t("grid.shift", "Dienst")}
                   </div>
                   <span className="text-[11px] text-muted-foreground">{group.time}</span>
                 </div>
               </td>
               {days.map((d, dayIdx) => {
                 const target = getDemand(demandMap, group.label, dayIdx);
-                const emps = employees
+                const assignedNames = getAssignmentNames(assignmentNamesByShiftDay, group.label, dayIdx);
+                const fallbackNames = employees
                   .filter((emp) => {
                     const s = emp.shifts[dayIdx];
                     return s && s.type === group.type && s.label === group.label;
                   })
                   .map((emp) => emp.name);
+                const emps = assignedNames.length > 0 ? assignedNames : fallbackNames;
+                const count = getDemand(assignedByShiftDay, group.label, dayIdx) || emps.length;
                 return (
                   <td
                     key={dayIdx}
@@ -159,16 +166,19 @@ export function ServiceRosterGrid({ data }: ServiceRosterGridProps) {
                     }`}
                   >
                     <div className="mb-1">
-                      <CountBadge count={emps.length} target={target} />
+                      <CountBadge count={count} target={target} />
                     </div>
                     {emps.map((name, nIdx) => (
                       <div
-                        key={nIdx}
+                        key={`${name}-${nIdx}`}
                         className="text-[12px] leading-relaxed text-foreground py-0.5 truncate hover:text-primary transition-colors cursor-default"
                       >
                         {toTitleCase(name)}
                       </div>
                     ))}
+                    {count > emps.length && (
+                      <div className="text-[11px] text-muted-foreground">+{count - emps.length} {t("grid.otherAssignments", "overige")}</div>
+                    )}
                   </td>
                 );
               })}
