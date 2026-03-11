@@ -229,7 +229,7 @@ function SolverSection() {
 
 /* ── Main sidebar ─────────────────────────────────────── */
 
-export function PlannerSidebar({ onSolve, hideFooter }: { onSolve?: () => void; hideFooter?: boolean }) {
+export function PlannerSidebar({ onSolve, hideFooter, onJsonLoaded }: { onSolve?: () => void; hideFooter?: boolean; onJsonLoaded?: () => void }) {
   const [activeSection, setActiveSection] = useState<SectionId>("json");
   const [contentCollapsed, setContentCollapsed] = useState(true);
 
