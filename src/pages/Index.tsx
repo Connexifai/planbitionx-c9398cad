@@ -95,7 +95,7 @@ function SolvingOverlay() {
               strokeDasharray={`${2 * Math.PI * 42 * 0.3} ${2 * Math.PI * 42 * 0.7}`}
             />
           </svg>
-          <img src={robotImg} alt="Solving..." className="absolute inset-4 object-contain drop-shadow-xl" />
+          <img src={robotImg} alt="Solving..." className="absolute inset-4 object-contain drop-shadow-xl robot-float" />
         </div>
 
         <h2 className="text-2xl font-bold text-foreground">{t("solving.title")}</h2>
