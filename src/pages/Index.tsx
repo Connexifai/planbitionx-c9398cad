@@ -131,6 +131,15 @@ export default function Index() {
   const [activeTab, setActiveTab] = useState("roster");
   const [chatOpen, setChatOpen] = useState(false);
   const [jsonLoaded, setJsonLoaded] = useState(false);
+  const [robotLanded, setRobotLanded] = useState(false);
+
+  useEffect(() => {
+    if (jsonLoaded) {
+      const timer = setTimeout(() => setRobotLanded(true), 3200);
+      return () => clearTimeout(timer);
+    }
+    setRobotLanded(false);
+  }, [jsonLoaded]);
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
