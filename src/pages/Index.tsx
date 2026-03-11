@@ -128,22 +128,6 @@ export default function Index() {
              <h1 className="text-lg font-bold tracking-tight">Planbition X</h1>
           </div>
           <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1.5 rounded-lg border bg-background px-3 py-1.5 text-xs">
-              <Settings className="h-3.5 w-3.5 text-muted-foreground" />
-              <span className="text-muted-foreground">API:</span>
-              <Input
-                defaultValue="http://localhost:8080"
-                className="h-6 w-40 border-0 bg-transparent p-0 text-xs shadow-none focus-visible:ring-0"
-              />
-            </div>
-            <div className="flex items-center gap-1.5 rounded-lg border bg-background px-3 py-1.5 text-xs">
-              <Key className="h-3.5 w-3.5 text-muted-foreground" />
-              <span className="text-muted-foreground">Key:</span>
-              <Input
-                defaultValue="test-2024"
-                className="h-6 w-24 border-0 bg-transparent p-0 text-xs shadow-none focus-visible:ring-0"
-              />
-            </div>
             <Button variant="outline" size="sm" className="gap-1.5 text-xs">
               <Download className="h-3.5 w-3.5" />
               Download JSON
