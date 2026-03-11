@@ -121,6 +121,22 @@ export function parseSolverResponse(request: RawSchedule, response: SolverRespon
     dayIndexMap.set(format(d, "yyyy-MM-dd"), i);
   });
 
+  // Fallback map for mismatched request/response date ranges: align by request day order
+  const requestDayOrder = Array.from(
+    new Set(request.Shifts.map((s) => format(parseISO(s.Start), "yyyy-MM-dd")))
+  ).sort((a, b) => a.localeCompare(b));
+  const requestDayOrderMap = new Map<string, number>(requestDayOrder.map((d, i) => [d, i]));
+
+  const resolveDayIndex = (dateKey: string): number | undefined => {
+    const direct = dayIndexMap.get(dateKey);
+    if (direct !== undefined) return direct;
+
+    const fallbackIdx = requestDayOrderMap.get(dateKey);
+    if (fallbackIdx !== undefined && fallbackIdx < days.length) return fallbackIdx;
+
+    return undefined;
+  };
+
   // Map shiftId → shift name from request (deduplicated)
   const shiftNameMap = new Map<string, string>();
   for (const s of request.Shifts) {
