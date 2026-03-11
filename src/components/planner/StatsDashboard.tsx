@@ -163,24 +163,29 @@ function computeStats(data: RosterData, t: (key: string) => string) {
     value: totalQuals > 0 ? Math.round((count / totalQuals) * 100) : 0,
   }));
 
-  // Weekend vs weekday
+  // Weekend vs weekday using actual demand
   const weekdayDays = days.filter((d) => !d.weekend);
   const weekendDays = days.filter((d) => d.weekend);
-  const weekdayFilled = weekdayDays.reduce((sum, _, i) => {
-    const dayIdx = days.indexOf(weekdayDays[i]);
-    return sum + employees.filter((emp) => emp.shifts[dayIdx]?.type !== null).length;
-  }, 0);
-  const weekendFilled = weekendDays.reduce((sum, d) => {
-    const dayIdx = days.indexOf(d);
-    return sum + employees.filter((emp) => emp.shifts[dayIdx]?.type !== null).length;
-  }, 0);
 
-  const weekdayTarget = weekdayDays.length * employees.length;
-  const weekendTarget = weekendDays.length * employees.length;
+  const computeDayGroupStats = (daySubset: DayColumn[]) => {
+    let filled = 0;
+    let demand = 0;
+    for (const d of daySubset) {
+      const dayIdx = days.indexOf(d);
+      filled += employees.filter((emp) => emp.shifts[dayIdx]?.type !== null).length;
+      data.demandMap.forEach((dayDemands) => {
+        demand += dayDemands[dayIdx] || 0;
+      });
+    }
+    return { filled, demand };
+  };
+
+  const weekdayStats = computeDayGroupStats(weekdayDays);
+  const weekendStats = computeDayGroupStats(weekendDays);
 
   const weekdayWeekend = [
-    { type: t("stats.weekday"), bezetting: weekdayTarget > 0 ? Math.round((weekdayFilled / weekdayTarget) * 100) : 0, uren: Math.round(weekdayFilled * 8) },
-    { type: t("stats.weekend"), bezetting: weekendTarget > 0 ? Math.round((weekendFilled / weekendTarget) * 100) : 0, uren: Math.round(weekendFilled * 8) },
+    { type: t("stats.weekday"), bezetting: weekdayStats.demand > 0 ? Math.round((weekdayStats.filled / weekdayStats.demand) * 100) : 0, uren: Math.round(weekdayStats.filled * 8) },
+    { type: t("stats.weekend"), bezetting: weekendStats.demand > 0 ? Math.round((weekendStats.filled / weekendStats.demand) * 100) : 0, uren: Math.round(weekendStats.filled * 8) },
   ];
 
   return {
