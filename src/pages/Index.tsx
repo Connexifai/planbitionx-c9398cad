@@ -113,7 +113,7 @@ export default function Index() {
     setTimeout(() => {
       setSolving(false);
       setSolved(true);
-    }, 8000);
+    }, 15000);
   };
 
   return (
