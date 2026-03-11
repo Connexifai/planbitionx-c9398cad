@@ -7,7 +7,9 @@ import { ExplanationView } from "@/components/planner/ExplanationView";
 import { RosterTabs } from "@/components/planner/RosterTabs";
 import { PostSolveChat } from "@/components/planner/PostSolveChat";
 import { AiBriefingChat } from "@/components/planner/AiBriefingChat";
-import { JsonDataViewer, demoScheduleData } from "@/components/planner/JsonDataViewer";
+import { JsonDataViewer } from "@/components/planner/JsonDataViewer";
+import type { JsonScheduleData } from "@/components/planner/JsonDataViewer";
+import { parseRawScheduleJson } from "@/lib/parseScheduleJson";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -132,6 +134,16 @@ export default function Index() {
   const [chatOpen, setChatOpen] = useState(false);
   const [jsonLoaded, setJsonLoaded] = useState(false);
   const [robotLanded, setRobotLanded] = useState(false);
+  const [scheduleData, setScheduleData] = useState<JsonScheduleData | null>(null);
+
+  useEffect(() => {
+    if (jsonLoaded && !scheduleData) {
+      fetch("/data/schedule-request.json")
+        .then((r) => r.json())
+        .then((raw) => setScheduleData(parseRawScheduleJson(raw)))
+        .catch(console.error);
+    }
+  }, [jsonLoaded, scheduleData]);
 
   useEffect(() => {
     if (jsonLoaded) {
@@ -194,7 +206,7 @@ export default function Index() {
               <div className="flex-1 flex flex-col min-h-0">
                 <div className="flex-1 overflow-y-auto roster-scroll p-5 space-y-5">
                   <KpiCards solved={false} />
-                  {jsonLoaded && <JsonDataViewer data={demoScheduleData} />}
+                  {jsonLoaded && scheduleData && <JsonDataViewer data={scheduleData} />}
                 </div>
 
                 {!chatOpen && (
