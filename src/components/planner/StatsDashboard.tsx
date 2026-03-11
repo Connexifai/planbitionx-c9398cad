@@ -1,21 +1,11 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
-  LineChart, Line, Legend, AreaChart, Area,
 } from "recharts";
 import { Users, TrendingUp, AlertTriangle, Clock, Target, BarChart3 } from "lucide-react";
 import { useTranslation } from "react-i18next";
-
-// ── Mock data derived from roster ──────────────────────────────────────────────
-
-const SHIFT_COLORS = {
-  early: "hsl(152, 60%, 46%)",
-  day: "hsl(32, 95%, 55%)",
-  late: "hsl(217, 75%, 55%)",
-  night: "hsl(270, 60%, 55%)",
-};
+import type { RosterData } from "@/lib/parseSolverResponse";
 
 const CHART_COLORS = [
   "hsl(217, 91%, 53%)",
@@ -25,38 +15,6 @@ const CHART_COLORS = [
   "hsl(0, 72%, 51%)",
   "hsl(190, 70%, 50%)",
 ];
-
-// Uren per medewerker vs contract
-const employeeHours = [
-  { naam: "Bachmann, F.", gepland: 48, contract: 40, delta: 8 },
-  { naam: "Bly, L.", gepland: 40, contract: 40, delta: 0 },
-  { naam: "Angius, B.", gepland: 44, contract: 38, delta: 6 },
-  { naam: "Ankrett, E.", gepland: 48, contract: 40, delta: 8 },
-  { naam: "Grenier, B.", gepland: 48, contract: 40, delta: 8 },
-  { naam: "Poucke, M.", gepland: 18, contract: 32, delta: -14 },
-  { naam: "Sarcy, C.", gepland: 8, contract: 24, delta: -16 },
-  { naam: "Sarpaux, T.", gepland: 32, contract: 38, delta: -6 },
-  { naam: "Bouchard, P.", gepland: 45, contract: 40, delta: 5 },
-  { naam: "Delacroix, M.", gepland: 24, contract: 38, delta: -14 },
-  { naam: "Fernandez, C.", gepland: 24, contract: 40, delta: -16 },
-  { naam: "Janssen, E.", gepland: 32, contract: 38, delta: -6 },
-  { naam: "Kowalski, A.", gepland: 40, contract: 40, delta: 0 },
-  { naam: "Martin, S.", gepland: 26, contract: 32, delta: -6 },
-  { naam: "Nguyen, T.", gepland: 24, contract: 38, delta: -14 },
-  { naam: "Petit, L.", gepland: 24, contract: 40, delta: -16 },
-  { naam: "Rousseau, C.", gepland: 32, contract: 38, delta: -6 },
-  { naam: "Heloise, H.", gepland: 48, contract: 40, delta: 8 },
-  { naam: "Sede, A.", gepland: 32, contract: 38, delta: -6 },
-  { naam: "Semaille, L.", gepland: 48, contract: 40, delta: 8 },
-  { naam: "Senechal, L.", gepland: 40, contract: 40, delta: 0 },
-  { naam: "Seraiche, N.", gepland: 48, contract: 40, delta: 8 },
-  { naam: "Sillah, M.", gepland: 34, contract: 38, delta: -4 },
-  { naam: "Taisne, A.", gepland: 45, contract: 40, delta: 5 },
-  { naam: "Tallout, M.", gepland: 16, contract: 32, delta: -16 },
-  { naam: "Tarrade, L.", gepland: 32, contract: 38, delta: -6 },
-];
-
-// ── Helper components ──────────────────────────────────────────────────────────
 
 function HeatmapCell({ value }: { value: number }) {
   let bg = "bg-destructive/20 text-destructive";
@@ -94,7 +52,7 @@ function StatCard({ title, value, subtitle, icon: Icon, color }: {
 function ContractDeltaBar({ naam, gepland, contract, delta }: {
   naam: string; gepland: number; contract: number; delta: number;
 }) {
-  const maxHours = 56;
+  const maxHours = Math.max(gepland, contract, 48) + 8;
   const contractPct = (contract / maxHours) * 100;
   const geplandPct = (gepland / maxHours) * 100;
   const overUnder = delta > 0 ? "text-destructive" : delta < 0 ? "text-amber-600 dark:text-amber-400" : "text-emerald-600 dark:text-emerald-400";
@@ -103,85 +61,158 @@ function ContractDeltaBar({ naam, gepland, contract, delta }: {
     <div className="flex items-center gap-2 py-1">
       <span className="text-[11px] text-foreground w-24 truncate" title={naam}>{naam}</span>
       <div className="flex-1 h-4 bg-muted/50 rounded-full relative overflow-hidden">
-        <div
-          className="absolute top-0 left-0 h-full bg-primary/30 rounded-full"
-          style={{ width: `${contractPct}%` }}
-        />
+        <div className="absolute top-0 left-0 h-full bg-primary/30 rounded-full" style={{ width: `${contractPct}%` }} />
         <div
           className={`absolute top-0 left-0 h-full rounded-full ${
             delta > 0 ? "bg-destructive/60" : delta < 0 ? "bg-amber-500/60" : "bg-emerald-500/60"
           }`}
           style={{ width: `${geplandPct}%` }}
         />
-        <div
-          className="absolute top-0 h-full w-0.5 bg-foreground/40"
-          style={{ left: `${contractPct}%` }}
-        />
+        <div className="absolute top-0 h-full w-0.5 bg-foreground/40" style={{ left: `${contractPct}%` }} />
       </div>
       <span className={`text-[11px] font-semibold w-16 text-right ${overUnder}`}>
-        {delta > 0 ? "+" : ""}{delta}u ({gepland}/{contract})
+        {delta > 0 ? "+" : ""}{delta.toFixed(0)}u ({gepland.toFixed(0)}/{contract})
       </span>
     </div>
   );
 }
 
-// ── Main Dashboard ─────────────────────────────────────────────────────────────
+// ── Compute stats from RosterData ──
 
-export function StatsDashboard() {
-  const { t } = useTranslation();
+function computeStats(data: RosterData, t: (key: string) => string) {
+  const { days, employees } = data;
+  const numDays = days.length;
+
+  // Employee hours
+  const employeeHours = employees.map((emp) => {
+    // Parse hours string "X.X/Yu" to get planned and contract
+    const match = emp.hours.match(/([\d.]+)\/([\d.]+)/);
+    const gepland = match ? parseFloat(match[1]) : 0;
+    const contract = match ? parseFloat(match[2]) : 48;
+    const nameParts = emp.name.split(",");
+    const shortName = nameParts.length >= 2
+      ? `${nameParts[0].trim().charAt(0).toUpperCase()}${nameParts[0].trim().slice(1).toLowerCase()}, ${nameParts[1].trim().charAt(0).toUpperCase()}.`
+      : emp.name;
+    return { naam: shortName, gepland, contract, delta: gepland - contract };
+  });
+
   const totalGepland = employeeHours.reduce((s, e) => s + e.gepland, 0);
   const totalContract = employeeHours.reduce((s, e) => s + e.contract, 0);
-  const overEmployees = employeeHours.filter(e => e.delta > 4).length;
-  const underEmployees = employeeHours.filter(e => e.delta < -8).length;
+  const overEmployees = employeeHours.filter((e) => e.delta > 4).length;
+  const underEmployees = employeeHours.filter((e) => e.delta < -8).length;
+  const scheduledEmployees = employees.filter((e) => e.shifts.some((s) => s.type !== null)).length;
 
-  const dayKeys = ["mo", "tu", "we", "th", "fr", "sa", "su"] as const;
-  const dayLabels = dayKeys.map(k => t(`days.${k}`));
+  // Daily fill rate
+  const dailyFillRate = days.map((d, dayIdx) => {
+    const filled = employees.filter((emp) => emp.shifts[dayIdx]?.type !== null).length;
+    const pct = employees.length > 0 ? Math.round((filled / employees.length) * 100) : 0;
+    return { dag: t(`days.${d.dayKey}`), bezet: filled, target: employees.length, pct };
+  });
 
-  const dailyFillRate = [
-    { dag: dayLabels[0], bezet: 18, target: 25, pct: 72 },
-    { dag: dayLabels[1], bezet: 20, target: 25, pct: 80 },
-    { dag: dayLabels[2], bezet: 22, target: 25, pct: 88 },
-    { dag: dayLabels[3], bezet: 21, target: 25, pct: 84 },
-    { dag: dayLabels[4], bezet: 19, target: 25, pct: 76 },
-    { dag: dayLabels[5], bezet: 12, target: 25, pct: 48 },
-    { dag: dayLabels[6], bezet: 2, target: 25, pct: 8 },
-  ];
+  const avgFillRate = dailyFillRate.length > 0
+    ? Math.round(dailyFillRate.reduce((s, d) => s + d.pct, 0) / dailyFillRate.length)
+    : 0;
 
-  const avgFillRate = Math.round(dailyFillRate.reduce((s, d) => s + d.pct, 0) / dailyFillRate.length);
+  // Shift groups for heatmap
+  const shiftLabels = new Set<string>();
+  employees.forEach((emp) => emp.shifts.forEach((s) => { if (s.label) shiftLabels.add(s.label); }));
 
-  const heatmapData = [
-    { dienst: "Early pick", [dayLabels[0]]: 85, [dayLabels[1]]: 80, [dayLabels[2]]: 75, [dayLabels[3]]: 90, [dayLabels[4]]: 80, [dayLabels[5]]: 60, [dayLabels[6]]: 0 },
-    { dienst: "Day Pick", [dayLabels[0]]: 70, [dayLabels[1]]: 75, [dayLabels[2]]: 80, [dayLabels[3]]: 85, [dayLabels[4]]: 70, [dayLabels[5]]: 50, [dayLabels[6]]: 40 },
-    { dienst: "Late pick", [dayLabels[0]]: 90, [dayLabels[1]]: 85, [dayLabels[2]]: 80, [dayLabels[3]]: 75, [dayLabels[4]]: 65, [dayLabels[5]]: 0, [dayLabels[6]]: 0 },
-    { dienst: "Late pack", [dayLabels[0]]: 95, [dayLabels[1]]: 90, [dayLabels[2]]: 90, [dayLabels[3]]: 85, [dayLabels[4]]: 80, [dayLabels[5]]: 45, [dayLabels[6]]: 0 },
-    { dienst: "Night Pick", [dayLabels[0]]: 80, [dayLabels[1]]: 80, [dayLabels[2]]: 80, [dayLabels[3]]: 80, [dayLabels[4]]: 80, [dayLabels[5]]: 60, [dayLabels[6]]: 0 },
-    { dienst: "Night Pack", [dayLabels[0]]: 0, [dayLabels[1]]: 0, [dayLabels[2]]: 60, [dayLabels[3]]: 60, [dayLabels[4]]: 60, [dayLabels[5]]: 0, [dayLabels[6]]: 0 },
-  ];
+  const dayLabels = days.map((d) => t(`days.${d.dayKey}`));
+  const heatmapData = Array.from(shiftLabels).map((label) => {
+    const row: Record<string, any> = { dienst: label };
+    days.forEach((d, dayIdx) => {
+      const dayLabel = t(`days.${d.dayKey}`);
+      const total = employees.length;
+      const filled = employees.filter((emp) => emp.shifts[dayIdx]?.label === label).length;
+      // Use target of 25 as baseline for percentage
+      row[dayLabel] = total > 0 ? Math.round((filled / 25) * 100) : 0;
+    });
+    return row;
+  });
 
+  // Shift type distribution
+  const shiftTypeCounts: Record<string, number> = { vroeg: 0, dag: 0, laat: 0, nacht: 0 };
+  employees.forEach((emp) => emp.shifts.forEach((s) => { if (s.type) shiftTypeCounts[s.type]++; }));
+  const totalShifts = Object.values(shiftTypeCounts).reduce((a, b) => a + b, 0);
   const shiftDistribution = [
-    { shift: t("grid.early"), value: 28 },
-    { shift: t("grid.day"), value: 22 },
-    { shift: t("grid.late"), value: 35 },
-    { shift: t("grid.night"), value: 15 },
+    { shift: t("grid.early"), value: totalShifts > 0 ? Math.round((shiftTypeCounts.vroeg / totalShifts) * 100) : 0 },
+    { shift: t("grid.day"), value: totalShifts > 0 ? Math.round((shiftTypeCounts.dag / totalShifts) * 100) : 0 },
+    { shift: t("grid.late"), value: totalShifts > 0 ? Math.round((shiftTypeCounts.laat / totalShifts) * 100) : 0 },
+    { shift: t("grid.night"), value: totalShifts > 0 ? Math.round((shiftTypeCounts.nacht / totalShifts) * 100) : 0 },
   ];
 
-  const qualificationData = [
-    { name: "Pick", value: 62 },
-    { name: "Pack", value: 30 },
-    { name: t("stats.noQualification"), value: 8 },
-  ];
+  // Qualification distribution
+  const qualCounts: Record<string, number> = {};
+  employees.forEach((emp) => {
+    const quals = emp.tags.filter((t) => !["Own Employee", "Flex", "Temp"].includes(t));
+    if (quals.length === 0) {
+      qualCounts[t("stats.noQualification")] = (qualCounts[t("stats.noQualification")] || 0) + 1;
+    } else {
+      quals.forEach((q) => { qualCounts[q] = (qualCounts[q] || 0) + 1; });
+    }
+  });
+  const totalQuals = Object.values(qualCounts).reduce((a, b) => a + b, 0);
+  const qualificationData = Object.entries(qualCounts).map(([name, count]) => ({
+    name,
+    value: totalQuals > 0 ? Math.round((count / totalQuals) * 100) : 0,
+  }));
 
-  const weekTrend = [
-    { week: "Wk 8", fillRate: 68, uren: 780, kosten: 14200 },
-    { week: "Wk 9", fillRate: 72, uren: 810, kosten: 14800 },
-    { week: "Wk 10", fillRate: 75, uren: 845, kosten: 15300 },
-    { week: "Wk 11", fillRate: 78, uren: 860, kosten: 15600 },
-  ];
+  // Weekend vs weekday
+  const weekdayDays = days.filter((d) => !d.weekend);
+  const weekendDays = days.filter((d) => d.weekend);
+  const weekdayFilled = weekdayDays.reduce((sum, _, i) => {
+    const dayIdx = days.indexOf(weekdayDays[i]);
+    return sum + employees.filter((emp) => emp.shifts[dayIdx]?.type !== null).length;
+  }, 0);
+  const weekendFilled = weekendDays.reduce((sum, d) => {
+    const dayIdx = days.indexOf(d);
+    return sum + employees.filter((emp) => emp.shifts[dayIdx]?.type !== null).length;
+  }, 0);
+
+  const weekdayTarget = weekdayDays.length * employees.length;
+  const weekendTarget = weekendDays.length * employees.length;
 
   const weekdayWeekend = [
-    { type: t("stats.weekday"), bezetting: 82, uren: 680 },
-    { type: t("stats.weekend"), bezetting: 38, uren: 165 },
+    { type: t("stats.weekday"), bezetting: weekdayTarget > 0 ? Math.round((weekdayFilled / weekdayTarget) * 100) : 0, uren: Math.round(weekdayFilled * 8) },
+    { type: t("stats.weekend"), bezetting: weekendTarget > 0 ? Math.round((weekendFilled / weekendTarget) * 100) : 0, uren: Math.round(weekendFilled * 8) },
   ];
+
+  return {
+    employeeHours,
+    totalGepland,
+    totalContract,
+    overEmployees,
+    underEmployees,
+    scheduledEmployees,
+    dailyFillRate,
+    avgFillRate,
+    heatmapData,
+    dayLabels,
+    shiftDistribution,
+    qualificationData,
+    weekdayWeekend,
+    shiftTypeCount: shiftLabels.size,
+  };
+}
+
+// ── Main Dashboard ─────────────────────────────────────────────────────────────
+
+interface StatsDashboardProps {
+  data?: RosterData;
+}
+
+export function StatsDashboard({ data }: StatsDashboardProps) {
+  const { t } = useTranslation();
+
+  if (!data) {
+    return (
+      <div className="rounded-xl border border-border/50 bg-card p-8 text-center text-muted-foreground">
+        <p className="text-sm">{t("grid.noData", "Geen data beschikbaar")}</p>
+      </div>
+    );
+  }
+
+  const stats = computeStats(data, t);
 
   return (
     <div className="space-y-5">
@@ -189,42 +220,42 @@ export function StatsDashboard() {
       <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-6 gap-3">
         <StatCard
           title={t("stats.avgFillRate")}
-          value={`${avgFillRate}%`}
+          value={`${stats.avgFillRate}%`}
           subtitle={t("stats.over7days")}
           icon={Target}
           color="bg-primary/10 text-primary"
         />
         <StatCard
           title={t("stats.totalPlannedHours")}
-          value={`${totalGepland}u`}
-          subtitle={t("stats.ofContract", { count: totalContract })}
+          value={`${Math.round(stats.totalGepland)}u`}
+          subtitle={t("stats.ofContract", { count: Math.round(stats.totalContract) })}
           icon={Clock}
           color="bg-emerald-500/10 text-emerald-600"
         />
         <StatCard
           title={t("stats.overloaded")}
-          value={`${overEmployees}`}
+          value={`${stats.overEmployees}`}
           subtitle={t("stats.overloadedSub")}
           icon={AlertTriangle}
           color="bg-destructive/10 text-destructive"
         />
         <StatCard
           title={t("stats.underloaded")}
-          value={`${underEmployees}`}
+          value={`${stats.underEmployees}`}
           subtitle={t("stats.underloadedSub")}
           icon={TrendingUp}
           color="bg-amber-500/10 text-amber-600"
         />
         <StatCard
           title={t("stats.employeesScheduled")}
-          value={`${employeeHours.length}`}
+          value={`${stats.scheduledEmployees}`}
           subtitle={t("stats.scheduledThisWeek")}
           icon={Users}
           color="bg-purple-500/10 text-purple-600"
         />
         <StatCard
           title={t("stats.shiftsLabel")}
-          value="6"
+          value={`${stats.shiftTypeCount}`}
           subtitle={t("stats.activeShiftTypes")}
           icon={BarChart3}
           color="bg-blue-500/10 text-blue-600"
@@ -239,10 +270,10 @@ export function StatsDashboard() {
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={220}>
-              <BarChart data={dailyFillRate} barGap={4}>
+              <BarChart data={stats.dailyFillRate} barGap={4}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 15%, 90%)" />
                 <XAxis dataKey="dag" tick={{ fontSize: 11 }} />
-                <YAxis tick={{ fontSize: 11 }} domain={[0, 100]} tickFormatter={v => `${v}%`} />
+                <YAxis tick={{ fontSize: 11 }} domain={[0, 100]} tickFormatter={(v) => `${v}%`} />
                 <Tooltip
                   formatter={(value: number) => [`${value}%`, t("stats.fillRate")]}
                   contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid hsl(220,15%,90%)" }}
@@ -262,16 +293,16 @@ export function StatsDashboard() {
               <thead>
                 <tr>
                   <th className="text-left py-1 px-2 text-muted-foreground font-medium">{t("json.shift")}</th>
-                  {dayLabels.map(d => (
+                  {stats.dayLabels.map((d) => (
                     <th key={d} className="text-center py-1 px-2 text-muted-foreground font-medium">{d}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
-                {heatmapData.map((row, i) => (
+                {stats.heatmapData.map((row, i) => (
                   <tr key={i}>
                     <td className="py-1.5 px-2 font-medium text-foreground whitespace-nowrap">{row.dienst}</td>
-                    {dayLabels.map(d => (
+                    {stats.dayLabels.map((d) => (
                       <HeatmapCell key={d} value={(row as any)[d]} />
                     ))}
                   </tr>
@@ -305,7 +336,7 @@ export function StatsDashboard() {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-0.5 max-h-[320px] overflow-y-auto roster-scroll">
-            {employeeHours
+            {stats.employeeHours
               .sort((a, b) => a.delta - b.delta)
               .map((e, i) => (
                 <ContractDeltaBar key={i} {...e} />
@@ -324,7 +355,7 @@ export function StatsDashboard() {
             <ResponsiveContainer width="100%" height={200}>
               <PieChart>
                 <Pie
-                  data={qualificationData}
+                  data={stats.qualificationData}
                   cx="50%"
                   cy="50%"
                   innerRadius={50}
@@ -333,8 +364,8 @@ export function StatsDashboard() {
                   label={({ name, value }) => `${name} ${value}%`}
                   labelLine={false}
                 >
-                  {qualificationData.map((_, i) => (
-                    <Cell key={i} fill={CHART_COLORS[i]} />
+                  {stats.qualificationData.map((_, i) => (
+                    <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
                   ))}
                 </Pie>
                 <Tooltip contentStyle={{ fontSize: 12, borderRadius: 8 }} />
@@ -349,7 +380,7 @@ export function StatsDashboard() {
           </CardHeader>
           <CardContent className="flex items-center justify-center">
             <ResponsiveContainer width="100%" height={200}>
-              <RadarChart data={shiftDistribution}>
+              <RadarChart data={stats.shiftDistribution}>
                 <PolarGrid stroke="hsl(220,15%,85%)" />
                 <PolarAngleAxis dataKey="shift" tick={{ fontSize: 11 }} />
                 <PolarRadiusAxis tick={{ fontSize: 10 }} />
@@ -365,7 +396,7 @@ export function StatsDashboard() {
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={200}>
-              <BarChart data={weekdayWeekend} barGap={8}>
+              <BarChart data={stats.weekdayWeekend} barGap={8}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(220,15%,90%)" />
                 <XAxis dataKey="type" tick={{ fontSize: 11 }} />
                 <YAxis tick={{ fontSize: 11 }} />
@@ -373,48 +404,6 @@ export function StatsDashboard() {
                 <Bar dataKey="bezetting" name={t("stats.occupancyPct")} fill={CHART_COLORS[0]} radius={[4, 4, 0, 0]} />
                 <Bar dataKey="uren" name={t("grid.hours")} fill={CHART_COLORS[1]} radius={[4, 4, 0, 0]} />
               </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* ── Row 4: Trends ── */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-        <Card className="border-border/50">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-semibold">{t("stats.fillRateTrend")}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={200}>
-              <AreaChart data={weekTrend}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(220,15%,90%)" />
-                <XAxis dataKey="week" tick={{ fontSize: 11 }} />
-                <YAxis tick={{ fontSize: 11 }} domain={[50, 100]} tickFormatter={v => `${v}%`} />
-                <Tooltip contentStyle={{ fontSize: 12, borderRadius: 8 }} />
-                <Area type="monotone" dataKey="fillRate" name={t("stats.fillRate") + " %"} stroke="hsl(217,91%,53%)" fill="hsl(217,91%,53%)" fillOpacity={0.15} />
-              </AreaChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-
-        <Card className="border-border/50">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-semibold">{t("stats.estimatedLabor")}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={200}>
-              <LineChart data={weekTrend}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(220,15%,90%)" />
-                <XAxis dataKey="week" tick={{ fontSize: 11 }} />
-                <YAxis tick={{ fontSize: 11 }} tickFormatter={v => `€${(v / 1000).toFixed(1)}k`} />
-                <Tooltip
-                  formatter={(value: number) => [`€${value.toLocaleString()}`, ""]}
-                  contentStyle={{ fontSize: 12, borderRadius: 8 }}
-                />
-                <Legend wrapperStyle={{ fontSize: 11 }} />
-                <Line type="monotone" dataKey="kosten" name={t("stats.estimatedLabor")} stroke={CHART_COLORS[3]} strokeWidth={2} dot={{ r: 3 }} />
-                <Line type="monotone" dataKey="uren" name={t("grid.hours")} stroke={CHART_COLORS[1]} strokeWidth={2} dot={{ r: 3 }} />
-              </LineChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
