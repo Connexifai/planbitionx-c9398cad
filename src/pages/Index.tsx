@@ -199,45 +199,54 @@ export default function Index() {
 
                 {!chatOpen && (
                   <div
-                    className={cn(
-                      "fixed z-50 flex flex-col items-center transition-all duration-[3000ms] ease-in-out pointer-events-none",
-                      jsonLoaded
-                        ? "bottom-6 right-6 items-end pointer-events-auto cursor-pointer"
-                        : "inset-0 justify-center"
-                    )}
-                    onClick={jsonLoaded ? () => setChatOpen(true) : undefined}
+                    className="fixed z-50 pointer-events-none"
+                    style={{
+                      transition: 'all 3s cubic-bezier(0.4, 0, 0.2, 1)',
+                      ...(jsonLoaded
+                        ? { bottom: 24, right: 24, top: 'auto', left: 'auto' }
+                        : { top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }
+                      ),
+                    }}
                   >
-                    {!jsonLoaded && (
-                      <p className="absolute bottom-[12%] text-lg font-semibold text-muted-foreground">
-                        {t("robot.uploadJson")}
-                      </p>
-                    )}
+                    <div className="flex flex-col items-center">
+                      {!jsonLoaded && (
+                        <p className="absolute -bottom-16 left-1/2 -translate-x-1/2 whitespace-nowrap text-lg font-semibold text-muted-foreground">
+                          {t("robot.uploadJson")}
+                        </p>
+                      )}
 
-                    {jsonLoaded && (
-                      <div className="relative bg-primary text-primary-foreground shadow-xl rounded-2xl px-4 py-3 max-w-[230px] animate-[bounce_2s_ease-in-out_3] mr-4 mb-2">
-                        <p className="text-sm font-semibold leading-snug">{t("robot.clickMe")}</p>
-                        <div className="absolute -bottom-2 right-6 w-4 h-4 bg-primary rotate-45 rounded-sm" />
-                      </div>
-                    )}
+                      {robotLanded && jsonLoaded && (
+                        <div
+                          className="relative bg-primary text-primary-foreground shadow-xl rounded-2xl px-4 py-3 max-w-[230px] mb-2 animate-fade-in cursor-pointer pointer-events-auto"
+                          onClick={() => setChatOpen(true)}
+                        >
+                          <p className="text-sm font-semibold leading-snug">{t("robot.clickMe")}</p>
+                          <div className="absolute -bottom-2 right-6 w-4 h-4 bg-primary rotate-45 rounded-sm" />
+                        </div>
+                      )}
 
-                    <div className="relative pointer-events-auto">
-                      <img
-                        src={robotImg}
-                        alt="AI Assistent"
-                        className={cn(
-                          "object-contain drop-shadow-2xl robot-float transition-all duration-[3000ms] ease-in-out",
-                          jsonLoaded
-                            ? "w-56 h-56 hover:scale-110"
-                            : "w-[420px] h-[420px]"
-                        )}
-                      />
                       <div
                         className={cn(
-                          "absolute right-[95%] top-[20%] transition-all duration-500",
-                          jsonLoaded ? "opacity-0 scale-75 pointer-events-none" : "opacity-100 scale-100"
+                          "relative pointer-events-auto",
+                          jsonLoaded && robotLanded ? "cursor-pointer" : ""
                         )}
+                        onClick={jsonLoaded && robotLanded ? () => setChatOpen(true) : undefined}
                       >
-                        <RobotQuoteBubble />
+                        <img
+                          src={robotImg}
+                          alt="AI Assistent"
+                          className="object-contain drop-shadow-2xl robot-float"
+                          style={{
+                            transition: 'width 3s cubic-bezier(0.4, 0, 0.2, 1), height 3s cubic-bezier(0.4, 0, 0.2, 1)',
+                            width: jsonLoaded ? 224 : 420,
+                            height: jsonLoaded ? 224 : 420,
+                          }}
+                        />
+                        {!jsonLoaded && (
+                          <div className="absolute right-[95%] top-[20%]">
+                            <RobotQuoteBubble />
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
