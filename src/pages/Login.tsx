@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -28,14 +28,21 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [exiting, setExiting] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    navigate("/");
+    setLoading(true);
+    setExiting(true);
+    setTimeout(() => navigate("/"), 800);
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background relative">
+    <div
+      ref={containerRef}
+      className={`min-h-screen flex items-center justify-center bg-background relative transition-all duration-700 ease-in-out ${exiting ? "scale-110 opacity-0 blur-sm" : ""}`}
+    >
       <AnimatedBackground />
 
       {/* Centered card */}
