@@ -108,18 +108,8 @@ function SolvingOverlay() {
     </div>
   );
 }
-                "px-3 py-1.5 rounded-lg text-xs font-medium transition-all",
-                variant === v ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-accent"
-              )}
-            >
-              {v === 1 ? "Tijdlijn" : v === 2 ? "Rooster" : "Dashboard"}
-            </button>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
+
+
 
 export default function Index() {
   const [dark, setDark] = useState(() => document.documentElement.classList.contains("dark"));
