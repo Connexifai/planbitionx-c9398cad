@@ -236,7 +236,7 @@ export function PlannerSidebar({ onSolve, hideFooter, onJsonLoaded }: { onSolve?
   const activeDef = sections.find(s => s.id === activeSection)!;
 
   const contentMap: Record<SectionId, React.ReactNode> = {
-    json: <JsonSection />,
+    json: <JsonSection onJsonLoaded={onJsonLoaded} />,
     atw: <AtwSection />,
     zachte: <ZachteSection />,
     solver: <SolverSection />,
