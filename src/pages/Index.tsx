@@ -211,15 +211,17 @@ export default function Index() {
                 {/* Grote robot gecentreerd — als JSON nog NIET geladen */}
                 {!jsonLoaded && (
                   <div className="absolute inset-0 flex items-center justify-center z-40 pointer-events-none">
-                    <div className="flex flex-col items-center gap-4 pointer-events-auto">
-                      <RobotQuoteBubble />
+                    <div className="flex items-center gap-0 pointer-events-auto">
                       <img
                         src={robotImg}
                         alt="AI Assistent"
-                        className="w-[420px] h-[420px] object-contain drop-shadow-2xl animate-[orbit_180s_ease-in-out_infinite]"
+                        className="w-[420px] h-[420px] object-contain drop-shadow-2xl animate-[orbit_180s_ease-in-out_infinite] shrink-0"
                       />
-                      <p className="text-lg font-semibold text-muted-foreground">Upload een JSON-bestand om te beginnen</p>
+                      <div className="relative -ml-8 mb-20">
+                        <RobotQuoteBubble />
+                      </div>
                     </div>
+                    <p className="absolute bottom-[12%] text-lg font-semibold text-muted-foreground">Upload een JSON-bestand om te beginnen</p>
                   </div>
                 )}
 
