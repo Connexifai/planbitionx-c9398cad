@@ -33,21 +33,23 @@ interface KpiCardsProps {
 export function KpiCards({ solved = false, data, solveTime }: KpiCardsProps) {
   const { t } = useTranslation();
 
-  // Compute stats from data
-  let totalSlots = 0;
+  // Compute stats from data using actual demand
+  let totalDemand = 0;
   let filledSlots = 0;
   let occupancyPct = "0%";
   let unfilledCount = 0;
 
   if (solved && data) {
-    const numDays = data.days.length;
-    totalSlots = data.employees.length * numDays;
+    // Total demand = sum of all demands across all shifts and days
+    data.demandMap.forEach((dayDemands) => {
+      totalDemand += dayDemands.reduce((s, d) => s + d, 0);
+    });
     filledSlots = data.employees.reduce(
       (sum, emp) => sum + emp.shifts.filter((s) => s.type !== null).length,
       0
     );
-    unfilledCount = totalSlots - filledSlots;
-    occupancyPct = totalSlots > 0 ? `${((filledSlots / totalSlots) * 100).toFixed(1)}%` : "0%";
+    unfilledCount = Math.max(0, totalDemand - filledSlots);
+    occupancyPct = totalDemand > 0 ? `${((filledSlots / totalDemand) * 100).toFixed(1)}%` : "0%";
   }
 
   const timeStr = solveTime ? `${(solveTime / 1000).toFixed(1)}s` : "0s";
