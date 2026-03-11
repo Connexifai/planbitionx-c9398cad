@@ -474,7 +474,7 @@ export function ServiceRosterGrid() {
                         key={nIdx}
                         className="text-[12px] leading-relaxed text-foreground py-0.5 truncate hover:text-primary transition-colors cursor-default"
                       >
-                        {name}
+                        {toTitleCase(name)}
                       </div>
                     ))}
                   </td>
