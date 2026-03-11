@@ -90,9 +90,14 @@ const dayKeyMap: Record<number, string> = {
 };
 
 export function parseSolverResponse(request: RawSchedule, response: SolverResponse): RosterData {
-  // Build day columns from request date range
-  const startDate = parseISO(request.Start);
-  const endDate = parseISO(request.End);
+  // Derive date range from the actual assigned shifts in the response
+  const allDates = response.assignedShifts.map(a => parseISO(a.scheduleDate).getTime());
+  const minDate = new Date(Math.min(...allDates));
+  const maxDate = new Date(Math.max(...allDates));
+
+  // Fall back to request range if no assignments
+  const startDate = allDates.length > 0 ? minDate : parseISO(request.Start);
+  const endDate = allDates.length > 0 ? maxDate : parseISO(request.End);
   const allDays = eachDayOfInterval({ start: startDate, end: endDate });
 
   const days: DayColumn[] = allDays.map((d) => ({
