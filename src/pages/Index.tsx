@@ -16,9 +16,68 @@ import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import robotImg from "@/assets/robot-assistant.png";
 
+function SolvingOverlay() {
+  const [elapsed, setElapsed] = useState(0);
+  const [phase, setPhase] = useState(0);
+
+  const phases = [
+    "Constraints inladen…",
+    "Medewerkers toewijzen…",
+    "ATW-regels controleren…",
+    "Conflicten oplossen…",
+    "Rooster optimaliseren…",
+    "Laatste controles…",
+  ];
+
+  useEffect(() => {
+    const timer = setInterval(() => setElapsed((e) => e + 1), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    const phaseTimer = setInterval(() => setPhase((p) => (p + 1) % phases.length), 5000);
+    return () => clearInterval(phaseTimer);
+  }, []);
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-background/80 backdrop-blur-sm">
+      <div className="flex flex-col items-center gap-6 animate-[fade-in_0.3s_ease-out]">
+        <img
+          src={robotImg}
+          alt="Solving..."
+          className="w-40 h-40 object-contain drop-shadow-2xl animate-bounce"
+        />
+        <div className="flex flex-col items-center gap-3">
+          <h2 className="text-2xl font-bold text-foreground">Rooster wordt opgelost</h2>
+          <p className="text-sm text-muted-foreground animate-pulse">{phases[phase]}</p>
+          <div className="flex items-center gap-3 mt-2">
+            <div className="w-48 h-2 rounded-full bg-muted overflow-hidden">
+              <div
+                className="h-full rounded-full bg-primary transition-all duration-1000 ease-out"
+                style={{ width: `${Math.min((elapsed / 45) * 100, 95)}%` }}
+              />
+            </div>
+            <span className="text-xs text-muted-foreground font-mono w-8">{elapsed}s</span>
+          </div>
+        </div>
+        <div className="flex gap-1.5 mt-2">
+          {[0, 1, 2].map((i) => (
+            <div
+              key={i}
+              className="w-2.5 h-2.5 rounded-full bg-primary animate-bounce"
+              style={{ animationDelay: `${i * 0.2}s` }}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function Index() {
   const [dark, setDark] = useState(() => document.documentElement.classList.contains("dark"));
   const [solved, setSolved] = useState(false);
+  const [solving, setSolving] = useState(false);
   const [activeTab, setActiveTab] = useState("roster");
   const [chatOpen, setChatOpen] = useState(false);
 
@@ -26,9 +85,19 @@ export default function Index() {
     document.documentElement.classList.toggle("dark", dark);
   }, [dark]);
 
+  const handleSolve = () => {
+    setSolving(true);
+    // Simulate solve duration (replace with real API call later)
+    setTimeout(() => {
+      setSolving(false);
+      setSolved(true);
+    }, 8000);
+  };
+
   return (
     <div className="h-screen flex w-full">
-      <PlannerSidebar onSolve={() => setSolved(true)} />
+      {solving && <SolvingOverlay />}
+      <PlannerSidebar onSolve={handleSolve} />
 
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top bar */}
