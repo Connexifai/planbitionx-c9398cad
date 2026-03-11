@@ -22,21 +22,21 @@ const KpiCard = ({ label, value, subtitle, icon, colorClass, bgClass }: KpiCardP
   </div>
 );
 
-export function KpiCards() {
+export function KpiCards({ solved = false }: { solved?: boolean }) {
   return (
     <div className="grid grid-cols-2 gap-4 lg:grid-cols-5">
       <KpiCard
         label="Bezetting"
-        value="79.7%"
-        subtitle="1396 / 1751 slots"
+        value={solved ? "79.7%" : "0%"}
+        subtitle={solved ? "1396 / 1751 slots" : "—"}
         icon={<TrendingUp className="h-5 w-5" />}
         colorClass="text-kpi-occupancy"
         bgClass="bg-kpi-occupancy/10"
       />
       <KpiCard
         label="Toewijzingen"
-        value="1396"
-        subtitle="van 1751 slots"
+        value={solved ? "1396" : "0"}
+        subtitle={solved ? "van 1751 slots" : "—"}
         icon={<Users className="h-5 w-5" />}
         colorClass="text-kpi-assignments"
         bgClass="bg-kpi-assignments/10"
@@ -44,23 +44,23 @@ export function KpiCards() {
       <KpiCard
         label="ATW Overtredingen"
         value="0"
-        subtitle="✓ compliant"
+        subtitle={solved ? "✓ compliant" : "—"}
         icon={<AlertTriangle className="h-5 w-5" />}
         colorClass="text-kpi-violations"
         bgClass="bg-kpi-violations/10"
       />
       <KpiCard
         label="Niet Ingevuld"
-        value="53"
-        subtitle="klik voor details"
+        value={solved ? "53" : "0"}
+        subtitle={solved ? "klik voor details" : "—"}
         icon={<HelpCircle className="h-5 w-5" />}
         colorClass="text-kpi-unfilled"
         bgClass="bg-kpi-unfilled/10"
       />
       <KpiCard
         label="Rekentijd"
-        value="20.6s"
-        subtitle="solver tijd"
+        value={solved ? "20.6s" : "0s"}
+        subtitle={solved ? "solver tijd" : "—"}
         icon={<Clock className="h-5 w-5" />}
         colorClass="text-kpi-time"
         bgClass="bg-kpi-time/10"
