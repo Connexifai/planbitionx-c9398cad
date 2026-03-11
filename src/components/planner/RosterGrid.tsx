@@ -120,7 +120,7 @@ export function RosterGrid({ data }: RosterGridProps) {
             >
               <span className="text-xs font-semibold text-foreground">{t(`days.${d.dayKey}`)}</span>
               <span className="text-[10px] text-muted-foreground">{d.date}</span>
-              <FillRateIndicator percent={dayFillRates[i]} />
+              <FillRateIndicator filled={dayFillRates[i].filled} target={dayFillRates[i].target} pct={dayFillRates[i].pct} />
             </div>
           ))}
         </div>
