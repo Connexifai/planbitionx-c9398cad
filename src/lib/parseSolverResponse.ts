@@ -71,6 +71,14 @@ export interface DayColumn {
 /** Per-shift-label, per-day demand from the request */
 export type DemandMap = Map<string, number[]>;
 
+export interface ShiftMeta {
+  type: ShiftType;
+  time: string;
+}
+
+export type ShiftMetaMap = Map<string, ShiftMeta>;
+export type AssignmentNamesMap = Map<string, string[][]>;
+
 export interface RosterData {
   days: DayColumn[];
   employees: RosterEmployee[];
@@ -78,6 +86,14 @@ export interface RosterData {
   demandMap: DemandMap;
   /** unique planned employees per day index */
   plannedByDay: number[];
+  /** total assigned shifts per day index */
+  assignedByDay: number[];
+  /** assigned shifts per shift label per day index */
+  assignedByShiftDay: DemandMap;
+  /** assigned employee names per shift label per day index */
+  assignmentNamesByShiftDay: AssignmentNamesMap;
+  /** shift metadata from request for correct grouping */
+  shiftMetaMap: ShiftMetaMap;
 }
 
 function classifyShiftType(name: string, startHour: number): ShiftType {
