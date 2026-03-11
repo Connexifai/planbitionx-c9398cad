@@ -60,7 +60,7 @@ function RobotQuoteBubble() {
   const typed = useTypingText(quote, 45);
 
   return (
-    <div className="relative bg-card border shadow-xl rounded-2xl px-5 py-4 max-w-[340px] animate-fade-in">
+    <div className="relative bg-card border shadow-xl rounded-2xl px-5 py-4 w-[480px] animate-fade-in">
       <p className="text-sm font-medium text-foreground leading-relaxed">
         {typed}
         <span className="inline-block w-[2px] h-4 bg-primary ml-0.5 animate-pulse align-middle" />
