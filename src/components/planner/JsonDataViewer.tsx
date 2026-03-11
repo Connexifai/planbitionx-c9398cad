@@ -5,6 +5,17 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 
+function toTitleCase(name: string): string {
+  return name
+    .split(/([,\s\-]+)/)
+    .map((part) =>
+      /^[,\s\-]+$/.test(part)
+        ? part
+        : part.charAt(0).toUpperCase() + part.slice(1).toLowerCase()
+    )
+    .join("");
+}
+
 export interface JsonScheduleData {
   start: string;
   end: string;
