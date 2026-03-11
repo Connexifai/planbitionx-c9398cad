@@ -302,17 +302,36 @@ export function PlannerSidebar({ onSolve, hideFooter }: { onSolve?: () => void; 
         )}
       </div>
 
-      {!contentCollapsed && !hideFooter && (
-        <div className="p-4 pt-4 pb-3 flex flex-col justify-center border-t border-border">
-          <div className="flex gap-2 mb-2">
-            <Button className="flex-1 h-10" style={{ background: "hsl(var(--kpi-assignments))" }} onClick={onSolve}>
-              ▶ Oplossen
-            </Button>
-            <Button variant="default" className="flex-1 h-10">
-              Stuur naar API
-            </Button>
-          </div>
-          <p className="text-[10px] text-muted-foreground text-center">Klaar in 16s</p>
+      {!hideFooter && (
+        <div className="border-t border-border">
+          {contentCollapsed ? (
+            <div className="p-1.5 flex justify-center">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={onSolve}
+                    className="flex items-center justify-center w-10 h-10 rounded-lg text-primary-foreground shadow-md transition-all"
+                    style={{ background: "hsl(var(--kpi-assignments))" }}
+                  >
+                    <Play className="h-4 w-4" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="right">Oplossen</TooltipContent>
+              </Tooltip>
+            </div>
+          ) : (
+            <div className="p-4 pt-4 pb-3 flex flex-col justify-center">
+              <div className="flex gap-2 mb-2">
+                <Button className="flex-1 h-10" style={{ background: "hsl(var(--kpi-assignments))" }} onClick={onSolve}>
+                  ▶ Oplossen
+                </Button>
+                <Button variant="default" className="flex-1 h-10">
+                  Stuur naar API
+                </Button>
+              </div>
+              <p className="text-[10px] text-muted-foreground text-center">Klaar in 16s</p>
+            </div>
+          )}
         </div>
       )}
     </div>
