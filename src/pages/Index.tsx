@@ -31,12 +31,6 @@ function SolvingOverlay() {
 
   const progress = Math.min(elapsed / 45, 0.95);
 
-  const kpis = [
-    { label: "Bezetting", color: "text-kpi-occupancy", bg: "bg-kpi-occupancy" },
-    { label: "Toewijzingen", color: "text-kpi-assignments", bg: "bg-kpi-assignments" },
-    { label: "Overtredingen", color: "text-kpi-violations", bg: "bg-kpi-violations" },
-    { label: "Niet ingevuld", color: "text-kpi-unfilled", bg: "bg-kpi-unfilled" },
-  ];
 
   useEffect(() => {
     const timer = setInterval(() => setElapsed((e) => e + 1), 1000);
