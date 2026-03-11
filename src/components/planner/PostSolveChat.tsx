@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { SendHorizontal, Bot, User, ArrowRightLeft, Lightbulb } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 import robotImg from "@/assets/robot-assistant.png";
 
 interface Message {
@@ -9,19 +10,6 @@ interface Message {
   role: "user" | "assistant";
   content: string;
 }
-
-const examplePrompts = [
-  {
-    icon: ArrowRightLeft,
-    label: "Dienstruiling",
-    prompt: "Franz-Xaver heeft gevraagd of hij woensdag vrij kan zijn. Hoe kan ik zijn dienst het beste opvangen?",
-  },
-  {
-    icon: Lightbulb,
-    label: "Alternatief zoeken",
-    prompt: "Wie kan de nachtdienst van donderdag overnemen van Marie als zij ziek is?",
-  },
-];
 
 const mockResponses: Record<string, string> = {
   default: `Ik heb het rooster geanalyseerd. Hier zijn mijn voorstellen:
@@ -67,12 +55,12 @@ function getResponse(input: string): string {
 }
 
 export function PostSolveChat() {
+  const { t } = useTranslation();
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
       role: "assistant",
-      content:
-        "Het rooster is opgelost! 🎉\n\nIk kan je helpen met:\n- **Dienstruilingen** — als een medewerker vrij wil zijn\n- **Vervanging zoeken** — bij ziekte of onverwachte afwezigheid\n- **Impact-analyse** — wat gebeurt er als je een wijziging doorvoert?\n\nStel je vraag en ik geef je concrete alternatieven op basis van het huidige rooster, contracturen en ATW-regels.",
+      content: t("chat.postSolveInitial"),
     },
   ]);
   const [input, setInput] = useState("");
@@ -103,6 +91,19 @@ export function PostSolveChat() {
       setIsTyping(false);
     }, 1200);
   };
+
+  const examplePrompts = [
+    {
+      icon: ArrowRightLeft,
+      label: t("chat.shiftSwap"),
+      prompt: t("chat.shiftSwapPrompt"),
+    },
+    {
+      icon: Lightbulb,
+      label: t("chat.findAlternative"),
+      prompt: t("chat.findAlternativePrompt"),
+    },
+  ];
 
   return (
     <div className="flex h-full">
@@ -165,7 +166,7 @@ export function PostSolveChat() {
                 <div className="w-1.5 h-1.5 rounded-full bg-primary/50 animate-bounce" style={{ animationDelay: "0ms" }} />
                 <div className="w-1.5 h-1.5 rounded-full bg-primary/50 animate-bounce" style={{ animationDelay: "150ms" }} />
                 <div className="w-1.5 h-1.5 rounded-full bg-primary/50 animate-bounce" style={{ animationDelay: "300ms" }} />
-                <span className="ml-2 text-xs">Rooster analyseren…</span>
+                <span className="ml-2 text-xs">{t("chat.analyzing")}</span>
               </div>
             </div>
           </div>
@@ -195,7 +196,7 @@ export function PostSolveChat() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && !isTyping && handleSend()}
-            placeholder="Bijv. 'Wie kan de dienst van woensdag overnemen van Franz-Xaver?'"
+            placeholder={t("chat.postSolvePlaceholder")}
             className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground/60"
             disabled={isTyping}
           />
@@ -206,7 +207,7 @@ export function PostSolveChat() {
             disabled={!input.trim() || isTyping}
           >
             <SendHorizontal className="h-4 w-4" />
-            Verstuur
+            {t("chat.send")}
           </Button>
         </div>
       </div>

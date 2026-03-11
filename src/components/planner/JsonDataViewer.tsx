@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 export interface JsonScheduleData {
   start: string;
@@ -23,7 +24,6 @@ export interface JsonScheduleData {
   days: string[];
 }
 
-// Demo data that matches the existing roster structure
 export const demoScheduleData: JsonScheduleData = {
   start: "2026-03-30T00:00:00",
   end: "2026-04-12T00:00:00",
@@ -56,15 +56,15 @@ export const demoScheduleData: JsonScheduleData = {
 /* ── Summary Cards ───────────────────────── */
 
 function SummaryCards({ data }: { data: JsonScheduleData }) {
+  const { t } = useTranslation();
   const totalShiftsPerDay = data.shifts.reduce((sum, s) => sum + s.requiredPerDay, 0);
   const uniqueLocations = [...new Set(data.employees.map(e => e.location).filter(Boolean))];
-  const uniqueTags = [...new Set(data.employees.flatMap(e => e.tags))];
 
   const cards = [
-    { label: "Medewerkers", value: data.employees.length, icon: <Users className="h-5 w-5" />, color: "text-kpi-occupancy", bg: "bg-kpi-occupancy/10" },
-    { label: "Diensten/dag", value: totalShiftsPerDay, icon: <Layers className="h-5 w-5" />, color: "text-kpi-assignments", bg: "bg-kpi-assignments/10" },
-    { label: "Dagen", value: data.days.length, icon: <Calendar className="h-5 w-5" />, color: "text-primary", bg: "bg-primary/10" },
-    { label: "Locaties", value: uniqueLocations.length, icon: <MapPin className="h-5 w-5" />, color: "text-kpi-open", bg: "bg-kpi-open/10" },
+    { label: t("json.employees"), value: data.employees.length, icon: <Users className="h-5 w-5" />, color: "text-kpi-occupancy", bg: "bg-kpi-occupancy/10" },
+    { label: t("json.shiftsPerDay"), value: totalShiftsPerDay, icon: <Layers className="h-5 w-5" />, color: "text-kpi-assignments", bg: "bg-kpi-assignments/10" },
+    { label: t("json.days"), value: data.days.length, icon: <Calendar className="h-5 w-5" />, color: "text-primary", bg: "bg-primary/10" },
+    { label: t("json.locations"), value: uniqueLocations.length, icon: <MapPin className="h-5 w-5" />, color: "text-kpi-open", bg: "bg-kpi-open/10" },
   ];
 
   return (
@@ -87,6 +87,7 @@ function SummaryCards({ data }: { data: JsonScheduleData }) {
 /* ── Employee Table ──────────────────────── */
 
 function EmployeeTable({ data }: { data: JsonScheduleData }) {
+  const { t } = useTranslation();
   const [expanded, setExpanded] = useState(true);
 
   return (
@@ -97,7 +98,7 @@ function EmployeeTable({ data }: { data: JsonScheduleData }) {
       >
         <div className="flex items-center gap-2">
           <Users className="h-4 w-4 text-primary" />
-          <h3 className="text-sm font-semibold">Medewerkers ({data.employees.length})</h3>
+          <h3 className="text-sm font-semibold">{t("json.employees")} ({data.employees.length})</h3>
         </div>
         {expanded ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
       </button>
@@ -107,10 +108,10 @@ function EmployeeTable({ data }: { data: JsonScheduleData }) {
             <table className="w-full text-sm">
               <thead className="bg-muted/50 sticky top-0">
                 <tr>
-                  <th className="text-left px-4 py-2 text-xs font-medium text-muted-foreground">Naam</th>
-                  <th className="text-left px-4 py-2 text-xs font-medium text-muted-foreground">Locatie</th>
-                  <th className="text-left px-4 py-2 text-xs font-medium text-muted-foreground">Contract</th>
-                  <th className="text-left px-4 py-2 text-xs font-medium text-muted-foreground">Tags</th>
+                  <th className="text-left px-4 py-2 text-xs font-medium text-muted-foreground">{t("json.name")}</th>
+                  <th className="text-left px-4 py-2 text-xs font-medium text-muted-foreground">{t("json.location")}</th>
+                  <th className="text-left px-4 py-2 text-xs font-medium text-muted-foreground">{t("json.contract")}</th>
+                  <th className="text-left px-4 py-2 text-xs font-medium text-muted-foreground">{t("json.tags")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -142,6 +143,7 @@ function EmployeeTable({ data }: { data: JsonScheduleData }) {
 /* ── Shift Overview ──────────────────────── */
 
 function ShiftOverview({ data }: { data: JsonScheduleData }) {
+  const { t } = useTranslation();
   const [expanded, setExpanded] = useState(true);
 
   const shiftColorMap: Record<string, string> = {
@@ -159,7 +161,7 @@ function ShiftOverview({ data }: { data: JsonScheduleData }) {
       >
         <div className="flex items-center gap-2">
           <Clock className="h-4 w-4 text-primary" />
-          <h3 className="text-sm font-semibold">Diensten ({data.shifts.length})</h3>
+          <h3 className="text-sm font-semibold">{t("json.shifts")} ({data.shifts.length})</h3>
         </div>
         {expanded ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
       </button>
@@ -179,7 +181,7 @@ function ShiftOverview({ data }: { data: JsonScheduleData }) {
               </div>
               <div className="text-right">
                 <p className="text-lg font-bold">{shift.requiredPerDay}</p>
-                <p className="text-[10px] opacity-70">per dag</p>
+                <p className="text-[10px] opacity-70">{t("json.perDay")}</p>
               </div>
             </div>
           ))}
@@ -192,6 +194,7 @@ function ShiftOverview({ data }: { data: JsonScheduleData }) {
 /* ── Week Grid ───────────────────────────── */
 
 function WeekGrid({ data }: { data: JsonScheduleData }) {
+  const { t } = useTranslation();
   const [expanded, setExpanded] = useState(true);
 
   const shiftBgMap: Record<string, string> = {
@@ -209,7 +212,7 @@ function WeekGrid({ data }: { data: JsonScheduleData }) {
       >
         <div className="flex items-center gap-2">
           <Calendar className="h-4 w-4 text-primary" />
-          <h3 className="text-sm font-semibold">Weekoverzicht – benodigde bezetting</h3>
+          <h3 className="text-sm font-semibold">{t("json.weekOverview")}</h3>
         </div>
         {expanded ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
       </button>
@@ -219,7 +222,7 @@ function WeekGrid({ data }: { data: JsonScheduleData }) {
             <table className="w-full text-xs">
               <thead className="bg-muted/50">
                 <tr>
-                  <th className="text-left px-3 py-2 font-medium text-muted-foreground sticky left-0 bg-muted/50 z-10 min-w-[120px]">Dienst</th>
+                  <th className="text-left px-3 py-2 font-medium text-muted-foreground sticky left-0 bg-muted/50 z-10 min-w-[120px]">{t("json.shift")}</th>
                   {data.days.map((day, i) => {
                     const isWeekend = day.startsWith("Za") || day.startsWith("Zo");
                     return (
@@ -255,9 +258,8 @@ function WeekGrid({ data }: { data: JsonScheduleData }) {
                     })}
                   </tr>
                 ))}
-                {/* Totals row */}
                 <tr className="border-t-2 border-border bg-muted/30 font-bold">
-                  <td className="px-3 py-2 sticky left-0 bg-muted/30 z-10">Totaal</td>
+                  <td className="px-3 py-2 sticky left-0 bg-muted/30 z-10">{t("json.total")}</td>
                   {data.days.map((day, di) => {
                     const isWeekend = day.startsWith("Za") || day.startsWith("Zo");
                     const total = data.shifts.reduce((sum, s) => sum + (isWeekend ? Math.max(1, s.requiredPerDay - 1) : s.requiredPerDay), 0);
@@ -281,12 +283,13 @@ function WeekGrid({ data }: { data: JsonScheduleData }) {
 /* ── Main Viewer ─────────────────────────── */
 
 export function JsonDataViewer({ data }: { data: JsonScheduleData }) {
+  const { t } = useTranslation();
   return (
     <div className="space-y-4 animate-fade-in">
       <div className="flex items-center gap-2 mb-1">
         <div className="h-2 w-2 rounded-full bg-kpi-assignments animate-pulse" />
         <p className="text-sm font-medium text-muted-foreground">
-          JSON geladen · {data.start.split("T")[0]} t/m {data.end.split("T")[0]}
+          {t("json.loaded")} · {data.start.split("T")[0]} {t("json.toDate")} {data.end.split("T")[0]}
         </p>
       </div>
       <SummaryCards data={data} />

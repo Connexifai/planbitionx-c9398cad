@@ -6,6 +6,7 @@ import {
   LineChart, Line, Legend, AreaChart, Area,
 } from "recharts";
 import { Users, TrendingUp, AlertTriangle, Clock, Target, BarChart3 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 // ── Mock data derived from roster ──────────────────────────────────────────────
 
@@ -23,27 +24,6 @@ const CHART_COLORS = [
   "hsl(270, 60%, 55%)",
   "hsl(0, 72%, 51%)",
   "hsl(190, 70%, 50%)",
-];
-
-// Fill rate per dag
-const dailyFillRate = [
-  { dag: "Ma", bezet: 18, target: 25, pct: 72 },
-  { dag: "Di", bezet: 20, target: 25, pct: 80 },
-  { dag: "Wo", bezet: 22, target: 25, pct: 88 },
-  { dag: "Do", bezet: 21, target: 25, pct: 84 },
-  { dag: "Vr", bezet: 19, target: 25, pct: 76 },
-  { dag: "Za", bezet: 12, target: 25, pct: 48 },
-  { dag: "Zo", bezet: 2, target: 25, pct: 8 },
-];
-
-// Fill rate per dienst per dag (heatmap data)
-const heatmapData = [
-  { dienst: "Early pick", Ma: 85, Di: 80, Wo: 75, Do: 90, Vr: 80, Za: 60, Zo: 0 },
-  { dienst: "Day Pick", Ma: 70, Di: 75, Wo: 80, Do: 85, Vr: 70, Za: 50, Zo: 40 },
-  { dienst: "Late pick", Ma: 90, Di: 85, Wo: 80, Do: 75, Vr: 65, Za: 0, Zo: 0 },
-  { dienst: "Late pack", Ma: 95, Di: 90, Wo: 90, Do: 85, Vr: 80, Za: 45, Zo: 0 },
-  { dienst: "Night Pick", Ma: 80, Di: 80, Wo: 80, Do: 80, Vr: 80, Za: 60, Zo: 0 },
-  { dienst: "Night Pack", Ma: 0, Di: 0, Wo: 60, Do: 60, Vr: 60, Za: 0, Zo: 0 },
 ];
 
 // Uren per medewerker vs contract
@@ -74,35 +54,6 @@ const employeeHours = [
   { naam: "Taisne, A.", gepland: 45, contract: 40, delta: 5 },
   { naam: "Tallout, M.", gepland: 16, contract: 32, delta: -16 },
   { naam: "Tarrade, L.", gepland: 32, contract: 38, delta: -6 },
-];
-
-// Dienst spreiding radar (gemiddelde verdeling over medewerkers)
-const shiftDistribution = [
-  { shift: "Vroeg", value: 28 },
-  { shift: "Dag", value: 22 },
-  { shift: "Laat", value: 35 },
-  { shift: "Nacht", value: 15 },
-];
-
-// Pick vs Pack verdeling
-const qualificationData = [
-  { name: "Pick", value: 62 },
-  { name: "Pack", value: 30 },
-  { name: "Geen kwalificatie", value: 8 },
-];
-
-// Week trend
-const weekTrend = [
-  { week: "Wk 8", fillRate: 68, uren: 780, kosten: 14200 },
-  { week: "Wk 9", fillRate: 72, uren: 810, kosten: 14800 },
-  { week: "Wk 10", fillRate: 75, uren: 845, kosten: 15300 },
-  { week: "Wk 11", fillRate: 78, uren: 860, kosten: 15600 },
-];
-
-// Weekend vs doordeweeks
-const weekdayWeekend = [
-  { type: "Doordeweeks", bezetting: 82, uren: 680 },
-  { type: "Weekend", bezetting: 38, uren: 165 },
 ];
 
 // ── Helper components ──────────────────────────────────────────────────────────
@@ -177,55 +128,104 @@ function ContractDeltaBar({ naam, gepland, contract, delta }: {
 // ── Main Dashboard ─────────────────────────────────────────────────────────────
 
 export function StatsDashboard() {
+  const { t } = useTranslation();
   const totalGepland = employeeHours.reduce((s, e) => s + e.gepland, 0);
   const totalContract = employeeHours.reduce((s, e) => s + e.contract, 0);
-  const avgFillRate = Math.round(dailyFillRate.reduce((s, d) => s + d.pct, 0) / dailyFillRate.length);
   const overEmployees = employeeHours.filter(e => e.delta > 4).length;
   const underEmployees = employeeHours.filter(e => e.delta < -8).length;
+
+  const dayKeys = ["mo", "tu", "we", "th", "fr", "sa", "su"] as const;
+  const dayLabels = dayKeys.map(k => t(`days.${k}`));
+
+  const dailyFillRate = [
+    { dag: dayLabels[0], bezet: 18, target: 25, pct: 72 },
+    { dag: dayLabels[1], bezet: 20, target: 25, pct: 80 },
+    { dag: dayLabels[2], bezet: 22, target: 25, pct: 88 },
+    { dag: dayLabels[3], bezet: 21, target: 25, pct: 84 },
+    { dag: dayLabels[4], bezet: 19, target: 25, pct: 76 },
+    { dag: dayLabels[5], bezet: 12, target: 25, pct: 48 },
+    { dag: dayLabels[6], bezet: 2, target: 25, pct: 8 },
+  ];
+
+  const avgFillRate = Math.round(dailyFillRate.reduce((s, d) => s + d.pct, 0) / dailyFillRate.length);
+
+  const heatmapData = [
+    { dienst: "Early pick", [dayLabels[0]]: 85, [dayLabels[1]]: 80, [dayLabels[2]]: 75, [dayLabels[3]]: 90, [dayLabels[4]]: 80, [dayLabels[5]]: 60, [dayLabels[6]]: 0 },
+    { dienst: "Day Pick", [dayLabels[0]]: 70, [dayLabels[1]]: 75, [dayLabels[2]]: 80, [dayLabels[3]]: 85, [dayLabels[4]]: 70, [dayLabels[5]]: 50, [dayLabels[6]]: 40 },
+    { dienst: "Late pick", [dayLabels[0]]: 90, [dayLabels[1]]: 85, [dayLabels[2]]: 80, [dayLabels[3]]: 75, [dayLabels[4]]: 65, [dayLabels[5]]: 0, [dayLabels[6]]: 0 },
+    { dienst: "Late pack", [dayLabels[0]]: 95, [dayLabels[1]]: 90, [dayLabels[2]]: 90, [dayLabels[3]]: 85, [dayLabels[4]]: 80, [dayLabels[5]]: 45, [dayLabels[6]]: 0 },
+    { dienst: "Night Pick", [dayLabels[0]]: 80, [dayLabels[1]]: 80, [dayLabels[2]]: 80, [dayLabels[3]]: 80, [dayLabels[4]]: 80, [dayLabels[5]]: 60, [dayLabels[6]]: 0 },
+    { dienst: "Night Pack", [dayLabels[0]]: 0, [dayLabels[1]]: 0, [dayLabels[2]]: 60, [dayLabels[3]]: 60, [dayLabels[4]]: 60, [dayLabels[5]]: 0, [dayLabels[6]]: 0 },
+  ];
+
+  const shiftDistribution = [
+    { shift: t("grid.early"), value: 28 },
+    { shift: t("grid.day"), value: 22 },
+    { shift: t("grid.late"), value: 35 },
+    { shift: t("grid.night"), value: 15 },
+  ];
+
+  const qualificationData = [
+    { name: "Pick", value: 62 },
+    { name: "Pack", value: 30 },
+    { name: t("stats.noQualification"), value: 8 },
+  ];
+
+  const weekTrend = [
+    { week: "Wk 8", fillRate: 68, uren: 780, kosten: 14200 },
+    { week: "Wk 9", fillRate: 72, uren: 810, kosten: 14800 },
+    { week: "Wk 10", fillRate: 75, uren: 845, kosten: 15300 },
+    { week: "Wk 11", fillRate: 78, uren: 860, kosten: 15600 },
+  ];
+
+  const weekdayWeekend = [
+    { type: t("stats.weekday"), bezetting: 82, uren: 680 },
+    { type: t("stats.weekend"), bezetting: 38, uren: 165 },
+  ];
 
   return (
     <div className="space-y-5">
       {/* ── KPI Summary ── */}
       <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-6 gap-3">
         <StatCard
-          title="Gem. Fill Rate"
+          title={t("stats.avgFillRate")}
           value={`${avgFillRate}%`}
-          subtitle="Over 7 dagen"
+          subtitle={t("stats.over7days")}
           icon={Target}
           color="bg-primary/10 text-primary"
         />
         <StatCard
-          title="Totaal Geplande Uren"
+          title={t("stats.totalPlannedHours")}
           value={`${totalGepland}u`}
-          subtitle={`van ${totalContract}u contract`}
+          subtitle={t("stats.ofContract", { count: totalContract })}
           icon={Clock}
           color="bg-emerald-500/10 text-emerald-600"
         />
         <StatCard
-          title="Overbelast"
+          title={t("stats.overloaded")}
           value={`${overEmployees}`}
-          subtitle="medewerkers >4u boven contract"
+          subtitle={t("stats.overloadedSub")}
           icon={AlertTriangle}
           color="bg-destructive/10 text-destructive"
         />
         <StatCard
-          title="Onderbelast"
+          title={t("stats.underloaded")}
           value={`${underEmployees}`}
-          subtitle="medewerkers >8u onder contract"
+          subtitle={t("stats.underloadedSub")}
           icon={TrendingUp}
           color="bg-amber-500/10 text-amber-600"
         />
         <StatCard
-          title="Medewerkers"
+          title={t("stats.employeesScheduled")}
           value={`${employeeHours.length}`}
-          subtitle="Ingepland deze week"
+          subtitle={t("stats.scheduledThisWeek")}
           icon={Users}
           color="bg-purple-500/10 text-purple-600"
         />
         <StatCard
-          title="Diensten"
+          title={t("stats.shiftsLabel")}
           value="6"
-          subtitle="Actieve shift-types"
+          subtitle={t("stats.activeShiftTypes")}
           icon={BarChart3}
           color="bg-blue-500/10 text-blue-600"
         />
@@ -233,10 +233,9 @@ export function StatsDashboard() {
 
       {/* ── Row 1: Fill Rate + Heatmap ── */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-        {/* Fill Rate per dag */}
         <Card className="border-border/50">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-semibold">Bezetting per dag</CardTitle>
+            <CardTitle className="text-sm font-semibold">{t("stats.occupancyPerDay")}</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={220}>
@@ -245,7 +244,7 @@ export function StatsDashboard() {
                 <XAxis dataKey="dag" tick={{ fontSize: 11 }} />
                 <YAxis tick={{ fontSize: 11 }} domain={[0, 100]} tickFormatter={v => `${v}%`} />
                 <Tooltip
-                  formatter={(value: number) => [`${value}%`, "Fill Rate"]}
+                  formatter={(value: number) => [`${value}%`, t("stats.fillRate")]}
                   contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid hsl(220,15%,90%)" }}
                 />
                 <Bar dataKey="pct" radius={[4, 4, 0, 0]} fill="hsl(217, 91%, 53%)" />
@@ -254,17 +253,16 @@ export function StatsDashboard() {
           </CardContent>
         </Card>
 
-        {/* Onderbezetting heatmap */}
         <Card className="border-border/50">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-semibold">Bezetting per dienst (heatmap)</CardTitle>
+            <CardTitle className="text-sm font-semibold">{t("stats.occupancyHeatmap")}</CardTitle>
           </CardHeader>
           <CardContent className="overflow-x-auto">
             <table className="w-full text-xs">
               <thead>
                 <tr>
-                  <th className="text-left py-1 px-2 text-muted-foreground font-medium">Dienst</th>
-                  {["Ma","Di","Wo","Do","Vr","Za","Zo"].map(d => (
+                  <th className="text-left py-1 px-2 text-muted-foreground font-medium">{t("json.shift")}</th>
+                  {dayLabels.map(d => (
                     <th key={d} className="text-center py-1 px-2 text-muted-foreground font-medium">{d}</th>
                   ))}
                 </tr>
@@ -273,7 +271,7 @@ export function StatsDashboard() {
                 {heatmapData.map((row, i) => (
                   <tr key={i}>
                     <td className="py-1.5 px-2 font-medium text-foreground whitespace-nowrap">{row.dienst}</td>
-                    {["Ma","Di","Wo","Do","Vr","Za","Zo"].map(d => (
+                    {dayLabels.map(d => (
                       <HeatmapCell key={d} value={(row as any)[d]} />
                     ))}
                   </tr>
@@ -288,19 +286,19 @@ export function StatsDashboard() {
       <Card className="border-border/50">
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-sm font-semibold">Geplande uren vs. contract uren per medewerker</CardTitle>
+            <CardTitle className="text-sm font-semibold">{t("stats.plannedVsContract")}</CardTitle>
             <div className="flex items-center gap-4 text-[11px]">
               <span className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded-sm bg-primary/30" /> Contract
+                <span className="w-3 h-3 rounded-sm bg-primary/30" /> {t("stats.contractLegend")}
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded-sm bg-emerald-500/60" /> Gepland (OK)
+                <span className="w-3 h-3 rounded-sm bg-emerald-500/60" /> {t("stats.plannedOk")}
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded-sm bg-destructive/60" /> Overbelast
+                <span className="w-3 h-3 rounded-sm bg-destructive/60" /> {t("stats.overloadedLegend")}
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded-sm bg-amber-500/60" /> Onderbelast
+                <span className="w-3 h-3 rounded-sm bg-amber-500/60" /> {t("stats.underloadedLegend")}
               </span>
             </div>
           </div>
@@ -318,10 +316,9 @@ export function StatsDashboard() {
 
       {/* ── Row 3: Kwalificaties + Dienst spreiding ── */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Pick vs Pack */}
         <Card className="border-border/50">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-semibold">Kwalificatieverdeling</CardTitle>
+            <CardTitle className="text-sm font-semibold">{t("stats.qualificationDist")}</CardTitle>
           </CardHeader>
           <CardContent className="flex items-center justify-center">
             <ResponsiveContainer width="100%" height={200}>
@@ -346,10 +343,9 @@ export function StatsDashboard() {
           </CardContent>
         </Card>
 
-        {/* Dienst spreiding radar */}
         <Card className="border-border/50">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-semibold">Dienstspreiding</CardTitle>
+            <CardTitle className="text-sm font-semibold">{t("stats.shiftSpread")}</CardTitle>
           </CardHeader>
           <CardContent className="flex items-center justify-center">
             <ResponsiveContainer width="100%" height={200}>
@@ -363,10 +359,9 @@ export function StatsDashboard() {
           </CardContent>
         </Card>
 
-        {/* Weekend vs doordeweeks */}
         <Card className="border-border/50">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-semibold">Weekend vs. doordeweeks</CardTitle>
+            <CardTitle className="text-sm font-semibold">{t("stats.weekendVsWeekday")}</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={200}>
@@ -375,8 +370,8 @@ export function StatsDashboard() {
                 <XAxis dataKey="type" tick={{ fontSize: 11 }} />
                 <YAxis tick={{ fontSize: 11 }} />
                 <Tooltip contentStyle={{ fontSize: 12, borderRadius: 8 }} />
-                <Bar dataKey="bezetting" name="Bezetting %" fill={CHART_COLORS[0]} radius={[4, 4, 0, 0]} />
-                <Bar dataKey="uren" name="Uren" fill={CHART_COLORS[1]} radius={[4, 4, 0, 0]} />
+                <Bar dataKey="bezetting" name={t("stats.occupancyPct")} fill={CHART_COLORS[0]} radius={[4, 4, 0, 0]} />
+                <Bar dataKey="uren" name={t("grid.hours")} fill={CHART_COLORS[1]} radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
@@ -385,10 +380,9 @@ export function StatsDashboard() {
 
       {/* ── Row 4: Trends ── */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-        {/* Fill rate trend */}
         <Card className="border-border/50">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-semibold">Fill rate trend (per week)</CardTitle>
+            <CardTitle className="text-sm font-semibold">{t("stats.fillRateTrend")}</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={200}>
@@ -397,16 +391,15 @@ export function StatsDashboard() {
                 <XAxis dataKey="week" tick={{ fontSize: 11 }} />
                 <YAxis tick={{ fontSize: 11 }} domain={[50, 100]} tickFormatter={v => `${v}%`} />
                 <Tooltip contentStyle={{ fontSize: 12, borderRadius: 8 }} />
-                <Area type="monotone" dataKey="fillRate" name="Fill Rate %" stroke="hsl(217,91%,53%)" fill="hsl(217,91%,53%)" fillOpacity={0.15} />
+                <Area type="monotone" dataKey="fillRate" name={t("stats.fillRate") + " %"} stroke="hsl(217,91%,53%)" fill="hsl(217,91%,53%)" fillOpacity={0.15} />
               </AreaChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
 
-        {/* Kosten trend */}
         <Card className="border-border/50">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-semibold">Geschatte loonkosten per week</CardTitle>
+            <CardTitle className="text-sm font-semibold">{t("stats.estimatedLabor")}</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={200}>
@@ -415,12 +408,12 @@ export function StatsDashboard() {
                 <XAxis dataKey="week" tick={{ fontSize: 11 }} />
                 <YAxis tick={{ fontSize: 11 }} tickFormatter={v => `€${(v / 1000).toFixed(1)}k`} />
                 <Tooltip
-                  formatter={(value: number) => [`€${value.toLocaleString()}`, "Kosten"]}
+                  formatter={(value: number) => [`€${value.toLocaleString()}`, ""]}
                   contentStyle={{ fontSize: 12, borderRadius: 8 }}
                 />
                 <Legend wrapperStyle={{ fontSize: 11 }} />
-                <Line type="monotone" dataKey="kosten" name="Loonkosten" stroke={CHART_COLORS[3]} strokeWidth={2} dot={{ r: 3 }} />
-                <Line type="monotone" dataKey="uren" name="Uren" stroke={CHART_COLORS[1]} strokeWidth={2} dot={{ r: 3 }} />
+                <Line type="monotone" dataKey="kosten" name={t("stats.estimatedLabor")} stroke={CHART_COLORS[3]} strokeWidth={2} dot={{ r: 3 }} />
+                <Line type="monotone" dataKey="uren" name={t("grid.hours")} stroke={CHART_COLORS[1]} strokeWidth={2} dot={{ r: 3 }} />
               </LineChart>
             </ResponsiveContainer>
           </CardContent>

@@ -1,5 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useTranslation } from "react-i18next";
 
 type ShiftType = "vroeg" | "dag" | "laat" | "nacht" | null;
 
@@ -15,15 +16,8 @@ interface Employee {
   shifts: ShiftData[];
 }
 
-const days = [
-  { day: "Ma", date: "02/03" },
-  { day: "Di", date: "03/03" },
-  { day: "Wo", date: "04/03" },
-  { day: "Do", date: "05/03" },
-  { day: "Vr", date: "06/03" },
-  { day: "Za", date: "07/03" },
-  { day: "Zo", date: "08/03" },
-];
+const dayKeys = ["mo", "tu", "we", "th", "fr", "sa", "su"] as const;
+const dayDates = ["02/03", "03/03", "04/03", "05/03", "06/03", "07/03", "08/03"];
 
 // Reuse same employees from RosterGrid but map to the 7-day week view (indices 5-11 from original 14-day range)
 const employees: Employee[] = [
@@ -358,13 +352,6 @@ const shiftClassMap: Record<string, string> = {
   nacht: "shift-night",
 };
 
-const shiftTypeLabel: Record<string, string> = {
-  vroeg: "Vroeg",
-  dag: "Dag",
-  laat: "Laat",
-  nacht: "Nacht",
-};
-
 interface DayShiftGroup {
   groupLabel: string;
   shiftType: ShiftType;
@@ -374,7 +361,7 @@ interface DayShiftGroup {
 }
 
 function buildDayData(): DayShiftGroup[][] {
-  return days.map((_, dayIdx) => {
+  return dayKeys.map((_, dayIdx) => {
     return shiftGroups.map((group) => {
       const emps = employees
         .filter((emp) => {
@@ -419,26 +406,33 @@ function DayFillRate({ dayGroups, totalTarget }: { dayGroups: DayShiftGroup[]; t
 }
 
 export function ServiceRosterGrid() {
+  const { t } = useTranslation();
   const dayData = buildDayData();
   const totalTarget = shiftGroups.reduce((s, g) => s + g.target, 0);
+
+  const shiftTypeLabel: Record<string, string> = {
+    vroeg: t("grid.early"),
+    dag: t("grid.day"),
+    laat: t("grid.late"),
+    nacht: t("grid.night"),
+  };
 
   return (
     <div className="roster-scroll w-full max-w-full rounded-xl border border-border/50 bg-card shadow-sm overflow-x-auto overflow-y-auto max-h-[calc(100vh-280px)]">
       <table style={{ minWidth: "1200px" }} className="w-full border-collapse">
         <thead>
           <tr className="sticky top-0 z-[5]">
-            {/* Empty top-left corner */}
             <th className="sticky left-0 z-[6] bg-card border-b border-r w-[180px] min-w-[180px]" />
-            {days.map((d, i) => (
+            {dayKeys.map((dk, i) => (
               <th
                 key={i}
                 className={`border-b border-r last:border-r-0 py-3 px-2 bg-card shadow-sm ${
-                  d.day === "Za" || d.day === "Zo" ? "bg-weekend" : ""
+                  dk === "sa" || dk === "su" ? "bg-weekend" : ""
                 }`}
               >
                 <div className="flex flex-col items-center gap-0.5">
-                  <span className="text-sm font-bold text-foreground">{d.day}</span>
-                  <span className="text-[11px] text-muted-foreground">{d.date}</span>
+                  <span className="text-sm font-bold text-foreground">{t(`days.${dk}`)}</span>
+                  <span className="text-[11px] text-muted-foreground">{dayDates[i]}</span>
                   <DayFillRate dayGroups={dayData[i]} totalTarget={totalTarget} />
                 </div>
               </th>
@@ -448,7 +442,6 @@ export function ServiceRosterGrid() {
         <tbody>
           {shiftGroups.map((group, gIdx) => (
             <tr key={gIdx} className="border-b last:border-b-0">
-              {/* Sticky left column with shift info */}
               <td className="sticky left-0 z-[3] bg-card border-r w-[180px] min-w-[180px] px-3 py-3 align-top">
                 <div className="flex flex-col gap-1.5">
                   <span className="text-[12px] font-semibold text-foreground">{group.label}</span>
@@ -458,8 +451,7 @@ export function ServiceRosterGrid() {
                   <span className="text-[11px] text-muted-foreground">{group.time}</span>
                 </div>
               </td>
-              {/* Day cells */}
-              {days.map((d, dayIdx) => {
+              {dayKeys.map((dk, dayIdx) => {
                 const emps = employees
                   .filter((emp) => {
                     const s = emp.shifts[dayIdx];
@@ -470,7 +462,7 @@ export function ServiceRosterGrid() {
                   <td
                     key={dayIdx}
                     className={`border-r last:border-r-0 px-3 py-2 align-top ${
-                      d.day === "Za" || d.day === "Zo" ? "bg-weekend" : ""
+                      dk === "sa" || dk === "su" ? "bg-weekend" : ""
                     }`}
                   >
                     <div className="mb-1">
