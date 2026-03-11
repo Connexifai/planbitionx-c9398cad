@@ -236,7 +236,7 @@ export default function Index() {
                     <img
                       src={robotImg}
                       alt="AI Briefing"
-                      className="w-56 h-56 object-contain drop-shadow-2xl hover:scale-110 transition-transform duration-500"
+                      className="w-56 h-56 object-contain drop-shadow-2xl animate-[orbit_4s_ease-in-out_infinite] hover:scale-110 transition-transform duration-500"
                     />
                   </div>
                 )}
