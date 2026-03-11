@@ -49,11 +49,12 @@ function getDemand(demandMap: DemandMap, label: string, dayIdx: number): number 
 }
 
 function CountBadge({ count, target }: { count: number; target: number }) {
-  if (target === 0) return <span className="text-xs text-muted-foreground">—</span>;
-  const full = count >= target;
+  if (target === 0 && count === 0) return <span className="text-xs text-muted-foreground">—</span>;
+  const effective = target > 0 ? target : count;
+  const full = count >= effective;
   const color = full
     ? "text-kpi-assignments"
-    : count >= target * 0.6
+    : count >= effective * 0.6
     ? "text-kpi-unfilled"
     : "text-destructive";
   return (
