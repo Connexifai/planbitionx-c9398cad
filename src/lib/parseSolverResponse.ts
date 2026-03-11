@@ -225,14 +225,15 @@ export function parseSolverResponse(request: RawSchedule, response: SolverRespon
   const demandMap: DemandMap = new Map();
   for (const s of request.Shifts) {
     const sDate = format(parseISO(s.Start), "yyyy-MM-dd");
-    const dayIdx = dayIndexMap.get(sDate);
+    const dayIdx = resolveDayIndex(sDate);
     if (dayIdx === undefined) continue;
     const shiftName = s.Name;
     if (!demandMap.has(shiftName)) {
       demandMap.set(shiftName, new Array(days.length).fill(0));
     }
-    demandMap.get(shiftName)![dayIdx] = s.Demand;
+    demandMap.get(shiftName)![dayIdx] += s.Demand;
   }
 
-  return { days, employees, demandMap };
-}
+  const plannedByDay = plannedContractsByDay.map((contracts) => contracts.size);
+
+  return { days, employees, demandMap, plannedByDay };
