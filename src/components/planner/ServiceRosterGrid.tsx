@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { toTitleCase } from "@/lib/utils";
-import type { RosterData, ShiftData, DayColumn, RosterEmployee } from "@/lib/parseSolverResponse";
+import type { RosterData, ShiftData, DayColumn, RosterEmployee, DemandMap } from "@/lib/parseSolverResponse";
 
 type ShiftType = "vroeg" | "dag" | "laat" | "nacht" | null;
 
@@ -15,7 +15,6 @@ interface ShiftGroup {
   label: string;
   type: ShiftType;
   time: string;
-  target: number;
 }
 
 function deriveShiftGroups(data: RosterData): ShiftGroup[] {
@@ -30,13 +29,11 @@ function deriveShiftGroups(data: RosterData): ShiftGroup[] {
           label: shift.label,
           type: shift.type,
           time: shift.time || "",
-          target: 25, // default target
         });
       }
     }
   }
 
-  // Sort: vroeg → dag → laat → nacht, then by label
   const typeOrder: Record<string, number> = { vroeg: 0, dag: 1, laat: 2, nacht: 3 };
   return Array.from(groupMap.values()).sort((a, b) => {
     const oa = typeOrder[a.type || ""] ?? 9;
@@ -46,7 +43,13 @@ function deriveShiftGroups(data: RosterData): ShiftGroup[] {
   });
 }
 
+function getDemand(demandMap: DemandMap, label: string, dayIdx: number): number {
+  const arr = demandMap.get(label);
+  return arr ? arr[dayIdx] : 0;
+}
+
 function CountBadge({ count, target }: { count: number; target: number }) {
+  if (target === 0) return <span className="text-xs text-muted-foreground">—</span>;
   const full = count >= target;
   const color = full
     ? "text-kpi-assignments"
@@ -60,17 +63,9 @@ function CountBadge({ count, target }: { count: number; target: number }) {
   );
 }
 
-interface DayShiftGroup {
-  groupLabel: string;
-  shiftType: ShiftType;
-  time: string;
-  target: number;
-  employees: string[];
-}
-
-function DayFillRate({ dayGroups, totalTarget }: { dayGroups: DayShiftGroup[]; totalTarget: number }) {
-  const filled = dayGroups.reduce((sum, g) => sum + g.employees.length, 0);
-  const pct = totalTarget > 0 ? Math.round((filled / totalTarget) * 100) : 0;
+function DayFillRate({ filled, totalTarget }: { filled: number; totalTarget: number }) {
+  if (totalTarget === 0) return <span className="text-xs text-muted-foreground">—</span>;
+  const pct = Math.round((filled / totalTarget) * 100);
   const color = pct >= 75 ? "text-kpi-assignments" : pct >= 50 ? "text-kpi-unfilled" : "text-destructive";
   return (
     <span className={`text-xs font-semibold ${color}`}>
@@ -94,9 +89,8 @@ export function ServiceRosterGrid({ data }: ServiceRosterGridProps) {
     );
   }
 
-  const { days, employees } = data;
+  const { days, employees, demandMap } = data;
   const shiftGroups = deriveShiftGroups(data);
-  const totalTarget = shiftGroups.reduce((s, g) => s + g.target, 0);
 
   const shiftTypeLabel: Record<string, string> = {
     vroeg: t("grid.early"),
@@ -105,45 +99,35 @@ export function ServiceRosterGrid({ data }: ServiceRosterGridProps) {
     nacht: t("grid.night"),
   };
 
-  // Build day data for fill rates
-  const dayData: DayShiftGroup[][] = days.map((_, dayIdx) => {
-    return shiftGroups.map((group) => {
-      const emps = employees
-        .filter((emp) => {
-          const s = emp.shifts[dayIdx];
-          return s && s.type === group.type && s.label === group.label;
-        })
-        .map((emp) => emp.name);
-      return {
-        groupLabel: group.label,
-        shiftType: group.type,
-        time: group.time,
-        target: group.target,
-        employees: emps,
-      };
-    });
-  });
-
   return (
     <div className="roster-scroll w-full max-w-full rounded-xl border border-border/50 bg-card shadow-sm overflow-x-auto overflow-y-auto max-h-[calc(100vh-280px)]">
       <table style={{ minWidth: `${180 + days.length * 140}px` }} className="w-full border-collapse">
         <thead>
           <tr className="sticky top-0 z-[5]">
             <th className="sticky left-0 z-[6] bg-card border-b border-r w-[180px] min-w-[180px]" />
-            {days.map((d, i) => (
-              <th
-                key={i}
-                className={`border-b border-r last:border-r-0 py-3 px-2 bg-card shadow-sm ${
-                  d.weekend ? "bg-weekend" : ""
-                }`}
-              >
-                <div className="flex flex-col items-center gap-0.5">
-                  <span className="text-sm font-bold text-foreground">{t(`days.${d.dayKey}`)}</span>
-                  <span className="text-[11px] text-muted-foreground">{d.date}</span>
-                  <DayFillRate dayGroups={dayData[i]} totalTarget={totalTarget} />
-                </div>
-              </th>
-            ))}
+            {days.map((d, i) => {
+              const dayTotalDemand = shiftGroups.reduce((s, g) => s + getDemand(demandMap, g.label, i), 0);
+              const dayFilled = shiftGroups.reduce((s, g) => {
+                return s + employees.filter((emp) => {
+                  const sh = emp.shifts[i];
+                  return sh && sh.type === g.type && sh.label === g.label;
+                }).length;
+              }, 0);
+              return (
+                <th
+                  key={i}
+                  className={`border-b border-r last:border-r-0 py-3 px-2 bg-card shadow-sm ${
+                    d.weekend ? "bg-weekend" : ""
+                  }`}
+                >
+                  <div className="flex flex-col items-center gap-0.5">
+                    <span className="text-sm font-bold text-foreground">{t(`days.${d.dayKey}`)}</span>
+                    <span className="text-[11px] text-muted-foreground">{d.date}</span>
+                    <DayFillRate filled={dayFilled} totalTarget={dayTotalDemand} />
+                  </div>
+                </th>
+              );
+            })}
           </tr>
         </thead>
         <tbody>
@@ -159,6 +143,7 @@ export function ServiceRosterGrid({ data }: ServiceRosterGridProps) {
                 </div>
               </td>
               {days.map((d, dayIdx) => {
+                const target = getDemand(demandMap, group.label, dayIdx);
                 const emps = employees
                   .filter((emp) => {
                     const s = emp.shifts[dayIdx];
@@ -173,7 +158,7 @@ export function ServiceRosterGrid({ data }: ServiceRosterGridProps) {
                     }`}
                   >
                     <div className="mb-1">
-                      <CountBadge count={emps.length} target={group.target} />
+                      <CountBadge count={emps.length} target={target} />
                     </div>
                     {emps.map((name, nIdx) => (
                       <div
