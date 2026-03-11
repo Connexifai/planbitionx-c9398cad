@@ -18,15 +18,9 @@ import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 type SectionId = "json" | "atw" | "zachte" | "solver";
-
-const sections: { id: SectionId; icon: React.ElementType; label: string }[] = [
-  { id: "json", icon: FileJson, label: "JSON Invoer" },
-  { id: "atw", icon: ShieldCheck, label: "ATW Regels" },
-  { id: "zachte", icon: Sparkles, label: "Zachte Beperkingen" },
-  { id: "solver", icon: Settings2, label: "Solver Instellingen" },
-];
 
 /* ── Rule row ─────────────────────────────────────────── */
 
@@ -95,6 +89,7 @@ function LevelSelector({ levels, active }: { levels: string[]; active: number })
 /* ── Section content panels ───────────────────────────── */
 
 function JsonSection({ onJsonLoaded }: { onJsonLoaded?: () => void }) {
+  const { t } = useTranslation();
   const [loaded, setLoaded] = useState(false);
 
   const handleLoad = () => {
@@ -106,9 +101,9 @@ function JsonSection({ onJsonLoaded }: { onJsonLoaded?: () => void }) {
     <div className="space-y-3">
       <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-border bg-accent/50 px-4 py-6 text-center transition-colors hover:border-primary/30 hover:bg-accent cursor-pointer" onClick={handleLoad}>
         <Upload className="mb-2 h-8 w-8 text-muted-foreground" />
-        <p className="text-sm font-medium">Sleep een JSON-bestand</p>
-        <p className="text-xs text-muted-foreground">of klik om te bladeren</p>
-        <p className="text-[10px] text-muted-foreground mt-1">.json · max 10 MB</p>
+        <p className="text-sm font-medium">{t("sidebar.dragJson")}</p>
+        <p className="text-xs text-muted-foreground">{t("sidebar.orClickBrowse")}</p>
+        <p className="text-[10px] text-muted-foreground mt-1">{t("sidebar.maxSize")}</p>
       </div>
       <textarea
         className="w-full h-28 rounded-lg border bg-background px-3 py-2 text-xs font-mono resize-none focus:outline-none focus:ring-1 focus:ring-ring"
@@ -116,10 +111,10 @@ function JsonSection({ onJsonLoaded }: { onJsonLoaded?: () => void }) {
       />
       <div className="flex gap-2">
         <Button variant={loaded ? "default" : "outline"} size="sm" className="flex-1 text-xs" onClick={handleLoad}>
-          {loaded ? "✓ Geladen" : "✓ Valideer & Laad"}
+          {loaded ? t("sidebar.loaded") : t("sidebar.validateLoad")}
         </Button>
         <Button variant="outline" size="sm" className="flex-1 text-xs">
-          {"{ } Format"}
+          {t("sidebar.format")}
         </Button>
       </div>
     </div>
@@ -127,64 +122,66 @@ function JsonSection({ onJsonLoaded }: { onJsonLoaded?: () => void }) {
 }
 
 function AtwSection() {
+  const { t } = useTranslation();
   return (
     <div className="space-y-1">
       <p className="text-xs text-muted-foreground mb-2">
-        Schakel een regel uit om te testen. Pas de waarde aan om de grens te wijzigen.
+        {t("sidebar.toggleRuleHint")}
       </p>
-      <RuleRow label="Max dienstduur" sublabel="Max minuten per dienst" value={720} />
-      <RuleRow label="Max nachtdienst" sublabel="Max minuten nachtdienst" value={600} />
-      <RuleRow label="Nachtdienst uitzondering" sublabel="Laat 12 uur nachtdiensten toe" enabled={false} />
-      <RuleRow label="Max weekuren" sublabel="Max minuten per week" value={3600} />
-      <RuleRow label="Min rust tussen diensten" sublabel="Min minuten rust" value={660} />
-      <RuleRow label="Verkorte rust (1× per week)" sublabel="Min minuten verkorte rust" value={480} enabled={false} />
-      <RuleRow label="Rust na nachtdienst" sublabel="Min minuten rust na nacht" value={840} />
-      <RuleRow label="Pauzeregels" sublabel="Drempel pauze 1 / pauze 2" value={330} secondValue={600} enabled={false} />
-      <RuleRow label="36u rust per 7 dagen" sublabel="ATW art. 5:5 – aaneengesloten" value={2160} />
-      <RuleRow label="46u rust na nachtreeks" sublabel="Na ≥3 nachtdiensten op rij" value={2760} />
+      <RuleRow label={t("sidebar.maxShiftDuration")} sublabel={t("sidebar.maxShiftDurationSub")} value={720} />
+      <RuleRow label={t("sidebar.maxNightShift")} sublabel={t("sidebar.maxNightShiftSub")} value={600} />
+      <RuleRow label={t("sidebar.nightShiftException")} sublabel={t("sidebar.nightShiftExceptionSub")} enabled={false} />
+      <RuleRow label={t("sidebar.maxWeekHours")} sublabel={t("sidebar.maxWeekHoursSub")} value={3600} />
+      <RuleRow label={t("sidebar.minRestBetween")} sublabel={t("sidebar.minRestBetweenSub")} value={660} />
+      <RuleRow label={t("sidebar.shortenedRest")} sublabel={t("sidebar.shortenedRestSub")} value={480} enabled={false} />
+      <RuleRow label={t("sidebar.restAfterNight")} sublabel={t("sidebar.restAfterNightSub")} value={840} />
+      <RuleRow label={t("sidebar.breakRules")} sublabel={t("sidebar.breakRulesSub")} value={330} secondValue={600} enabled={false} />
+      <RuleRow label={t("sidebar.rest36h")} sublabel={t("sidebar.rest36hSub")} value={2160} />
+      <RuleRow label={t("sidebar.rest46h")} sublabel={t("sidebar.rest46hSub")} value={2760} />
     </div>
   );
 }
 
 function ZachteSection() {
+  const { t } = useTranslation();
   return (
     <div className="space-y-4">
       <div>
-        <p className="text-sm font-medium mb-1">Minimaliseer dienstwisseling</p>
-        <p className="text-xs text-muted-foreground mb-1.5">Uit / Laag / Middel / Hoog</p>
-        <LevelSelector levels={["Uit", "L", "M", "H"]} active={0} />
+        <p className="text-sm font-medium mb-1">{t("sidebar.minimizeShiftChange")}</p>
+        <p className="text-xs text-muted-foreground mb-1.5">{t("sidebar.offLowMedHigh")}</p>
+        <LevelSelector levels={[t("sidebar.off"), "L", "M", "H"]} active={0} />
       </div>
       <div>
-        <p className="text-sm font-medium mb-1">Voorwaartse rotatie</p>
-        <p className="text-xs text-muted-foreground mb-1.5">Vroeg → Dag → Laat → Nacht</p>
-        <LevelSelector levels={["Uit", "L", "M", "H"]} active={3} />
+        <p className="text-sm font-medium mb-1">{t("sidebar.forwardRotation")}</p>
+        <p className="text-xs text-muted-foreground mb-1.5">{t("sidebar.forwardRotationSub")}</p>
+        <LevelSelector levels={[t("sidebar.off"), "L", "M", "H"]} active={3} />
       </div>
       <div>
-        <p className="text-sm font-medium mb-1">Cross-week rotatie</p>
-        <p className="text-xs text-muted-foreground mb-1.5">Roteer naar volgend diensttype per week</p>
-        <LevelSelector levels={["Uit", "L", "M", "H"]} active={0} />
+        <p className="text-sm font-medium mb-1">{t("sidebar.crossWeekRotation")}</p>
+        <p className="text-xs text-muted-foreground mb-1.5">{t("sidebar.crossWeekRotationSub")}</p>
+        <LevelSelector levels={[t("sidebar.off"), "L", "M", "H"]} active={0} />
       </div>
       <div>
-        <p className="text-sm font-medium mb-1">Dienstkonsistentie blok</p>
-        <p className="text-xs text-muted-foreground mb-1.5">Zelfde dienst (Vroeg/Dag) per blok</p>
-        <LevelSelector levels={["Uit", "L", "M", "H"]} active={3} />
+        <p className="text-sm font-medium mb-1">{t("sidebar.shiftConsistency")}</p>
+        <p className="text-xs text-muted-foreground mb-1.5">{t("sidebar.shiftConsistencySub")}</p>
+        <LevelSelector levels={[t("sidebar.off"), "L", "M", "H"]} active={3} />
       </div>
-      <RuleRow label="Min rotatieblok" sublabel="Minimaal aaneengesloten diensten" value={2} unit="" />
-      <RuleRow label="Max rotatieblok" sublabel="Maximaal aaneengesloten diensten" value={5} unit="" />
+      <RuleRow label={t("sidebar.minRotationBlock")} sublabel={t("sidebar.minRotationBlockSub")} value={2} unit="" />
+      <RuleRow label={t("sidebar.maxRotationBlock")} sublabel={t("sidebar.maxRotationBlockSub")} value={5} unit="" />
       <div>
-        <p className="text-sm font-medium mb-1">14u rust voorkeur</p>
-        <p className="text-xs text-muted-foreground mb-1.5">Voorkeur voor ≥14u tussen diensten</p>
-        <LevelSelector levels={["Uit", "L", "M", "H"]} active={2} />
+        <p className="text-sm font-medium mb-1">{t("sidebar.rest14hPreference")}</p>
+        <p className="text-xs text-muted-foreground mb-1.5">{t("sidebar.rest14hPreferenceSub")}</p>
+        <LevelSelector levels={[t("sidebar.off"), "L", "M", "H"]} active={2} />
       </div>
       <div>
-        <p className="text-sm font-medium mb-1">Losse nachtdiensten</p>
-        <p className="text-xs text-muted-foreground mb-1.5">Penaliseer vrij-nacht-vrij patroon</p>
-        <LevelSelector levels={["Uit", "L", "M", "H"]} active={3} />
+        <p className="text-sm font-medium mb-1">{t("sidebar.singleNightShifts")}</p>
+        <p className="text-xs text-muted-foreground mb-1.5">{t("sidebar.singleNightShiftsSub")}</p>
+        <LevelSelector levels={[t("sidebar.off"), "L", "M", "H"]} active={3} />
       </div>
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm font-medium">Verdeel open posities</p>
-          <p className="text-xs text-muted-foreground">Spreidt niet-ingevulde diensten over de week</p>
+          <p className="text-sm font-medium">{t("sidebar.distributeOpen")}</p>
+          <p className="text-xs text-muted-foreground">{t("sidebar.distributeOpenSub")}</p>
         </div>
         <Switch defaultChecked />
       </div>
@@ -193,28 +190,29 @@ function ZachteSection() {
 }
 
 function SolverSection() {
+  const { t } = useTranslation();
   return (
     <div className="space-y-4">
       <div>
-        <p className="text-sm font-medium mb-1">Tijdslimiet</p>
-        <p className="text-xs text-muted-foreground mb-1.5">Maximale rekentijd</p>
+        <p className="text-sm font-medium mb-1">{t("sidebar.timeLimit")}</p>
+        <p className="text-xs text-muted-foreground mb-1.5">{t("sidebar.timeLimitSub")}</p>
         <LevelSelector levels={["30s", "1m", "2m", "5m"]} active={0} />
       </div>
       <div>
-        <p className="text-sm font-medium mb-1">Plateau-stop</p>
-        <p className="text-xs text-muted-foreground mb-1.5">Stop als geen verbetering na…</p>
-        <LevelSelector levels={["Uit", "15s", "30s", "1m"]} active={0} />
+        <p className="text-sm font-medium mb-1">{t("sidebar.plateauStop")}</p>
+        <p className="text-xs text-muted-foreground mb-1.5">{t("sidebar.plateauStopSub")}</p>
+        <LevelSelector levels={[t("sidebar.off"), "15s", "30s", "1m"]} active={0} />
       </div>
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm font-medium">✨ AI-uitleg</p>
-          <p className="text-xs text-muted-foreground">Begrijpelijke uitleg via Claude na het oplossen</p>
+          <p className="text-sm font-medium">{t("sidebar.aiExplanation")}</p>
+          <p className="text-xs text-muted-foreground">{t("sidebar.aiExplanationSub")}</p>
         </div>
         <Switch />
       </div>
-      <RuleRow label="Startpunt herhaling" sublabel="Zelfde getal = zelfde rooster; 0 = willekeurig" value={42} unit="" />
+      <RuleRow label={t("sidebar.seedRepeat")} sublabel={t("sidebar.seedRepeatSub")} value={42} unit="" />
       <div>
-        <p className="text-sm font-medium mb-1">Callback URL</p>
+        <p className="text-sm font-medium mb-1">{t("sidebar.callbackUrl")}</p>
         <div className="flex items-center gap-1.5 rounded-lg border bg-background px-3 py-1.5 text-xs">
           <span className="text-kpi-assignments">🔒</span>
           <Input
@@ -230,8 +228,16 @@ function SolverSection() {
 /* ── Main sidebar ─────────────────────────────────────── */
 
 export function PlannerSidebar({ onSolve, hideFooter, onJsonLoaded }: { onSolve?: () => void; hideFooter?: boolean; onJsonLoaded?: () => void }) {
+  const { t } = useTranslation();
   const [activeSection, setActiveSection] = useState<SectionId>("json");
   const [contentCollapsed, setContentCollapsed] = useState(true);
+
+  const sections: { id: SectionId; icon: React.ElementType; label: string }[] = [
+    { id: "json", icon: FileJson, label: t("sidebar.jsonInput") },
+    { id: "atw", icon: ShieldCheck, label: t("sidebar.atwRules") },
+    { id: "zachte", icon: Sparkles, label: t("sidebar.softConstraints") },
+    { id: "solver", icon: Settings2, label: t("sidebar.solverSettings") },
+  ];
 
   const activeDef = sections.find(s => s.id === activeSection)!;
 
@@ -299,7 +305,7 @@ export function PlannerSidebar({ onSolve, hideFooter, onJsonLoaded }: { onSolve?
                   </button>
                 </TooltipTrigger>
                 <TooltipContent side="right">
-                  Paneel sluiten
+                  {t("sidebar.closePanel")}
                 </TooltipContent>
               </Tooltip>
             </div>
@@ -324,20 +330,20 @@ export function PlannerSidebar({ onSolve, hideFooter, onJsonLoaded }: { onSolve?
                     <Play className="h-4 w-4" />
                   </button>
                 </TooltipTrigger>
-                <TooltipContent side="right">Oplossen</TooltipContent>
+                <TooltipContent side="right">{t("sidebar.solve")}</TooltipContent>
               </Tooltip>
             </div>
           ) : (
             <div className="p-4 pt-4 pb-3 flex flex-col justify-center">
               <div className="flex gap-2 mb-2">
                 <Button className="flex-1 h-10" style={{ background: "hsl(var(--kpi-assignments))" }} onClick={onSolve}>
-                  ▶ Oplossen
+                  ▶ {t("sidebar.solve")}
                 </Button>
                 <Button variant="default" className="flex-1 h-10">
-                  Stuur naar API
+                  {t("sidebar.sendToApi")}
                 </Button>
               </div>
-              <p className="text-[10px] text-muted-foreground text-center">Klaar in 16s</p>
+              <p className="text-[10px] text-muted-foreground text-center">{t("sidebar.readyIn")}</p>
             </div>
           )}
         </div>

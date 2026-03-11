@@ -1,6 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { useTranslation } from "react-i18next";
 
 type ShiftType = "vroeg" | "dag" | "laat" | "nacht" | null;
 
@@ -21,20 +22,20 @@ interface Employee {
 }
 
 const days = [
-  { day: "Wo", date: "25/02", weekend: false },
-  { day: "Do", date: "26/02", weekend: false },
-  { day: "Vr", date: "27/02", weekend: false },
-  { day: "Za", date: "28/02", weekend: true },
-  { day: "Zo", date: "01/03", weekend: true },
-  { day: "Ma", date: "02/03", weekend: false },
-  { day: "Di", date: "03/03", weekend: false },
-  { day: "Wo", date: "04/03", weekend: false },
-  { day: "Do", date: "05/03", weekend: false },
-  { day: "Vr", date: "06/03", weekend: false },
-  { day: "Za", date: "07/03", weekend: true },
-  { day: "Zo", date: "08/03", weekend: true },
-  { day: "Ma", date: "09/03", weekend: false },
-  { day: "Di", date: "10/03", weekend: false },
+  { dayKey: "we" as const, date: "25/02", weekend: false },
+  { dayKey: "th" as const, date: "26/02", weekend: false },
+  { dayKey: "fr" as const, date: "27/02", weekend: false },
+  { dayKey: "sa" as const, date: "28/02", weekend: true },
+  { dayKey: "su" as const, date: "01/03", weekend: true },
+  { dayKey: "mo" as const, date: "02/03", weekend: false },
+  { dayKey: "tu" as const, date: "03/03", weekend: false },
+  { dayKey: "we" as const, date: "04/03", weekend: false },
+  { dayKey: "th" as const, date: "05/03", weekend: false },
+  { dayKey: "fr" as const, date: "06/03", weekend: false },
+  { dayKey: "sa" as const, date: "07/03", weekend: true },
+  { dayKey: "su" as const, date: "08/03", weekend: true },
+  { dayKey: "mo" as const, date: "09/03", weekend: false },
+  { dayKey: "tu" as const, date: "10/03", weekend: false },
 ];
 
 const employees: Employee[] = [
@@ -379,7 +380,7 @@ const shiftClassMap: Record<string, string> = {
   nacht: "shift-night",
 };
 
-function ShiftCell({ shift }: { shift: ShiftData }) {
+function ShiftCell({ shift, t }: { shift: ShiftData; t: (key: string) => string }) {
   if (!shift.type) {
     return (
       <div className="flex h-full items-center justify-center">
@@ -389,15 +390,20 @@ function ShiftCell({ shift }: { shift: ShiftData }) {
   }
 
   const cls = shiftClassMap[shift.type] || "";
-
-  // Extract role from label (e.g. "Late pick" → "pick", "Night Pack" → "pack")
   const role = shift.label?.split(" ").slice(1).join(" ") || "";
+
+  const shiftTypeLabel: Record<string, string> = {
+    vroeg: t("grid.early"),
+    dag: t("grid.day"),
+    laat: t("grid.late"),
+    nacht: t("grid.night"),
+  };
 
   return (
     <Tooltip>
       <TooltipTrigger asChild>
         <div className={`shift-badge ${cls} cursor-default flex-col items-start w-full`}>
-          <span className="font-semibold capitalize text-[11px]">{shift.type === "vroeg" ? "Vroeg" : shift.type === "dag" ? "Dag" : shift.type === "laat" ? "Laat" : "Nacht"}</span>
+          <span className="font-semibold capitalize text-[11px]">{shiftTypeLabel[shift.type]}</span>
           <span className="text-[10px] opacity-75">{shift.time}</span>
           {role && <span className="text-[9px] opacity-60 capitalize font-medium mt-0.5">{role}</span>}
         </div>
@@ -421,7 +427,6 @@ function HoursBar({ percent }: { percent: number }) {
   );
 }
 
-// Compute fill rate per day across all employees
 function getDayFillRates() {
   return days.map((_, dayIdx) => {
     const filled = employees.filter(emp => emp.shifts[dayIdx]?.type !== null).length;
@@ -429,7 +434,6 @@ function getDayFillRates() {
   });
 }
 
-// Compute fill rate per employee (filled shifts / total days)
 function getEmployeeFillRate(emp: Employee) {
   const filled = emp.shifts.filter(s => s.type !== null).length;
   return Math.round((filled / days.length) * 100);
@@ -443,6 +447,7 @@ function FillRateIndicator({ percent }: { percent: number }) {
 }
 
 export function RosterGrid() {
+  const { t } = useTranslation();
   const dayFillRates = getDayFillRates();
 
   return (
@@ -451,14 +456,14 @@ export function RosterGrid() {
         {/* Header */}
         <div className="sticky top-0 z-[5] grid grid-cols-[220px_repeat(14,minmax(80px,1fr))] border-b bg-card shadow-sm">
           <div className="flex items-center gap-2 px-4 py-3 border-r">
-            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Medewerker</span>
+            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t("grid.employee")}</span>
           </div>
           {days.map((d, i) => (
             <div
               key={i}
               className={`flex flex-col items-center justify-center py-2.5 text-center border-r last:border-r-0 ${d.weekend ? "bg-weekend" : ""}`}
             >
-              <span className="text-xs font-semibold text-foreground">{d.day}</span>
+              <span className="text-xs font-semibold text-foreground">{t(`days.${d.dayKey}`)}</span>
               <span className="text-[10px] text-muted-foreground">{d.date}</span>
               <FillRateIndicator percent={dayFillRates[i]} />
             </div>
@@ -502,7 +507,7 @@ export function RosterGrid() {
                   key={i}
                   className={`flex items-center justify-center px-1 py-2 border-r last:border-r-0 ${days[i]?.weekend ? "bg-weekend" : ""}`}
                 >
-                  <ShiftCell shift={shift} />
+                  <ShiftCell shift={shift} t={t} />
                 </div>
               ))}
             </div>

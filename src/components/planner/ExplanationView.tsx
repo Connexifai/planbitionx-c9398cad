@@ -19,12 +19,13 @@ import {
   Briefcase,
   TrendingUp,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
 interface Reason {
   icon: React.ElementType;
-  label: string;
+  labelKey: string;
   detail: string;
   weight: "high" | "medium" | "low";
 }
@@ -46,100 +47,100 @@ interface EmployeeExplanation {
 const explanations: EmployeeExplanation[] = [
   {
     name: "AABachmann, Franz-Xaver", id: 233,
-    shift: "Late pack", shiftType: "laat", day: "Ma", date: "02/03",
+    shift: "Late pack", shiftType: "laat", day: "Mo", date: "02/03",
     score: 94,
     reasons: [
-      { icon: Star, label: "Kwalificatie", detail: "Gecertificeerd voor Pack-werkzaamheden (niveau 3)", weight: "high" },
-      { icon: Clock, label: "Beschikbaarheid", detail: "Volledige beschikbaarheid opgegeven voor late diensten Ma-Za", weight: "high" },
-      { icon: Repeat, label: "Patroon continuïteit", detail: "Draait al 3 weken aaneengesloten late diensten — minimale verstoring", weight: "medium" },
-      { icon: CalendarCheck, label: "Contracturen", detail: "48u gepland van 40u contract — licht boven target maar binnen marge", weight: "low" },
-      { icon: Users, label: "Teambezetting", detail: "Late pack had nog 3 plekken open op maandag", weight: "medium" },
+      { icon: Star, labelKey: "qualification", detail: "Gecertificeerd voor Pack-werkzaamheden (niveau 3)", weight: "high" },
+      { icon: Clock, labelKey: "availability", detail: "Volledige beschikbaarheid opgegeven voor late diensten Ma-Za", weight: "high" },
+      { icon: Repeat, labelKey: "patternContinuity", detail: "Draait al 3 weken aaneengesloten late diensten — minimale verstoring", weight: "medium" },
+      { icon: CalendarCheck, labelKey: "contractHours", detail: "48u gepland van 40u contract — licht boven target maar binnen marge", weight: "low" },
+      { icon: Users, labelKey: "teamOccupancy", detail: "Late pack had nog 3 plekken open op maandag", weight: "medium" },
     ],
     alternatives: ["SEDE, Alexia", "SEMAILLE, Laurence"],
   },
   {
     name: "ANGIUS, Benvenuto", id: 1187,
-    shift: "Day Pick", shiftType: "dag", day: "Ma", date: "02/03",
+    shift: "Day Pick", shiftType: "dag", day: "Mo", date: "02/03",
     score: 87,
     reasons: [
-      { icon: Star, label: "Kwalificatie", detail: "Pick-kwalificatie (niveau 2) — voldoet aan minimale eis", weight: "high" },
-      { icon: Briefcase, label: "Voorkeur", detail: "Heeft voorkeur opgegeven voor dagdiensten", weight: "medium" },
-      { icon: ShieldCheck, label: "Rusttijd", detail: "Minimaal 11 uur rust sinds laatste dienst (vr nacht) — conform CAO", weight: "high" },
-      { icon: TrendingUp, label: "Urenverdeling", detail: "44u gepland van 38u contract — binnen toegestane overwerk", weight: "low" },
+      { icon: Star, labelKey: "qualification", detail: "Pick-kwalificatie (niveau 2) — voldoet aan minimale eis", weight: "high" },
+      { icon: Briefcase, labelKey: "preference", detail: "Heeft voorkeur opgegeven voor dagdiensten", weight: "medium" },
+      { icon: ShieldCheck, labelKey: "restTime", detail: "Minimaal 11 uur rust sinds laatste dienst (vr nacht) — conform CAO", weight: "high" },
+      { icon: TrendingUp, labelKey: "hourDistribution", detail: "44u gepland van 38u contract — binnen toegestane overwerk", weight: "low" },
     ],
     alternatives: ["TAISNE, Aurelien", "SILLAH, Mamogara"],
   },
   {
     name: "Ankrett, Emmie", id: 787,
-    shift: "Early pick", shiftType: "vroeg", day: "Ma", date: "02/03",
+    shift: "Early pick", shiftType: "vroeg", day: "Mo", date: "02/03",
     score: 91,
     reasons: [
-      { icon: Star, label: "Kwalificatie", detail: "Senior Pick-medewerker (niveau 4) — hoogst beschikbare kwalificatie", weight: "high" },
-      { icon: Clock, label: "Beschikbaarheid", detail: "Beschikbaar Ma-Za voor vroege diensten", weight: "high" },
-      { icon: Repeat, label: "Patroon continuïteit", detail: "Consistent vroege diensten afgelopen 4 weken", weight: "medium" },
-      { icon: Users, label: "Teambezetting", detail: "Vroege pick had minimaal 2 ervaren krachten nodig — Ankrett vult die rol", weight: "high" },
-      { icon: CalendarCheck, label: "Contracturen", detail: "48u gepland van 40u contract — overwerk geaccepteerd door medewerker", weight: "low" },
+      { icon: Star, labelKey: "qualification", detail: "Senior Pick-medewerker (niveau 4) — hoogst beschikbare kwalificatie", weight: "high" },
+      { icon: Clock, labelKey: "availability", detail: "Beschikbaar Ma-Za voor vroege diensten", weight: "high" },
+      { icon: Repeat, labelKey: "patternContinuity", detail: "Consistent vroege diensten afgelopen 4 weken", weight: "medium" },
+      { icon: Users, labelKey: "teamOccupancy", detail: "Vroege pick had minimaal 2 ervaren krachten nodig — Ankrett vult die rol", weight: "high" },
+      { icon: CalendarCheck, labelKey: "contractHours", detail: "48u gepland van 40u contract — overwerk geaccepteerd door medewerker", weight: "low" },
     ],
     alternatives: ["SERAICHE, Nesrine", "TARRADE, Loic"],
   },
   {
-    name: "GRENIER, Beatrice", id: 2975,
-    shift: "Night Pick", shiftType: "nacht", day: "Ma", date: "02/03",
+    name: "GRENIER, Beatrice, STACHOWIAK", id: 2975,
+    shift: "Night Pick", shiftType: "nacht", day: "Mo", date: "02/03",
     score: 89,
     reasons: [
-      { icon: Star, label: "Kwalificatie", detail: "Nacht-gecertificeerd Pick-medewerker", weight: "high" },
-      { icon: ShieldCheck, label: "Gezondheidscheck", detail: "Medische goedkeuring voor nachtwerk geldig t/m 12/2026", weight: "high" },
-      { icon: Clock, label: "Beschikbaarheid", detail: "Heeft exclusief nachtdiensten aangevraagd", weight: "medium" },
-      { icon: Repeat, label: "Rotatie", detail: "Max 6 aaneengesloten nachten — nu op dag 1 van cyclus", weight: "medium" },
-      { icon: CalendarCheck, label: "Contracturen", detail: "48u van 40u — nachttoeslag meeberekend", weight: "low" },
+      { icon: Star, labelKey: "qualification", detail: "Nacht-gecertificeerd Pick-medewerker", weight: "high" },
+      { icon: ShieldCheck, labelKey: "healthCheck", detail: "Medische goedkeuring voor nachtwerk geldig t/m 12/2026", weight: "high" },
+      { icon: Clock, labelKey: "availability", detail: "Heeft exclusief nachtdiensten aangevraagd", weight: "medium" },
+      { icon: Repeat, labelKey: "rotation", detail: "Max 6 aaneengesloten nachten — nu op dag 1 van cyclus", weight: "medium" },
+      { icon: CalendarCheck, labelKey: "contractHours", detail: "48u van 40u — nachttoeslag meeberekend", weight: "low" },
     ],
     alternatives: ["SENECHAL, Lucie"],
   },
   {
-    name: "POUCKE, Matthieu", id: 2878,
-    shift: "Day no qualification", shiftType: "dag", day: "Wo", date: "04/03",
+    name: "POUCKE, Matthieu, VAN", id: 2878,
+    shift: "Day no qualification", shiftType: "dag", day: "We", date: "04/03",
     score: 62,
     reasons: [
-      { icon: AlertTriangle, label: "Geen kwalificatie", detail: "Geen specifieke pick/pack kwalificatie — ingezet op ondersteunende taken", weight: "low" },
-      { icon: Clock, label: "Beschikbaarheid", detail: "Beperkt beschikbaar: alleen Wo-Do", weight: "medium" },
-      { icon: CalendarCheck, label: "Contracturen", detail: "18u gepland van 32u contract — significant onderbelast", weight: "high" },
-      { icon: Users, label: "Teambezetting", detail: "Woensdag had nog capaciteit nodig — Poucke was enige beschikbare optie", weight: "high" },
+      { icon: AlertTriangle, labelKey: "noQualification", detail: "Geen specifieke pick/pack kwalificatie — ingezet op ondersteunende taken", weight: "low" },
+      { icon: Clock, labelKey: "availability", detail: "Beperkt beschikbaar: alleen Wo-Do", weight: "medium" },
+      { icon: CalendarCheck, labelKey: "contractHours", detail: "18u gepland van 32u contract — significant onderbelast", weight: "high" },
+      { icon: Users, labelKey: "teamOccupancy", detail: "Woensdag had nog capaciteit nodig — Poucke was enige beschikbare optie", weight: "high" },
     ],
     alternatives: [],
   },
   {
     name: "SARCY, Coralie", id: 2754,
-    shift: "Late pack", shiftType: "laat", day: "Do", date: "05/03",
+    shift: "Late pack", shiftType: "laat", day: "Th", date: "05/03",
     score: 58,
     reasons: [
-      { icon: Star, label: "Kwalificatie", detail: "Pack-kwalificatie (niveau 1) — basisniveau", weight: "medium" },
-      { icon: Clock, label: "Beschikbaarheid", detail: "Zeer beperkt beschikbaar deze week — alleen donderdag", weight: "high" },
-      { icon: CalendarCheck, label: "Contracturen", detail: "8u gepland van 24u contract — sterk onderbelast, maar geen beschikbaarheid", weight: "high" },
-      { icon: AlertTriangle, label: "Aandachtspunt", detail: "Solver kon geen extra diensten plannen door beschikbaarheidsbeperkingen", weight: "low" },
+      { icon: Star, labelKey: "qualification", detail: "Pack-kwalificatie (niveau 1) — basisniveau", weight: "medium" },
+      { icon: Clock, labelKey: "availability", detail: "Zeer beperkt beschikbaar deze week — alleen donderdag", weight: "high" },
+      { icon: CalendarCheck, labelKey: "contractHours", detail: "8u gepland van 24u contract — sterk onderbelast, maar geen beschikbaarheid", weight: "high" },
+      { icon: AlertTriangle, labelKey: "attention", detail: "Solver kon geen extra diensten plannen door beschikbaarheidsbeperkingen", weight: "low" },
     ],
     alternatives: ["KOWALSKI, Adam"],
   },
   {
     name: "SARPAUX, Teddy", id: 2735,
-    shift: "Early pick", shiftType: "vroeg", day: "Ma", date: "02/03",
+    shift: "Early pick", shiftType: "vroeg", day: "Mo", date: "02/03",
     score: 78,
     reasons: [
-      { icon: Star, label: "Kwalificatie", detail: "Pick-kwalificatie (niveau 2)", weight: "high" },
-      { icon: Repeat, label: "Wisseldienst", detail: "Wisselt van vroeg naar laat op dinsdag — solver minimaliseert wisselingen", weight: "medium" },
-      { icon: ShieldCheck, label: "Rusttijd", detail: "11+ uur rust gegarandeerd bij overgang vroeg→laat", weight: "high" },
-      { icon: CalendarCheck, label: "Contracturen", detail: "32u van 38u — licht onder target", weight: "low" },
+      { icon: Star, labelKey: "qualification", detail: "Pick-kwalificatie (niveau 2)", weight: "high" },
+      { icon: Repeat, labelKey: "shiftChange", detail: "Wisselt van vroeg naar laat op dinsdag — solver minimaliseert wisselingen", weight: "medium" },
+      { icon: ShieldCheck, labelKey: "restTime", detail: "11+ uur rust gegarandeerd bij overgang vroeg→laat", weight: "high" },
+      { icon: CalendarCheck, labelKey: "contractHours", detail: "32u van 38u — licht onder target", weight: "low" },
     ],
     alternatives: ["JANSSEN, Eva", "ROUSSEAU, Claire"],
   },
   {
     name: "BOUCHARD, Pierre", id: 3012,
-    shift: "Day Pick", shiftType: "dag", day: "Wo", date: "04/03",
+    shift: "Day Pick", shiftType: "dag", day: "We", date: "04/03",
     score: 85,
     reasons: [
-      { icon: Star, label: "Kwalificatie", detail: "Pick-kwalificatie (niveau 3) — ervaren medewerker", weight: "high" },
-      { icon: Clock, label: "Beschikbaarheid", detail: "Beschikbaar Wo-Zo voor dagdiensten", weight: "high" },
-      { icon: Briefcase, label: "Voorkeur", detail: "Voorkeur voor aaneengesloten werkblokken — 5 dagen achtereen gepland", weight: "medium" },
-      { icon: CalendarCheck, label: "Contracturen", detail: "45u van 40u — overwerk binnen marge", weight: "low" },
+      { icon: Star, labelKey: "qualification", detail: "Pick-kwalificatie (niveau 3) — ervaren medewerker", weight: "high" },
+      { icon: Clock, labelKey: "availability", detail: "Beschikbaar Wo-Zo voor dagdiensten", weight: "high" },
+      { icon: Briefcase, labelKey: "preference", detail: "Voorkeur voor aaneengesloten werkblokken — 5 dagen achtereen gepland", weight: "medium" },
+      { icon: CalendarCheck, labelKey: "contractHours", detail: "45u van 40u — overwerk binnen marge", weight: "low" },
     ],
     alternatives: ["MARTIN, Sophie", "TAISNE, Aurelien"],
   },
@@ -154,23 +155,10 @@ const shiftClassMap: Record<string, string> = {
   nacht: "shift-night",
 };
 
-const shiftTypeLabel: Record<string, string> = {
-  vroeg: "Vroeg",
-  dag: "Dag",
-  laat: "Laat",
-  nacht: "Nacht",
-};
-
 const weightColor: Record<string, string> = {
   high: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/30",
   medium: "bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/30",
   low: "bg-muted text-muted-foreground border-border",
-};
-
-const weightLabel: Record<string, string> = {
-  high: "Doorslaggevend",
-  medium: "Meegewogen",
-  low: "Bijkomend",
 };
 
 function ScoreBadge({ score }: { score: number }) {
@@ -188,6 +176,21 @@ function ScoreBadge({ score }: { score: number }) {
 // ── Main Component ─────────────────────────────────────────────────────────────
 
 export function ExplanationView() {
+  const { t } = useTranslation();
+
+  const weightLabel: Record<string, string> = {
+    high: t("explanation.decisive"),
+    medium: t("explanation.considered"),
+    low: t("explanation.additional"),
+  };
+
+  const shiftTypeLabel: Record<string, string> = {
+    vroeg: t("grid.early"),
+    dag: t("grid.day"),
+    laat: t("grid.late"),
+    nacht: t("grid.night"),
+  };
+
   return (
     <div className="space-y-4">
       {/* Header */}
@@ -198,12 +201,8 @@ export function ExplanationView() {
               <CheckCircle2 className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="text-sm font-bold text-foreground">Solver Uitleg</h2>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                Hieronder wordt per medewerker uitgelegd waarom de solver deze specifieke dienst heeft toegewezen.
-                Elke toewijzing heeft een <strong>score</strong> (0-100) gebaseerd op kwalificatie, beschikbaarheid,
-                contracturen, rusttijden en teambezetting. Hoe hoger de score, hoe beter de match.
-              </p>
+              <h2 className="text-sm font-bold text-foreground">{t("explanation.title")}</h2>
+              <p className="text-xs text-muted-foreground mt-0.5" dangerouslySetInnerHTML={{ __html: t("explanation.description") }} />
             </div>
           </div>
         </CardContent>
@@ -258,7 +257,7 @@ export function ExplanationView() {
                         <reason.icon className="h-4 w-4 mt-0.5 shrink-0" />
                         <div className="min-w-0">
                           <div className="flex items-center gap-2">
-                            <span className="text-xs font-semibold">{reason.label}</span>
+                            <span className="text-xs font-semibold">{t(`explanation.${reason.labelKey}`)}</span>
                             <Badge variant="outline" className="text-[9px] px-1.5 py-0 h-4 border-current/30">
                               {weightLabel[reason.weight]}
                             </Badge>
@@ -273,7 +272,7 @@ export function ExplanationView() {
                   {emp.alternatives.length > 0 && (
                     <div className="rounded-lg bg-muted/30 border border-border/50 px-3 py-2.5">
                       <span className="text-[11px] text-muted-foreground font-medium">
-                        Alternatieve kandidaten:{" "}
+                        {t("explanation.alternativeCandidates")}{" "}
                       </span>
                       {emp.alternatives.map((alt, i) => (
                         <span key={i} className="text-[11px] text-foreground">
