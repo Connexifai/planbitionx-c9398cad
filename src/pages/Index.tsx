@@ -228,7 +228,7 @@ export default function Index() {
             ) : (
               <div className="flex-1 flex flex-col min-h-0">
                 <div className="flex-1 overflow-y-auto roster-scroll p-5 space-y-5">
-                  <KpiCards solved={false} />
+                  <KpiCards solved={false} data={undefined} />
                   {jsonLoaded && scheduleData && <JsonDataViewer data={scheduleData} />}
                 </div>
 
