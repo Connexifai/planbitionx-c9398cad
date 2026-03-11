@@ -98,7 +98,7 @@ export function ServiceRosterGrid({ data }: ServiceRosterGridProps) {
     );
   }
 
-  const { days, employees, demandMap } = data;
+  const { days, employees, demandMap, assignedByShiftDay, assignmentNamesByShiftDay } = data;
   const shiftGroups = deriveShiftGroups(data);
 
   const shiftTypeLabel: Record<string, string> = {
