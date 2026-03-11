@@ -221,7 +221,7 @@ export default function Index() {
                 <KpiCards solved />
                 <RosterTabs value={activeTab} onChange={setActiveTab} />
                 {activeTab === "roster" && <RosterGrid data={rosterData ?? undefined} />}
-                {activeTab === "dienst" && <ServiceRosterGrid />}
+                {activeTab === "dienst" && <ServiceRosterGrid data={rosterData ?? undefined} />}
                 {activeTab === "stats" && <StatsDashboard />}
                 {activeTab === "uitleg" && <ExplanationView />}
               </main>
