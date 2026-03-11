@@ -172,10 +172,20 @@ export default function Index() {
 
   const handleSolve = () => {
     setSolving(true);
-    setTimeout(() => {
+    setTimeout(async () => {
+      try {
+        const res = await fetch("/data/schedule-response.json");
+        const solverResponse: SolverResponse = await res.json();
+        if (requestData) {
+          const roster = parseSolverResponse(requestData, solverResponse);
+          setRosterData(roster);
+        }
+      } catch (e) {
+        console.error("Failed to load solver response:", e);
+      }
       setSolving(false);
       setSolved(true);
-    }, 15000);
+    }, 36000);
   };
 
   return (
