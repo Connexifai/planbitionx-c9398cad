@@ -212,6 +212,7 @@ export default function Index() {
                 {!jsonLoaded && (
                   <div className="absolute inset-0 flex items-center justify-center z-40 pointer-events-none">
                     <div className="flex flex-col items-center gap-4 pointer-events-auto">
+                      <RobotQuoteBubble />
                       <img
                         src={robotImg}
                         alt="AI Assistent"
