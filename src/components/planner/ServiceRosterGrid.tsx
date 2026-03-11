@@ -50,6 +50,7 @@ function deriveShiftGroups(data: RosterData): ShiftGroup[] {
 function getDemand(demandMap: DemandMap, label: string, dayIdx: number): number {
   const arr = demandMap.get(label);
   return arr ? arr[dayIdx] : 0;
+}
 
 function getAssignmentNames(assignmentNamesMap: RosterData["assignmentNamesByShiftDay"], label: string, dayIdx: number): string[] {
   const days = assignmentNamesMap?.get(label);
