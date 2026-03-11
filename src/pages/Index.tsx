@@ -10,6 +10,8 @@ import { AiBriefingChat } from "@/components/planner/AiBriefingChat";
 import { JsonDataViewer } from "@/components/planner/JsonDataViewer";
 import type { JsonScheduleData } from "@/components/planner/JsonDataViewer";
 import { parseRawScheduleJson } from "@/lib/parseScheduleJson";
+import { parseSolverResponse } from "@/lib/parseSolverResponse";
+import type { RosterData, SolverResponse } from "@/lib/parseSolverResponse";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -141,12 +143,17 @@ export default function Index() {
   const [jsonLoaded, setJsonLoaded] = useState(false);
   const [robotLanded, setRobotLanded] = useState(false);
   const [scheduleData, setScheduleData] = useState<JsonScheduleData | null>(null);
+  const [rosterData, setRosterData] = useState<RosterData | null>(null);
+  const [requestData, setRequestData] = useState<any>(null);
 
   useEffect(() => {
     if (jsonLoaded && !scheduleData) {
       fetch("/data/schedule-request.json")
         .then((r) => r.json())
-        .then((raw) => setScheduleData(parseRawScheduleJson(raw)))
+        .then((raw) => {
+          setRequestData(raw);
+          setScheduleData(parseRawScheduleJson(raw));
+        })
         .catch(console.error);
     }
   }, [jsonLoaded, scheduleData]);
@@ -165,10 +172,20 @@ export default function Index() {
 
   const handleSolve = () => {
     setSolving(true);
-    setTimeout(() => {
+    setTimeout(async () => {
+      try {
+        const res = await fetch("/data/schedule-response.json");
+        const solverResponse: SolverResponse = await res.json();
+        if (requestData) {
+          const roster = parseSolverResponse(requestData, solverResponse);
+          setRosterData(roster);
+        }
+      } catch (e) {
+        console.error("Failed to load solver response:", e);
+      }
       setSolving(false);
       setSolved(true);
-    }, 15000);
+    }, 36000);
   };
 
   return (
@@ -203,7 +220,7 @@ export default function Index() {
               <main className="flex-1 overflow-y-auto overflow-x-hidden p-5 space-y-5">
                 <KpiCards solved />
                 <RosterTabs value={activeTab} onChange={setActiveTab} />
-                {activeTab === "roster" && <RosterGrid />}
+                {activeTab === "roster" && <RosterGrid data={rosterData ?? undefined} />}
                 {activeTab === "dienst" && <ServiceRosterGrid />}
                 {activeTab === "stats" && <StatsDashboard />}
                 {activeTab === "uitleg" && <ExplanationView />}
