@@ -66,7 +66,7 @@ function RobotQuoteBubble() {
         <span className="inline-block w-[2px] h-4 bg-primary ml-0.5 animate-pulse align-middle" />
       </p>
       {/* Speech bubble tail pointing left toward robot's mouth */}
-      <div className="absolute top-1/2 -left-2 -translate-y-1/2 w-4 h-4 bg-card border-l border-b -rotate-45 rounded-sm" />
+      <div className="absolute top-1/2 -right-2 -translate-y-1/2 w-4 h-4 bg-card border-r border-b rotate-45 rounded-sm" />
     </div>
   );
 }
