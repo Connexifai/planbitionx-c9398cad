@@ -83,12 +83,20 @@ export function RosterGrid({ data }: RosterGridProps) {
     );
   }
 
-  const { days, employees } = data;
+  const { days, employees, demandMap } = data;
   const numDays = days.length;
+
+  // Compute total demand per day across all shifts
+  const dayDemands = days.map((_, dayIdx) => {
+    let total = 0;
+    demandMap.forEach((dayArr) => { total += dayArr[dayIdx] || 0; });
+    return total;
+  });
 
   const dayFillRates = days.map((_, dayIdx) => {
     const filled = employees.filter(emp => emp.shifts[dayIdx]?.type !== null).length;
-    return employees.length > 0 ? Math.round((filled / employees.length) * 100) : 0;
+    const target = dayDemands[dayIdx];
+    return target > 0 ? Math.round((filled / target) * 100) : 0;
   });
 
   const getEmployeeFillRate = (emp: RosterEmployee) => {
