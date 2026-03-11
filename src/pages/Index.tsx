@@ -103,7 +103,7 @@ export default function Index() {
   const [solving, setSolving] = useState(false);
   const [activeTab, setActiveTab] = useState("roster");
   const [chatOpen, setChatOpen] = useState(false);
-  const [jsonLoaded, setJsonLoaded] = useState(true); // demo: loaded by default
+  const [jsonLoaded, setJsonLoaded] = useState(false);
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
@@ -121,7 +121,7 @@ export default function Index() {
   return (
     <div className="h-screen flex w-full">
       {solving && <SolvingOverlay />}
-      <PlannerSidebar onSolve={handleSolve} />
+      <PlannerSidebar onSolve={handleSolve} onJsonLoaded={() => setJsonLoaded(true)} />
 
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top bar */}
