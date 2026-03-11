@@ -45,7 +45,7 @@ function SolvingOverlay() {
         <img
           src={robotImg}
           alt="Solving..."
-          className="w-40 h-40 object-contain drop-shadow-2xl animate-bounce"
+          className="w-40 h-40 object-contain drop-shadow-2xl animate-[orbit_180s_ease-in-out_infinite] hover:scale-110 transition-transform duration-500"
         />
         <div className="flex flex-col items-center gap-3">
           <h2 className="text-2xl font-bold text-foreground">Rooster wordt opgelost</h2>
