@@ -5,7 +5,7 @@ import {
 } from "recharts";
 import { Users, TrendingUp, AlertTriangle, Clock, Target, BarChart3 } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import type { RosterData } from "@/lib/parseSolverResponse";
+import type { RosterData, DayColumn } from "@/lib/parseSolverResponse";
 
 const CHART_COLORS = [
   "hsl(217, 91%, 53%)",
