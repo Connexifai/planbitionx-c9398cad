@@ -40,7 +40,7 @@ export default function Login() {
 
       {/* Centered card */}
       <div className="relative z-10 w-full max-w-md mx-4">
-        <div className="bg-transparent backdrop-blur-md border border-white/10 rounded-2xl shadow-2xl p-8 space-y-6">
+        <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl shadow-2xl p-8 space-y-6">
           {/* Logo & branding */}
           <div className="flex flex-col items-center">
             <img
