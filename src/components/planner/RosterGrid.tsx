@@ -61,10 +61,10 @@ function HoursBar({ percent }: { percent: number }) {
   );
 }
 
-function FillRateIndicator({ percent }: { percent: number }) {
-  const color = percent >= 80 ? "text-kpi-assignments" : percent >= 50 ? "text-kpi-unfilled" : "text-destructive";
+function FillRateIndicator({ filled, target, pct }: { filled: number; target: number; pct: number }) {
+  const color = pct >= 80 ? "text-kpi-assignments" : pct >= 50 ? "text-kpi-unfilled" : "text-destructive";
   return (
-    <span className={`text-[10px] font-semibold ${color}`}>{percent}%</span>
+    <span className={`text-[10px] font-semibold ${color}`}>{filled}/{target} · {pct}%</span>
   );
 }
 
@@ -94,9 +94,10 @@ export function RosterGrid({ data }: RosterGridProps) {
   });
 
   const dayFillRates = days.map((_, dayIdx) => {
+    // Count actual shift assignments (not unique employees)
     const filled = employees.filter(emp => emp.shifts[dayIdx]?.type !== null).length;
     const target = dayDemands[dayIdx];
-    return target > 0 ? Math.round((filled / target) * 100) : 0;
+    return { filled, target, pct: target > 0 ? Math.round((filled / target) * 100) : 0 };
   });
 
   const getEmployeeFillRate = (emp: RosterEmployee) => {
@@ -119,7 +120,7 @@ export function RosterGrid({ data }: RosterGridProps) {
             >
               <span className="text-xs font-semibold text-foreground">{t(`days.${d.dayKey}`)}</span>
               <span className="text-[10px] text-muted-foreground">{d.date}</span>
-              <FillRateIndicator percent={dayFillRates[i]} />
+              <FillRateIndicator filled={dayFillRates[i].filled} target={dayFillRates[i].target} pct={dayFillRates[i].pct} />
             </div>
           ))}
         </div>
