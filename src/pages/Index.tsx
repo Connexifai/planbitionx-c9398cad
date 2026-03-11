@@ -111,7 +111,7 @@ export default function Index() {
                   </TooltipTrigger>
                   <TooltipContent side="left">AI Assistent openen</TooltipContent>
                 </Tooltip>
-              )
+              )}
 
               <div
                 className={cn(
