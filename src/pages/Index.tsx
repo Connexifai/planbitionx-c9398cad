@@ -101,7 +101,7 @@ function SolvingOverlay() {
               style={{ transition: "stroke-dashoffset 1s ease-out" }}
             />
           </svg>
-          <img src={robotImg} alt="Solving..." className="absolute inset-4 object-contain drop-shadow-xl animate-[orbit_180s_ease-in-out_infinite]" />
+          <img src={robotImg} alt="Solving..." className="absolute inset-4 object-contain drop-shadow-xl animate-[orbit_360s_ease-in-out_infinite]" />
         </div>
 
         <h2 className="text-2xl font-bold text-foreground">Rooster wordt opgelost</h2>
