@@ -104,7 +104,7 @@ function EmployeeTable({ data }: { data: JsonScheduleData }) {
       </button>
       {expanded && (
         <div className="border-t">
-          <ScrollArea className="max-h-[280px]">
+          <ScrollArea className="h-[400px]">
             <table className="w-full text-sm">
               <thead className="bg-muted/50 sticky top-0">
                 <tr>
