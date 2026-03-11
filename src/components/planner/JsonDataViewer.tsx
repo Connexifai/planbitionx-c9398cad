@@ -1,4 +1,4 @@
-import { Users, Calendar, Clock, MapPin, Layers, ChevronDown, ChevronUp } from "lucide-react";
+import { Users, Calendar, Clock, Layers, ChevronDown, ChevronUp } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { useState } from "react";
