@@ -113,15 +113,10 @@ const dayKeyMap: Record<number, string> = {
 };
 
 export function parseSolverResponse(request: RawSchedule, response: SolverResponse): RosterData {
-  // Derive date range from the actual assigned shifts in the response
-  const allDates = response.assignedShifts.map(a => parseISO(a.scheduleDate).getTime());
-  const minDate = new Date(Math.min(...allDates));
-  const maxDate = new Date(Math.max(...allDates));
-
-  // Fall back to request range if no assignments
-  const startDate = allDates.length > 0 ? minDate : parseISO(request.Start);
-  const endDate = allDates.length > 0 ? maxDate : parseISO(request.End);
-  const allDays = eachDayOfInterval({ start: startDate, end: endDate });
+  // Use requested date range as canonical timeline for demand vs assignments
+  const requestStartDate = parseISO(request.Start);
+  const requestEndDate = parseISO(request.End);
+  const allDays = eachDayOfInterval({ start: requestStartDate, end: requestEndDate });
 
   const days: DayColumn[] = allDays.map((d) => ({
     dayKey: dayKeyMap[d.getDay()],
@@ -130,23 +125,23 @@ export function parseSolverResponse(request: RawSchedule, response: SolverRespon
     weekend: d.getDay() === 0 || d.getDay() === 6,
   }));
 
-  // Map of date string (YYYY-MM-DD) → day index
+  // Map canonical date string (YYYY-MM-DD) → day index
   const dayIndexMap = new Map<string, number>();
   allDays.forEach((d, i) => {
     dayIndexMap.set(format(d, "yyyy-MM-dd"), i);
   });
 
-  // Fallback map for mismatched request/response date ranges: align by request day order
-  const requestDayOrder = Array.from(
-    new Set(request.Shifts.map((s) => format(parseISO(s.Start), "yyyy-MM-dd")))
+  // Fallback when solver returns shifted dates (same relative day order, different calendar week)
+  const assignmentDayOrder = Array.from(
+    new Set(response.assignedShifts.map((a) => format(parseISO(a.scheduleDate), "yyyy-MM-dd")))
   ).sort((a, b) => a.localeCompare(b));
-  const requestDayOrderMap = new Map<string, number>(requestDayOrder.map((d, i) => [d, i]));
+  const assignmentDayOrderMap = new Map<string, number>(assignmentDayOrder.map((d, i) => [d, i]));
 
   const resolveDayIndex = (dateKey: string): number | undefined => {
     const direct = dayIndexMap.get(dateKey);
     if (direct !== undefined) return direct;
 
-    const fallbackIdx = requestDayOrderMap.get(dateKey);
+    const fallbackIdx = assignmentDayOrderMap.get(dateKey);
     if (fallbackIdx !== undefined && fallbackIdx < days.length) return fallbackIdx;
 
     return undefined;
