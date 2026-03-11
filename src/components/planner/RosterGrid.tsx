@@ -94,9 +94,10 @@ export function RosterGrid({ data }: RosterGridProps) {
   });
 
   const dayFillRates = days.map((_, dayIdx) => {
+    // Count actual shift assignments (not unique employees)
     const filled = employees.filter(emp => emp.shifts[dayIdx]?.type !== null).length;
     const target = dayDemands[dayIdx];
-    return target > 0 ? Math.round((filled / target) * 100) : 0;
+    return { filled, target, pct: target > 0 ? Math.round((filled / target) * 100) : 0 };
   });
 
   const getEmployeeFillRate = (emp: RosterEmployee) => {
