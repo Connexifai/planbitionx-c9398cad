@@ -18,7 +18,7 @@ const initialMessage: Message = {
 };
 
 export function AiBriefingChat() {
-  const [messages, setMessages] = useState<Message[]>(mockMessages);
+  const [messages, setMessages] = useState<Message[]>([initialMessage]);
   const [input, setInput] = useState("");
 
   const handleSend = () => {
