@@ -11,12 +11,16 @@ import robotImg from "@/assets/robot-assistant.png";
 function AnimatedBackground() {
   return (
     <div className="fixed inset-0 overflow-hidden pointer-events-none">
-      <img
-        src="/images/login-bg.gif"
-        alt=""
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
         className="absolute inset-0 w-full h-full object-cover"
-      />
-      <div className="absolute inset-0 bg-background/60" />
+      >
+        <source src="/videos/login-bg.mp4" type="video/mp4" />
+      </video>
+      <div className="absolute inset-0 bg-background/30" />
     </div>
   );
 }
