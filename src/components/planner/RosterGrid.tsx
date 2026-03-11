@@ -2,6 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useTranslation } from "react-i18next";
+import { toTitleCase } from "@/lib/utils";
 
 type ShiftType = "vroeg" | "dag" | "laat" | "nacht" | null;
 
