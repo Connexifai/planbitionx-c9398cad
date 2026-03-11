@@ -220,7 +220,7 @@ export default function Index() {
               <main className="flex-1 overflow-y-auto overflow-x-hidden p-5 space-y-5">
                 <KpiCards solved />
                 <RosterTabs value={activeTab} onChange={setActiveTab} />
-                {activeTab === "roster" && <RosterGrid />}
+                {activeTab === "roster" && <RosterGrid data={rosterData ?? undefined} />}
                 {activeTab === "dienst" && <ServiceRosterGrid />}
                 {activeTab === "stats" && <StatsDashboard />}
                 {activeTab === "uitleg" && <ExplanationView />}
