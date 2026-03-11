@@ -11,12 +11,16 @@ import robotImg from "@/assets/robot-assistant.png";
 function AnimatedBackground() {
   return (
     <div className="fixed inset-0 overflow-hidden pointer-events-none">
-      <img
-        src="/images/login-bg.gif"
-        alt=""
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
         className="absolute inset-0 w-full h-full object-cover"
-      />
-      <div className="absolute inset-0 bg-background/60" />
+      >
+        <source src="/videos/login-bg.mp4" type="video/mp4" />
+      </video>
+      <div className="absolute inset-0 bg-background/30" />
     </div>
   );
 }
@@ -41,13 +45,13 @@ export default function Login() {
   return (
     <div
       ref={containerRef}
-      className={`min-h-screen flex items-center justify-center bg-background relative transition-all duration-700 ease-in-out ${exiting ? "scale-110 opacity-0 blur-sm" : ""}`}
+      className={`min-h-screen flex items-center justify-end bg-background relative transition-all duration-700 ease-in-out ${exiting ? "scale-110 opacity-0 blur-sm" : ""}`}
     >
       <AnimatedBackground />
 
-      {/* Centered card */}
-      <div className="relative z-10 w-full max-w-md mx-4">
-        <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl shadow-2xl p-8 space-y-6">
+      {/* Right-aligned card */}
+      <div className="relative z-10 w-full max-w-sm mr-[8%] mx-4">
+        <div className="bg-background/5 backdrop-blur-sm border border-white/10 rounded-2xl shadow-2xl p-7 space-y-5">
           {/* Logo & branding */}
           <div className="flex flex-col items-center">
             <img
