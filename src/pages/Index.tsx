@@ -29,7 +29,7 @@ function SolvingOverlay() {
   const [elapsed, setElapsed] = useState(0);
   const [phase, setPhase] = useState(0);
 
-  const progress = Math.min(elapsed / 45, 0.95);
+  const progress = Math.min(elapsed / 15, 0.95);
 
 
   useEffect(() => {
@@ -38,7 +38,7 @@ function SolvingOverlay() {
   }, []);
 
   useEffect(() => {
-    const phaseTimer = setInterval(() => setPhase((p) => (p + 1) % solvePhases.length), 5000);
+    const phaseTimer = setInterval(() => setPhase((p) => (p + 1) % solvePhases.length), 2500);
     return () => clearInterval(phaseTimer);
   }, []);
 
@@ -113,7 +113,7 @@ export default function Index() {
     setTimeout(() => {
       setSolving(false);
       setSolved(true);
-    }, 8000);
+    }, 15000);
   };
 
   return (
