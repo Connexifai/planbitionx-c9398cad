@@ -192,5 +192,5 @@
 }
 
 .robot-float {
-  animation: orbitsm 30s ease-in-out infinite;
+  animation: orbit 4s ease-in-out infinite;
 }
