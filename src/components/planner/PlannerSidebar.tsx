@@ -223,7 +223,7 @@ function SolverSection() {
 
 export function PlannerSidebar({ onSolve, hideFooter }: { onSolve?: () => void; hideFooter?: boolean }) {
   const [activeSection, setActiveSection] = useState<SectionId>("json");
-  const [contentCollapsed, setContentCollapsed] = useState(false);
+  const [contentCollapsed, setContentCollapsed] = useState(true);
 
   const activeDef = sections.find(s => s.id === activeSection)!;
 
