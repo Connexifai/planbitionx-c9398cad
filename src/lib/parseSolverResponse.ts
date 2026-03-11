@@ -162,6 +162,7 @@ export function parseSolverResponse(request: RawSchedule, response: SolverRespon
 
   // Build employee rows
   const employees: RosterEmployee[] = [];
+  const plannedContractsByDay = days.map(() => new Set<string>());
 
   for (const emp of request.Employees) {
     const assignments = assignmentsByContract.get(emp.ContractId) || [];
@@ -171,8 +172,10 @@ export function parseSolverResponse(request: RawSchedule, response: SolverRespon
 
     for (const a of assignments) {
       const dateKey = format(parseISO(a.scheduleDate), "yyyy-MM-dd");
-      const dayIdx = dayIndexMap.get(dateKey);
+      const dayIdx = resolveDayIndex(dateKey);
       if (dayIdx === undefined) continue;
+
+      plannedContractsByDay[dayIdx].add(a.contractId);
 
       const start = parseISO(a.startTime);
       const end = parseISO(a.endTime);
