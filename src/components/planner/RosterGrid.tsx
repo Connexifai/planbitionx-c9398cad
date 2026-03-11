@@ -3,7 +3,7 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useTranslation } from "react-i18next";
 import { toTitleCase } from "@/lib/utils";
-import type { RosterData, ShiftData, DayColumn, RosterEmployee } from "@/lib/parseSolverResponse";
+import type { RosterData, ShiftData, DayColumn, RosterEmployee, DemandMap } from "@/lib/parseSolverResponse";
 
 type ShiftType = "vroeg" | "dag" | "laat" | "nacht" | null;
 
