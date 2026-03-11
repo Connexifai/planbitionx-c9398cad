@@ -226,7 +226,17 @@
     "rotation": "Rotatie",
     "noQualification": "Geen kwalificatie",
     "shiftChange": "Wisseldienst",
-    "attention": "Aandachtspunt"
+    "attention": "Aandachtspunt",
+    "qualifiedFor": "Gekwalificeerd voor",
+    "noSpecificQual": "Geen specifieke pick/pack kwalificatie — ingezet op ondersteunende taken",
+    "daysAssigned": "dagen ingepland",
+    "of": "van",
+    "overloaded": "overbelast",
+    "underloaded": "onderbelast",
+    "withinTarget": "binnen target",
+    "consecutiveSameShift": "aaneengesloten dagen met hetzelfde diensttype",
+    "shiftChangeRest": "Minimaal 11 uur rust gegarandeerd bij dienstwissel conform ATW",
+    "employeesOnShift": "medewerkers op dienst"
   },
   "days": {
     "mo": "Ma",

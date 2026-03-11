@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
@@ -20,6 +20,9 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { toTitleCase } from "@/lib/utils";
+import type { RosterData, RosterEmployee, ShiftData } from "@/lib/parseSolverResponse";
+import { useMemo } from "react";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -42,109 +45,171 @@ interface EmployeeExplanation {
   alternatives: string[];
 }
 
-// ── Mock explanations ──────────────────────────────────────────────────────────
+// ── Generate explanations from roster data ─────────────────────────────────────
 
-const explanations: EmployeeExplanation[] = [
-  {
-    name: "AABachmann, Franz-Xaver", id: 233,
-    shift: "Late pack", shiftType: "laat", day: "Mo", date: "02/03",
-    score: 94,
-    reasons: [
-      { icon: Star, labelKey: "qualification", detail: "Gecertificeerd voor Pack-werkzaamheden (niveau 3)", weight: "high" },
-      { icon: Clock, labelKey: "availability", detail: "Volledige beschikbaarheid opgegeven voor late diensten Ma-Za", weight: "high" },
-      { icon: Repeat, labelKey: "patternContinuity", detail: "Draait al 3 weken aaneengesloten late diensten — minimale verstoring", weight: "medium" },
-      { icon: CalendarCheck, labelKey: "contractHours", detail: "48u gepland van 40u contract — licht boven target maar binnen marge", weight: "low" },
-      { icon: Users, labelKey: "teamOccupancy", detail: "Late pack had nog 3 plekken open op maandag", weight: "medium" },
-    ],
-    alternatives: ["SEDE, Alexia", "SEMAILLE, Laurence"],
-  },
-  {
-    name: "ANGIUS, Benvenuto", id: 1187,
-    shift: "Day Pick", shiftType: "dag", day: "Mo", date: "02/03",
-    score: 87,
-    reasons: [
-      { icon: Star, labelKey: "qualification", detail: "Pick-kwalificatie (niveau 2) — voldoet aan minimale eis", weight: "high" },
-      { icon: Briefcase, labelKey: "preference", detail: "Heeft voorkeur opgegeven voor dagdiensten", weight: "medium" },
-      { icon: ShieldCheck, labelKey: "restTime", detail: "Minimaal 11 uur rust sinds laatste dienst (vr nacht) — conform CAO", weight: "high" },
-      { icon: TrendingUp, labelKey: "hourDistribution", detail: "44u gepland van 38u contract — binnen toegestane overwerk", weight: "low" },
-    ],
-    alternatives: ["TAISNE, Aurelien", "SILLAH, Mamogara"],
-  },
-  {
-    name: "Ankrett, Emmie", id: 787,
-    shift: "Early pick", shiftType: "vroeg", day: "Mo", date: "02/03",
-    score: 91,
-    reasons: [
-      { icon: Star, labelKey: "qualification", detail: "Senior Pick-medewerker (niveau 4) — hoogst beschikbare kwalificatie", weight: "high" },
-      { icon: Clock, labelKey: "availability", detail: "Beschikbaar Ma-Za voor vroege diensten", weight: "high" },
-      { icon: Repeat, labelKey: "patternContinuity", detail: "Consistent vroege diensten afgelopen 4 weken", weight: "medium" },
-      { icon: Users, labelKey: "teamOccupancy", detail: "Vroege pick had minimaal 2 ervaren krachten nodig — Ankrett vult die rol", weight: "high" },
-      { icon: CalendarCheck, labelKey: "contractHours", detail: "48u gepland van 40u contract — overwerk geaccepteerd door medewerker", weight: "low" },
-    ],
-    alternatives: ["SERAICHE, Nesrine", "TARRADE, Loic"],
-  },
-  {
-    name: "GRENIER, Beatrice, STACHOWIAK", id: 2975,
-    shift: "Night Pick", shiftType: "nacht", day: "Mo", date: "02/03",
-    score: 89,
-    reasons: [
-      { icon: Star, labelKey: "qualification", detail: "Nacht-gecertificeerd Pick-medewerker", weight: "high" },
-      { icon: ShieldCheck, labelKey: "healthCheck", detail: "Medische goedkeuring voor nachtwerk geldig t/m 12/2026", weight: "high" },
-      { icon: Clock, labelKey: "availability", detail: "Heeft exclusief nachtdiensten aangevraagd", weight: "medium" },
-      { icon: Repeat, labelKey: "rotation", detail: "Max 6 aaneengesloten nachten — nu op dag 1 van cyclus", weight: "medium" },
-      { icon: CalendarCheck, labelKey: "contractHours", detail: "48u van 40u — nachttoeslag meeberekend", weight: "low" },
-    ],
-    alternatives: ["SENECHAL, Lucie"],
-  },
-  {
-    name: "POUCKE, Matthieu, VAN", id: 2878,
-    shift: "Day no qualification", shiftType: "dag", day: "We", date: "04/03",
-    score: 62,
-    reasons: [
-      { icon: AlertTriangle, labelKey: "noQualification", detail: "Geen specifieke pick/pack kwalificatie — ingezet op ondersteunende taken", weight: "low" },
-      { icon: Clock, labelKey: "availability", detail: "Beperkt beschikbaar: alleen Wo-Do", weight: "medium" },
-      { icon: CalendarCheck, labelKey: "contractHours", detail: "18u gepland van 32u contract — significant onderbelast", weight: "high" },
-      { icon: Users, labelKey: "teamOccupancy", detail: "Woensdag had nog capaciteit nodig — Poucke was enige beschikbare optie", weight: "high" },
-    ],
-    alternatives: [],
-  },
-  {
-    name: "SARCY, Coralie", id: 2754,
-    shift: "Late pack", shiftType: "laat", day: "Th", date: "05/03",
-    score: 58,
-    reasons: [
-      { icon: Star, labelKey: "qualification", detail: "Pack-kwalificatie (niveau 1) — basisniveau", weight: "medium" },
-      { icon: Clock, labelKey: "availability", detail: "Zeer beperkt beschikbaar deze week — alleen donderdag", weight: "high" },
-      { icon: CalendarCheck, labelKey: "contractHours", detail: "8u gepland van 24u contract — sterk onderbelast, maar geen beschikbaarheid", weight: "high" },
-      { icon: AlertTriangle, labelKey: "attention", detail: "Solver kon geen extra diensten plannen door beschikbaarheidsbeperkingen", weight: "low" },
-    ],
-    alternatives: ["KOWALSKI, Adam"],
-  },
-  {
-    name: "SARPAUX, Teddy", id: 2735,
-    shift: "Early pick", shiftType: "vroeg", day: "Mo", date: "02/03",
-    score: 78,
-    reasons: [
-      { icon: Star, labelKey: "qualification", detail: "Pick-kwalificatie (niveau 2)", weight: "high" },
-      { icon: Repeat, labelKey: "shiftChange", detail: "Wisselt van vroeg naar laat op dinsdag — solver minimaliseert wisselingen", weight: "medium" },
-      { icon: ShieldCheck, labelKey: "restTime", detail: "11+ uur rust gegarandeerd bij overgang vroeg→laat", weight: "high" },
-      { icon: CalendarCheck, labelKey: "contractHours", detail: "32u van 38u — licht onder target", weight: "low" },
-    ],
-    alternatives: ["JANSSEN, Eva", "ROUSSEAU, Claire"],
-  },
-  {
-    name: "BOUCHARD, Pierre", id: 3012,
-    shift: "Day Pick", shiftType: "dag", day: "We", date: "04/03",
-    score: 85,
-    reasons: [
-      { icon: Star, labelKey: "qualification", detail: "Pick-kwalificatie (niveau 3) — ervaren medewerker", weight: "high" },
-      { icon: Clock, labelKey: "availability", detail: "Beschikbaar Wo-Zo voor dagdiensten", weight: "high" },
-      { icon: Briefcase, labelKey: "preference", detail: "Voorkeur voor aaneengesloten werkblokken — 5 dagen achtereen gepland", weight: "medium" },
-      { icon: CalendarCheck, labelKey: "contractHours", detail: "45u van 40u — overwerk binnen marge", weight: "low" },
-    ],
-    alternatives: ["MARTIN, Sophie", "TAISNE, Aurelien"],
-  },
-];
+function generateExplanations(data: RosterData, t: (key: string) => string): EmployeeExplanation[] {
+  const { days, employees } = data;
+  const explanations: EmployeeExplanation[] = [];
+
+  for (const emp of employees) {
+    // Find the first assigned shift for this employee
+    const firstShiftIdx = emp.shifts.findIndex((s) => s.type !== null);
+    if (firstShiftIdx === -1) continue;
+
+    const shift = emp.shifts[firstShiftIdx];
+    if (!shift.type) continue;
+
+    const day = days[firstShiftIdx];
+    const totalAssigned = emp.shifts.filter((s) => s.type !== null).length;
+    const totalDays = days.length;
+
+    // Parse hours
+    const hoursMatch = emp.hours.match(/([\d.]+)\/([\d.]+)/);
+    const planned = hoursMatch ? parseFloat(hoursMatch[1]) : 0;
+    const contract = hoursMatch ? parseFloat(hoursMatch[2]) : 48;
+    const delta = planned - contract;
+
+    // Build reasons
+    const reasons: Reason[] = [];
+
+    // Qualification reason
+    const qualTags = emp.tags.filter((t) => !["Own Employee", "Flex", "Temp"].includes(t));
+    if (qualTags.length > 0) {
+      reasons.push({
+        icon: Star,
+        labelKey: "qualification",
+        detail: t("explanation.qualifiedFor") + ": " + qualTags.join(", "),
+        weight: "high",
+      });
+    } else {
+      reasons.push({
+        icon: AlertTriangle,
+        labelKey: "noQualification",
+        detail: t("explanation.noSpecificQual"),
+        weight: "low",
+      });
+    }
+
+    // Fill rate / availability
+    const fillPct = Math.round((totalAssigned / totalDays) * 100);
+    reasons.push({
+      icon: Clock,
+      labelKey: "availability",
+      detail: `${totalAssigned}/${totalDays} ${t("explanation.daysAssigned")} (${fillPct}%)`,
+      weight: fillPct >= 60 ? "high" : "medium",
+    });
+
+    // Contract hours
+    if (delta > 4) {
+      reasons.push({
+        icon: CalendarCheck,
+        labelKey: "contractHours",
+        detail: `${planned.toFixed(0)}u ${t("explanation.of")} ${contract}u — ${t("explanation.overloaded")}`,
+        weight: "high",
+      });
+    } else if (delta < -8) {
+      reasons.push({
+        icon: CalendarCheck,
+        labelKey: "contractHours",
+        detail: `${planned.toFixed(0)}u ${t("explanation.of")} ${contract}u — ${t("explanation.underloaded")}`,
+        weight: "high",
+      });
+    } else {
+      reasons.push({
+        icon: CalendarCheck,
+        labelKey: "contractHours",
+        detail: `${planned.toFixed(0)}u ${t("explanation.of")} ${contract}u — ${t("explanation.withinTarget")}`,
+        weight: "low",
+      });
+    }
+
+    // Shift pattern continuity
+    const consecutiveShifts = countConsecutiveSameType(emp.shifts, firstShiftIdx);
+    if (consecutiveShifts >= 3) {
+      reasons.push({
+        icon: Repeat,
+        labelKey: "patternContinuity",
+        detail: `${consecutiveShifts} ${t("explanation.consecutiveSameShift")}`,
+        weight: "medium",
+      });
+    }
+
+    // Rest time (check if previous day was different shift type)
+    if (firstShiftIdx > 0 && emp.shifts[firstShiftIdx - 1]?.type) {
+      const prevType = emp.shifts[firstShiftIdx - 1].type;
+      if (prevType !== shift.type) {
+        reasons.push({
+          icon: ShieldCheck,
+          labelKey: "restTime",
+          detail: t("explanation.shiftChangeRest"),
+          weight: "high",
+        });
+      }
+    }
+
+    // Team occupancy - find how many others have same shift on same day
+    const sameShiftCount = employees.filter(
+      (e) => e.id !== emp.id && e.shifts[firstShiftIdx]?.label === shift.label
+    ).length;
+    reasons.push({
+      icon: Users,
+      labelKey: "teamOccupancy",
+      detail: `${sameShiftCount + 1} ${t("explanation.employeesOnShift")} "${shift.label}"`,
+      weight: sameShiftCount < 10 ? "medium" : "low",
+    });
+
+    // Score: based on qualification match, hours balance, fill rate
+    let score = 50;
+    if (qualTags.length > 0) score += 20;
+    if (Math.abs(delta) <= 4) score += 15;
+    else if (Math.abs(delta) <= 8) score += 8;
+    if (fillPct >= 60) score += 10;
+    if (consecutiveShifts >= 2) score += 5;
+    score = Math.min(score, 100);
+
+    // Alternatives: other employees with same qualification who could do this shift
+    const alternatives = employees
+      .filter((e) => {
+        if (e.id === emp.id) return false;
+        if (e.shifts[firstShiftIdx]?.type !== null) return false; // already assigned
+        // Check if they share a qualification
+        const eQuals = e.tags.filter((t) => !["Own Employee", "Flex", "Temp"].includes(t));
+        return qualTags.some((q) => eQuals.includes(q));
+      })
+      .slice(0, 3)
+      .map((e) => toTitleCase(e.name));
+
+    explanations.push({
+      name: emp.name,
+      id: emp.id,
+      shift: shift.label || "",
+      shiftType: shift.type,
+      day: t(`days.${day.dayKey}`),
+      date: day.date,
+      reasons,
+      score,
+      alternatives,
+    });
+  }
+
+  // Sort by score descending, show top entries
+  return explanations.sort((a, b) => b.score - a.score).slice(0, 30);
+}
+
+function countConsecutiveSameType(shifts: ShiftData[], startIdx: number): number {
+  const type = shifts[startIdx]?.type;
+  if (!type) return 0;
+  let count = 1;
+  for (let i = startIdx + 1; i < shifts.length; i++) {
+    if (shifts[i]?.type === type) count++;
+    else break;
+  }
+  for (let i = startIdx - 1; i >= 0; i--) {
+    if (shifts[i]?.type === type) count++;
+    else break;
+  }
+  return count;
+}
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
@@ -175,8 +240,17 @@ function ScoreBadge({ score }: { score: number }) {
 
 // ── Main Component ─────────────────────────────────────────────────────────────
 
-export function ExplanationView() {
+interface ExplanationViewProps {
+  data?: RosterData;
+}
+
+export function ExplanationView({ data }: ExplanationViewProps) {
   const { t } = useTranslation();
+
+  const explanations = useMemo(
+    () => (data ? generateExplanations(data, t) : []),
+    [data, t]
+  );
 
   const weightLabel: Record<string, string> = {
     high: t("explanation.decisive"),
@@ -190,6 +264,14 @@ export function ExplanationView() {
     laat: t("grid.late"),
     nacht: t("grid.night"),
   };
+
+  if (!data || explanations.length === 0) {
+    return (
+      <div className="rounded-xl border border-border/50 bg-card p-8 text-center text-muted-foreground">
+        <p className="text-sm">{t("grid.noData", "Geen data beschikbaar")}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
@@ -219,7 +301,7 @@ export function ExplanationView() {
 
       {/* Explanations */}
       <ScrollArea className="max-h-[calc(100vh-380px)]">
-        <Accordion type="multiple" defaultValue={[explanations[0].id.toString()]} className="space-y-2">
+        <Accordion type="multiple" defaultValue={explanations.length > 0 ? [explanations[0].id.toString()] : []} className="space-y-2">
           {explanations.map((emp) => (
             <AccordionItem
               key={emp.id}
@@ -230,8 +312,7 @@ export function ExplanationView() {
                 <div className="flex items-center gap-3 flex-1 min-w-0">
                   <div className="flex flex-col items-start gap-1 min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-semibold text-foreground truncate">{emp.name}</span>
-                      <span className="text-[10px] text-muted-foreground">#{emp.id}</span>
+                      <span className="text-sm font-semibold text-foreground truncate">{toTitleCase(emp.name)}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <div className={`shift-badge ${shiftClassMap[emp.shiftType]} text-[10px] px-2 py-0.5`}>

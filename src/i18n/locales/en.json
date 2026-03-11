@@ -226,7 +226,17 @@
     "rotation": "Rotation",
     "noQualification": "No qualification",
     "shiftChange": "Shift change",
-    "attention": "Attention point"
+    "attention": "Attention point",
+    "qualifiedFor": "Qualified for",
+    "noSpecificQual": "No specific pick/pack qualification — assigned to support tasks",
+    "daysAssigned": "days assigned",
+    "of": "of",
+    "overloaded": "overloaded",
+    "underloaded": "underloaded",
+    "withinTarget": "within target",
+    "consecutiveSameShift": "consecutive days with same shift type",
+    "shiftChangeRest": "Minimum 11 hours rest guaranteed at shift change per WTA",
+    "employeesOnShift": "employees on shift"
   },
   "days": {
     "mo": "Mon",
