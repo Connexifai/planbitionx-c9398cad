@@ -1,4 +1,4 @@
-import { Users, Calendar, Clock, MapPin, Layers, ChevronDown, ChevronUp } from "lucide-react";
+import { Users, Calendar, Clock, Layers, ChevronDown, ChevronUp } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { useState } from "react";
@@ -58,13 +58,13 @@ export const demoScheduleData: JsonScheduleData = {
 function SummaryCards({ data }: { data: JsonScheduleData }) {
   const { t } = useTranslation();
   const totalShiftsPerDay = data.shifts.reduce((sum, s) => sum + s.requiredPerDay, 0);
-  const uniqueLocations = [...new Set(data.employees.map(e => e.location).filter(Boolean))];
+  const totalShifts = totalShiftsPerDay * data.days.length;
 
   const cards = [
     { label: t("json.employees"), value: data.employees.length, icon: <Users className="h-5 w-5" />, color: "text-kpi-occupancy", bg: "bg-kpi-occupancy/10" },
     { label: t("json.shiftsPerDay"), value: totalShiftsPerDay, icon: <Layers className="h-5 w-5" />, color: "text-kpi-assignments", bg: "bg-kpi-assignments/10" },
     { label: t("json.days"), value: data.days.length, icon: <Calendar className="h-5 w-5" />, color: "text-primary", bg: "bg-primary/10" },
-    { label: t("json.locations"), value: uniqueLocations.length, icon: <MapPin className="h-5 w-5" />, color: "text-kpi-open", bg: "bg-kpi-open/10" },
+    { label: t("json.totalShifts"), value: totalShifts, icon: <Layers className="h-5 w-5" />, color: "text-kpi-open", bg: "bg-kpi-open/10" },
   ];
 
   return (

@@ -165,6 +165,7 @@
     "shiftsPerDay": "Turnos/dia",
     "days": "Dias",
     "locations": "Locais",
+    "totalShifts": "Total turnos",
     "name": "Nome",
     "location": "Local",
     "contract": "Contrato",

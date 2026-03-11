@@ -165,6 +165,7 @@
     "shiftsPerDay": "Shifts/day",
     "days": "Days",
     "locations": "Locations",
+    "totalShifts": "Total shifts",
     "name": "Name",
     "location": "Location",
     "contract": "Contract",
