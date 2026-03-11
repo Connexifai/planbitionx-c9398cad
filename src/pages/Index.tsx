@@ -8,37 +8,15 @@ import { RosterTabs } from "@/components/planner/RosterTabs";
 import { PostSolveChat } from "@/components/planner/PostSolveChat";
 import { AiBriefingChat } from "@/components/planner/AiBriefingChat";
 import { JsonDataViewer, demoScheduleData } from "@/components/planner/JsonDataViewer";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Download, Settings, Key, Moon, Sun, MessageCircle, PanelRightClose, PanelRightOpen } from "lucide-react";
+import { Download, Moon, Sun, MessageCircle, PanelRightClose } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import robotImg from "@/assets/robot-assistant.png";
-
-const robotQuotes = [
-  "Onze AI maakt zo'n strakke planning, zelfs de kaas krijgt gaten van de stress.",
-  "Onze AI plant zo precies… het zou een liniaal jaloers maken.",
-  "Mijn AI maakt een planning zo strak dat zelfs de kippen eieren op tijd leggen.",
-  "AI voorspelt beschikbaarheid. Ik voorspel koffiepauzes.",
-  "Onze AI plant zo goed… zelfs de toekomst vraagt om feedback.",
-  "Onze AI leert van data. Ik leer van fouten. Ik heb dus meer werk.",
-  "AI doet de planning. Ik doe de emotionele schade.",
-  "Met AI wordt planning kunstmatige intelligentie, zonder AI wordt het natuurlijke chaos.",
-  "Onze AI plant zo strak, zelfs een Zwitsers uurwerk vraagt om tips.",
-  "Ik vroeg AI om een planning. AI vroeg om betere medewerkers-data. We hebben allebei verwachtingen die niet worden waargemaakt.",
-  "Onze AI gebruikt machine learning. Ik gebruik trial & error. Vooral error.",
-];
-
-const solvePhases = [
-  { label: "Constraints inladen", icon: "📋" },
-  { label: "Medewerkers toewijzen", icon: "👥" },
-  { label: "ATW-regels controleren", icon: "⚖️" },
-  { label: "Conflicten oplossen", icon: "🔧" },
-  { label: "Rooster optimaliseren", icon: "✨" },
-  { label: "Laatste controles", icon: "✅" },
-];
 
 function useTypingText(text: string, speed = 40) {
   const [displayed, setDisplayed] = useState("");
@@ -56,7 +34,9 @@ function useTypingText(text: string, speed = 40) {
 }
 
 function RobotQuoteBubble() {
-  const [quote] = useState(() => robotQuotes[Math.floor(Math.random() * robotQuotes.length)]);
+  const { t } = useTranslation();
+  const quotes = t("robot.quotes", { returnObjects: true }) as string[];
+  const [quote] = useState(() => quotes[Math.floor(Math.random() * quotes.length)]);
   const typed = useTypingText(quote, 45);
 
   return (
@@ -65,18 +45,25 @@ function RobotQuoteBubble() {
         {typed}
         <span className="inline-block w-[2px] h-4 bg-primary ml-0.5 animate-pulse align-middle" />
       </p>
-      {/* Speech bubble tail pointing left toward robot's mouth */}
       <div className="absolute top-1/2 -right-2 -translate-y-1/2 w-4 h-4 bg-card border-r border-b rotate-45 rounded-sm" />
     </div>
   );
 }
 
 function SolvingOverlay() {
+  const { t } = useTranslation();
   const [elapsed, setElapsed] = useState(0);
   const [phase, setPhase] = useState(0);
-
   const progress = Math.min(elapsed / 15, 0.95);
 
+  const solvePhases = [
+    { label: t("solving.loadConstraints"), icon: "📋" },
+    { label: t("solving.assignEmployees"), icon: "👥" },
+    { label: t("solving.checkAtw"), icon: "⚖️" },
+    { label: t("solving.resolveConflicts"), icon: "🔧" },
+    { label: t("solving.optimizeRoster"), icon: "✨" },
+    { label: t("solving.finalChecks"), icon: "✅" },
+  ];
 
   useEffect(() => {
     const timer = setInterval(() => setElapsed((e) => e + 1), 1000);
@@ -91,7 +78,6 @@ function SolvingOverlay() {
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-background/80 backdrop-blur-sm">
       <div className="animate-[fade-in_0.3s_ease-out] flex flex-col items-center gap-6">
-        {/* Circular progress with robot */}
         <div className="relative w-44 h-44">
           <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
             <circle cx="50" cy="50" r="42" fill="none" strokeWidth="4" className="stroke-muted" />
@@ -104,9 +90,8 @@ function SolvingOverlay() {
           <img src={robotImg} alt="Solving..." className="absolute inset-4 object-contain drop-shadow-xl animate-[orbit_360s_ease-in-out_infinite]" />
         </div>
 
-        <h2 className="text-2xl font-bold text-foreground">Rooster wordt opgelost</h2>
+        <h2 className="text-2xl font-bold text-foreground">{t("solving.title")}</h2>
 
-        {/* Timeline steps */}
         <div className="flex items-center gap-2">
           {solvePhases.map((step, i) => {
             const status = i < phase ? "done" : i === phase ? "active" : "pending";
@@ -128,11 +113,9 @@ function SolvingOverlay() {
           })}
         </div>
 
-        {/* Active phase label */}
         <p className="text-sm text-muted-foreground font-medium animate-pulse">
           {solvePhases[phase]?.label}…
         </p>
-
 
         <span className="text-xs text-muted-foreground font-mono">{elapsed}s</span>
       </div>
@@ -140,9 +123,8 @@ function SolvingOverlay() {
   );
 }
 
-
-
 export default function Index() {
+  const { t } = useTranslation();
   const [dark, setDark] = useState(() => document.documentElement.classList.contains("dark"));
   const [solved, setSolved] = useState(false);
   const [solving, setSolving] = useState(false);
@@ -156,7 +138,6 @@ export default function Index() {
 
   const handleSolve = () => {
     setSolving(true);
-    // Simulate solve duration (replace with real API call later)
     setTimeout(() => {
       setSolving(false);
       setSolved(true);
@@ -169,18 +150,18 @@ export default function Index() {
       <PlannerSidebar onSolve={handleSolve} onJsonLoaded={() => setJsonLoaded(true)} />
 
       <div className="flex-1 flex flex-col min-w-0">
-        {/* Top bar */}
         <header className="flex items-center justify-between gap-4 border-b bg-card px-4 py-2.5 shadow-sm">
           <div className="flex items-center gap-3">
-             <h1 className="text-lg font-bold tracking-tight">Planbition X</h1>
+            <h1 className="text-lg font-bold tracking-tight">{t("app.title")}</h1>
           </div>
           <div className="flex items-center gap-2">
             {solved && (
               <Button variant="outline" size="sm" className="gap-1.5 text-xs">
                 <Download className="h-3.5 w-3.5" />
-                Download JSON
+                {t("app.downloadJson")}
               </Button>
             )}
+            <LanguageSwitcher />
             <div className="flex items-center gap-1.5 ml-1">
               <Sun className="h-3.5 w-3.5 text-muted-foreground" />
               <Switch checked={dark} onCheckedChange={setDark} className="scale-75" />
@@ -189,9 +170,7 @@ export default function Index() {
           </div>
         </header>
 
-        {/* Main content area */}
         <div className="flex-1 flex min-h-0">
-          {/* Content */}
           <div className="flex-1 flex flex-col min-w-0 overflow-visible">
             {solved ? (
               <main className="flex-1 overflow-y-auto overflow-x-hidden p-5 space-y-5">
@@ -209,7 +188,6 @@ export default function Index() {
                   {jsonLoaded && <JsonDataViewer data={demoScheduleData} />}
                 </div>
 
-                {/* Grote robot gecentreerd — als JSON nog NIET geladen */}
                 {!jsonLoaded && (
                   <div className="absolute inset-0 flex items-center justify-center z-40 pointer-events-none">
                     <div className="relative pointer-events-auto">
@@ -222,15 +200,14 @@ export default function Index() {
                         <RobotQuoteBubble />
                       </div>
                     </div>
-                    <p className="absolute bottom-[12%] text-lg font-semibold text-muted-foreground">Upload een JSON-bestand om te beginnen</p>
+                    <p className="absolute bottom-[12%] text-lg font-semibold text-muted-foreground">{t("robot.uploadJson")}</p>
                   </div>
                 )}
 
-                {/* Robot fixed rechtsonder — verschijnt alleen als JSON geladen en chat dicht */}
                 {jsonLoaded && !chatOpen && (
                   <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2 cursor-pointer" onClick={() => setChatOpen(true)}>
                     <div className="relative bg-primary text-primary-foreground shadow-xl rounded-2xl px-4 py-3 max-w-[230px] animate-[bounce_2s_ease-in-out_3] mr-4">
-                      <p className="text-sm font-semibold leading-snug">Hey! 👋 Klik op mij om je roosterwensen door te geven in de chat!</p>
+                      <p className="text-sm font-semibold leading-snug">{t("robot.clickMe")}</p>
                       <div className="absolute -bottom-2 right-6 w-4 h-4 bg-primary rotate-45 rounded-sm" />
                     </div>
                     <img
@@ -244,13 +221,12 @@ export default function Index() {
             )}
           </div>
 
-          {/* AI Chat side panel — works both pre-solve (AiBriefingChat) and post-solve (PostSolveChat) */}
           {(solved || (jsonLoaded && !solved)) && (
             <>
               {solved && !chatOpen && (
                 <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2 cursor-pointer" onClick={() => setChatOpen(true)}>
                   <div className="relative bg-primary text-primary-foreground shadow-xl rounded-2xl px-4 py-3 max-w-[230px] animate-[bounce_2s_ease-in-out_3] mr-4">
-                    <p className="text-sm font-semibold leading-snug">Hey! 👋 Klik op mij, dan help ik je met het rooster!</p>
+                    <p className="text-sm font-semibold leading-snug">{t("robot.clickMePost")}</p>
                     <div className="absolute -bottom-2 right-6 w-4 h-4 bg-primary rotate-45 rounded-sm" />
                   </div>
                   <img
@@ -272,7 +248,7 @@ export default function Index() {
                     <div className="flex items-center justify-between px-4 py-3 border-b">
                       <div className="flex items-center gap-2">
                         <MessageCircle className="h-4 w-4 text-primary" />
-                        <h3 className="text-sm font-semibold">{solved ? "AI Assistent" : "AI Briefing"}</h3>
+                        <h3 className="text-sm font-semibold">{solved ? t("chat.aiAssistant") : t("chat.aiBriefing")}</h3>
                       </div>
                       <Tooltip>
                         <TooltipTrigger asChild>
@@ -283,7 +259,7 @@ export default function Index() {
                             <PanelRightClose className="h-4 w-4" />
                           </button>
                         </TooltipTrigger>
-                        <TooltipContent side="left">Paneel sluiten</TooltipContent>
+                        <TooltipContent side="left">{t("sidebar.closePanel")}</TooltipContent>
                       </Tooltip>
                     </div>
                     <div className="flex-1 min-h-0">
