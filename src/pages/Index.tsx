@@ -223,7 +223,7 @@ export default function Index() {
       {solving && <SolvingOverlay />}
       <PlannerSidebar 
         onSolve={handleSolve} 
-        onJsonLoaded={() => setJsonLoaded(true)} 
+        onJsonLoaded={handleJsonLoaded} 
         collapsed={sidebarCollapsed}
         onCollapsedChange={setSidebarCollapsed}
       />
