@@ -258,6 +258,12 @@ export default function Index() {
         onJsonLoaded={handleJsonLoaded} 
         collapsed={sidebarCollapsed}
         onCollapsedChange={setSidebarCollapsed}
+        atw={atw}
+        setAtw={setAtw}
+        soft={soft}
+        setSoft={setSoft}
+        solver={solver}
+        setSolver={setSolver}
       />
 
       <div className="flex-1 flex flex-col min-w-0">
