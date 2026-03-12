@@ -145,7 +145,7 @@
 
 @layer components {
   .shift-badge {
-    @apply inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-semibold leading-tight shadow-sm;
+    @apply inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md text-xs font-semibold leading-tight shadow-sm;
   }
   .shift-early {
     background: hsl(var(--shift-early) / 0.15);
