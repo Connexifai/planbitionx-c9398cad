@@ -249,7 +249,7 @@ export function parseSolverResponse(request: RawSchedule, response: SolverRespon
     let totalHours = 0;
 
     for (const a of assignments) {
-      const dateKey = format(parseISO(a.scheduleDate), "yyyy-MM-dd");
+      const dateKey = format(parseISO(a.startTime), "yyyy-MM-dd");
       const dayIdx = resolveDayIndex(dateKey);
       if (dayIdx === undefined) continue;
 
