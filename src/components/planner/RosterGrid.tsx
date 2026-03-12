@@ -70,17 +70,13 @@ function FillRateIndicator({ filled, target, pct }: { filled: number; target: nu
   );
 }
 
-const ROW_HEIGHT = 74;
-
 const EmployeeRow = memo(function EmployeeRow({
   emp,
-  rowIdx,
   numDays,
   days,
   t,
 }: {
   emp: RosterEmployee;
-  rowIdx: number;
   numDays: number;
   days: DayColumn[];
   t: (key: string) => string;
@@ -90,7 +86,6 @@ const EmployeeRow = memo(function EmployeeRow({
       className="grid border-b border-border/60 transition-colors hover:bg-accent/30"
       style={{
         gridTemplateColumns: `230px repeat(${numDays}, minmax(85px, 1fr))`,
-        height: ROW_HEIGHT,
       }}
     >
       <div className="flex flex-col justify-center gap-0 px-3 py-0.5 border-r">
