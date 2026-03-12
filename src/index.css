@@ -171,23 +171,23 @@
   /* Dark mode shift badges with better contrast */
   .dark .shift-early {
     background: hsl(152 70% 35% / 0.25);
-    color: hsl(152 85% 70%);
-    border: 1.5px solid hsl(152 70% 45% / 0.6);
+    color: hsl(152 90% 78%);
+    border: 2px solid hsl(152 70% 50% / 0.7);
   }
   .dark .shift-day {
     background: hsl(35 95% 45% / 0.25);
-    color: hsl(40 100% 75%);
-    border: 1.5px solid hsl(35 95% 55% / 0.6);
+    color: hsl(40 100% 82%);
+    border: 2px solid hsl(35 95% 60% / 0.7);
   }
   .dark .shift-late {
     background: hsl(217 80% 55% / 0.25);
-    color: hsl(210 100% 80%);
-    border: 1.5px solid hsl(217 80% 65% / 0.6);
+    color: hsl(210 100% 88%);
+    border: 2px solid hsl(217 80% 70% / 0.7);
   }
   .dark .shift-night {
     background: hsl(270 70% 50% / 0.25);
-    color: hsl(275 90% 85%);
-    border: 1.5px solid hsl(270 70% 60% / 0.6);
+    color: hsl(275 90% 92%);
+    border: 2px solid hsl(270 70% 65% / 0.7);
   }
 
   .roster-scroll {
