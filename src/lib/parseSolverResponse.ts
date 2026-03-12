@@ -279,8 +279,15 @@ export function parseSolverResponse(request: RawSchedule, response: SolverRespon
     const maxHours = emp.MaxHoursPerWeek || 48;
     const hoursPercent = Math.round((totalHours / maxHours) * 100);
 
+    // Parse name: split on space, last part is last name, rest is first name(s)
+    const nameParts = emp.Name.trim().split(/\s+/);
+    const lastName = nameParts.length > 1 ? nameParts.pop()! : nameParts[0];
+    const firstName = nameParts.join(" ");
+
     employees.push({
       name: emp.Name,
+      firstName,
+      lastName,
       id: emp.PersonId,
       contractId: emp.ContractId,
       tags,
@@ -291,12 +298,12 @@ export function parseSolverResponse(request: RawSchedule, response: SolverRespon
     });
   }
 
-  // Sort: employees with shifts first, then by name
+  // Sort: employees with shifts first, then by last name alphabetically
   employees.sort((a, b) => {
     const aHasShifts = a.shifts.some((s) => s.type !== null);
     const bHasShifts = b.shifts.some((s) => s.type !== null);
     if (aHasShifts !== bHasShifts) return aHasShifts ? -1 : 1;
-    return a.name.localeCompare(b.name);
+    return a.lastName.localeCompare(b.lastName);
   });
 
   // Build demand map: shift name → demand per day
