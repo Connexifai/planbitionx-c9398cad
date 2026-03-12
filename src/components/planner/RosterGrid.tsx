@@ -88,12 +88,9 @@ const EmployeeRow = memo(function EmployeeRow({
         gridTemplateColumns: `230px repeat(${numDays}, minmax(85px, 1fr))`,
       }}
     >
-      <div className="flex flex-col justify-center gap-0 px-3 py-0.5 border-r">
+      <div className="flex flex-col justify-center gap-0 px-3 py-1 border-r">
         <p className="text-[12px] font-semibold leading-tight truncate">
           {emp.lastName}, <span className="font-normal">{emp.firstName}</span>
-        </p>
-        <p className="text-[10px] text-muted-foreground leading-tight tabular-nums truncate">
-          {emp.contractId} &nbsp; {emp.id} &nbsp; {emp.tags.join("  ")}
         </p>
         {emp.tags.length > 0 && (
           <div className="flex flex-wrap gap-0.5">
@@ -104,10 +101,6 @@ const EmployeeRow = memo(function EmployeeRow({
             ))}
           </div>
         )}
-        <div className="flex items-center gap-1.5">
-          <span className="text-[10px] text-muted-foreground font-medium tabular-nums">{emp.hours}</span>
-          <HoursBar percent={emp.hoursPercent} />
-        </div>
       </div>
 
       {emp.shifts.map((shift, i) => (
