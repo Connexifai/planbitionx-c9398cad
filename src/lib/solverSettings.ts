@@ -93,11 +93,11 @@ const levelValues = [0, 0.3, 0.6, 1.0];
 /** Build the API payload fields from UI settings */
 export function buildSettingsPayload(atw: AtwConstraints, soft: SoftConstraints, solver: SolverSettings) {
   const Settings: Record<string, unknown> = {
-    TimeLimitSeconds: timeLimitValues[solver.timeLimitIndex] ?? 30,
-    Seed: solver.seed,
+    time_limit_seconds: timeLimitValues[solver.timeLimitIndex] ?? 30,
+    seed: solver.seed,
   };
   if (plateauStopValues[solver.plateauStopIndex] > 0) {
-    Settings.PlateauStopSeconds = plateauStopValues[solver.plateauStopIndex];
+    Settings.plateau_stop_seconds = plateauStopValues[solver.plateauStopIndex];
   }
 
   const HardConstraints: Record<string, unknown> = {};
