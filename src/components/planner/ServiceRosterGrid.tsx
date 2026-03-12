@@ -166,17 +166,18 @@ export function ServiceRosterGrid({ data }: ServiceRosterGridProps) {
                 return (
                   <td
                     key={dayIdx}
-                    className={`border-r last:border-r-0 px-3 py-2 align-top relative ${
+                    className={`border-r last:border-r-0 px-3 py-2 align-top ${
                       d.weekend ? "bg-weekend" : ""
                     }`}
                   >
-                    {target > 0 && (() => {
-                      const pct = target > 0 ? Math.round((count / target) * 100) : 0;
-                      const color = pct >= 95 ? "text-kpi-assignments" : pct >= 85 ? "text-kpi-unfilled" : "text-destructive";
-                      return <span className={`absolute top-1 right-1.5 text-[10px] font-bold ${color}`}>{pct}%</span>;
-                    })()}
-                    <div className="mb-1">
+                    <div className="flex items-center justify-between mb-1">
                       <CountBadge count={count} target={target} />
+                      {target > 0 && (() => {
+                        const pct = Math.round((count / target) * 100);
+                        const color = pct >= 95 ? "text-kpi-assignments" : pct >= 85 ? "text-kpi-unfilled" : "text-destructive";
+                        const bgColor = pct >= 95 ? "bg-kpi-assignments/15" : pct >= 85 ? "bg-kpi-unfilled/15" : "bg-destructive/15";
+                        return <span className={`text-[12px] font-extrabold ${color} ${bgColor} px-1.5 py-0.5 rounded-md`}>{pct}%</span>;
+                      })()}
                     </div>
                     {emps.map((name, nIdx) => (
                       <div
