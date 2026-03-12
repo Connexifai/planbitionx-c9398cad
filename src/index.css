@@ -145,27 +145,27 @@
 
 @layer components {
   .shift-badge {
-    @apply inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold leading-tight shadow-sm;
+    @apply inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold leading-tight shadow-sm;
   }
   .shift-early {
     background: hsl(var(--shift-early) / 0.15);
-    color: hsl(152 65% 32%);
-    border: 1.5px solid hsl(var(--shift-early) / 0.4);
+    color: hsl(152 65% 28%);
+    border: 2px solid hsl(var(--shift-early) / 0.5);
   }
   .shift-day {
     background: hsl(var(--shift-day) / 0.15);
-    color: hsl(32 90% 38%);
-    border: 1.5px solid hsl(var(--shift-day) / 0.4);
+    color: hsl(32 90% 32%);
+    border: 2px solid hsl(var(--shift-day) / 0.5);
   }
   .shift-late {
     background: hsl(var(--shift-late) / 0.15);
-    color: hsl(217 80% 40%);
-    border: 1.5px solid hsl(var(--shift-late) / 0.4);
+    color: hsl(217 80% 32%);
+    border: 2px solid hsl(var(--shift-late) / 0.5);
   }
   .shift-night {
     background: hsl(var(--shift-night) / 0.15);
-    color: hsl(270 65% 40%);
-    border: 1.5px solid hsl(var(--shift-night) / 0.4);
+    color: hsl(270 65% 32%);
+    border: 2px solid hsl(var(--shift-night) / 0.5);
   }
 
   /* Dark mode shift badges with better contrast */
