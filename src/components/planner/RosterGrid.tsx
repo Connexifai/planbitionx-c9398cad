@@ -178,10 +178,12 @@ export function RosterGrid({ data }: RosterGridProps) {
           {days.map((d, i) => (
             <div
               key={i}
-              className={`flex flex-col items-center justify-center gap-0.5 py-3 text-center border-r last:border-r-0 ${d.weekend ? "bg-weekend" : ""}`}
+              className={`flex items-center justify-between gap-1 px-2 py-2 border-r last:border-r-0 ${d.weekend ? "bg-weekend" : ""}`}
             >
-              <span className="text-[13px] font-bold text-foreground">{t(`days.${d.dayKey}`)}</span>
-              <span className="text-[12px] font-medium text-muted-foreground">{d.date}</span>
+              <div className="flex flex-col items-start">
+                <span className="text-[13px] font-bold text-foreground leading-tight">{t(`days.${d.dayKey}`)}</span>
+                <span className="text-[11px] font-medium text-muted-foreground">{d.date}</span>
+              </div>
               <FillRateIndicator filled={dayFillRates[i].filled} target={dayFillRates[i].target} pct={dayFillRates[i].pct} />
             </div>
           ))}
