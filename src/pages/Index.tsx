@@ -220,6 +220,8 @@ export default function Index() {
       const basePayload = JSON.parse(requestRawJson);
       const settingsPayload = buildSettingsPayload(atw, soft, solver);
       const mergedPayload = { ...basePayload, ...settingsPayload };
+      console.log("Settings payload:", JSON.stringify(settingsPayload, null, 2));
+      console.log("Merged payload keys:", Object.keys(mergedPayload));
 
       const res = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/solve`,
