@@ -376,7 +376,7 @@ export function PlannerSidebar({
               </Tooltip>
             </div>
             <div className="flex-1 overflow-y-auto roster-scroll px-4 py-3">
-              {contentMap[activeSection]}
+              {renderSection()}
             </div>
           </div>
         )}
