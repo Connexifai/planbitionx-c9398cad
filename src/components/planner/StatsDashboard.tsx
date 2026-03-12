@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
+  Line, ComposedChart,
 } from "recharts";
 import { Users, TrendingUp, AlertTriangle, Clock, Target, BarChart3 } from "lucide-react";
 import { useTranslation } from "react-i18next";
