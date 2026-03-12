@@ -198,18 +198,18 @@ export function RosterGrid({ data }: RosterGridProps) {
             return (
               <div
                 key={emp.id}
+                ref={rowVirtualizer.measureElement}
+                data-index={virtualRow.index}
                 style={{
                   position: "absolute",
                   top: 0,
                   left: 0,
                   width: "100%",
-                  height: `${virtualRow.size}px`,
                   transform: `translateY(${virtualRow.start}px)`,
                 }}
               >
                 <EmployeeRow
                   emp={emp}
-                  rowIdx={virtualRow.index}
                   numDays={numDays}
                   days={days}
                   t={t}
