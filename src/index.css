@@ -216,3 +216,66 @@
 .robot-float {
   animation: orbit 4s ease-in-out infinite;
 }
+
+@keyframes pulse-x {
+  0%, 100% {
+    transform: rotate(45deg) scale(0.85);
+    opacity: 0.15;
+  }
+  50% {
+    transform: rotate(45deg) scale(1.15);
+    opacity: 0.35;
+  }
+}
+
+@keyframes pulse-x-glow {
+  0%, 100% {
+    opacity: 0;
+    transform: rotate(45deg) scale(0.9);
+  }
+  50% {
+    opacity: 0.2;
+    transform: rotate(45deg) scale(1.2);
+  }
+}
+
+.pulsating-x {
+  position: relative;
+  width: 120vmax;
+  height: 120vmax;
+}
+
+.pulsating-x::before,
+.pulsating-x::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform-origin: center;
+  border-radius: 2rem;
+  background: linear-gradient(
+    180deg,
+    hsl(var(--primary) / 0.6) 0%,
+    hsl(var(--primary) / 0.1) 100%
+  );
+  animation: pulse-x 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.pulsating-x::before {
+  width: 18vmax;
+  height: 120vmax;
+  margin-left: -9vmax;
+  margin-top: -60vmax;
+}
+
+.pulsating-x::after {
+  width: 120vmax;
+  height: 18vmax;
+  margin-left: -60vmax;
+  margin-top: -9vmax;
+}
+
+/* Glow layer via box-shadow on a wrapper pseudo */
+.pulsating-x {
+  filter: blur(8px);
+}
