@@ -92,12 +92,13 @@ const levelValues = [0, 0.3, 0.6, 1.0];
 
 /** Build the API payload fields from UI settings */
 export function buildSettingsPayload(atw: AtwConstraints, soft: SoftConstraints, solver: SolverSettings) {
-  const Settings: Record<string, unknown> = {
+  // Root-level solver settings (snake_case as expected by the API)
+  const rootSettings: Record<string, unknown> = {
     time_limit_seconds: timeLimitValues[solver.timeLimitIndex] ?? 30,
     seed: solver.seed,
   };
   if (plateauStopValues[solver.plateauStopIndex] > 0) {
-    Settings.plateau_stop_seconds = plateauStopValues[solver.plateauStopIndex];
+    rootSettings.plateau_stop_seconds = plateauStopValues[solver.plateauStopIndex];
   }
 
   const HardConstraints: Record<string, unknown> = {};
@@ -121,5 +122,5 @@ export function buildSettingsPayload(atw: AtwConstraints, soft: SoftConstraints,
   SoftConstraints.MaxRotationBlock = soft.maxRotationBlock;
   SoftConstraints.DistributeOpenShifts = soft.distributeOpen;
 
-  return { Settings, HardConstraints, SoftConstraints };
+  return { ...rootSettings, HardConstraints, SoftConstraints };
 }
