@@ -317,13 +317,17 @@ export function StatsDashboard({ data }: StatsDashboardProps) {
               </ComposedChart>
               </ResponsiveContainer>
             </div>
-            <div className="flex items-center justify-center gap-4 mt-2 shrink-0">
+            <div className="flex items-center justify-center gap-4 mt-2 shrink-0 flex-wrap">
               {Object.entries({ vroeg: t("grid.early"), dag: t("grid.day"), laat: t("grid.late"), nacht: t("grid.night") }).map(([key, label]) => (
                 <span key={key} className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
                   <span className="w-3 h-3 rounded-sm" style={{ backgroundColor: stats.shiftTypeColors[key] }} />
                   {label}
                 </span>
               ))}
+              <span className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                <span className="w-4 h-0.5 rounded-full" style={{ backgroundColor: "hsl(152, 60%, 46%)" }} />
+                {t("stats.fillRate")}
+              </span>
             </div>
           </CardContent>
         </Card>
