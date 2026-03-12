@@ -362,26 +362,44 @@ export function StatsDashboard({ data }: StatsDashboardProps) {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-semibold">{t("stats.qualificationDist")}</CardTitle>
           </CardHeader>
-          <CardContent className="flex items-center justify-center">
-            <ResponsiveContainer width="100%" height={200}>
-              <PieChart>
-                <Pie
-                  data={stats.qualificationData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={50}
-                  outerRadius={80}
-                  dataKey="value"
-                  label={({ name, value }) => `${name} ${value}%`}
-                  labelLine={false}
-                >
-                  {stats.qualificationData.map((_, i) => (
-                    <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip contentStyle={{ fontSize: 12, borderRadius: 8 }} />
-              </PieChart>
-            </ResponsiveContainer>
+          <CardContent>
+            <div className="flex items-center gap-4">
+              <ResponsiveContainer width="60%" height={200}>
+                <PieChart>
+                  <Pie
+                    data={stats.qualificationData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={50}
+                    outerRadius={80}
+                    dataKey="value"
+                    labelLine={false}
+                  >
+                    {stats.qualificationData.map((_, i) => (
+                      <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    formatter={(value: number, name: string) => [`${value}%`, name]}
+                    contentStyle={{ fontSize: 12, borderRadius: 8 }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="flex flex-col gap-2">
+                {stats.qualificationData.map((item, i) => (
+                  <div key={item.name} className="flex items-center gap-2">
+                    <span
+                      className="w-3 h-3 rounded-sm shrink-0"
+                      style={{ backgroundColor: CHART_COLORS[i % CHART_COLORS.length] }}
+                    />
+                    <span className="text-xs text-foreground font-medium whitespace-nowrap">
+                      {item.name}
+                    </span>
+                    <span className="text-xs text-muted-foreground font-semibold">{item.value}%</span>
+                  </div>
+                ))}
+              </div>
+            </div>
           </CardContent>
         </Card>
 
