@@ -167,6 +167,11 @@ export default function Index() {
   const [requestData, setRequestData] = useState<any>(null);
   const [requestRawJson, setRequestRawJson] = useState<string | null>(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
+  const [solverExplanations, setSolverExplanations] = useState<any[]>([]);
+  const [solverStatistics, setSolverStatistics] = useState<any>(null);
+  const [atw, setAtw] = useState<AtwConstraints>(defaultAtw);
+  const [soft, setSoft] = useState<SoftConstraints>(defaultSoft);
+  const [solver, setSolver] = useState<SolverSettings>(defaultSolver);
 
   const handleJsonLoaded = (rawJson?: string) => {
     setJsonLoaded(true);
