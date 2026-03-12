@@ -70,7 +70,7 @@ function FillRateIndicator({ filled, target, pct }: { filled: number; target: nu
   );
 }
 
-const ROW_HEIGHT = 64;
+const ROW_HEIGHT = 74;
 
 const EmployeeRow = memo(function EmployeeRow({
   emp,
@@ -93,21 +93,24 @@ const EmployeeRow = memo(function EmployeeRow({
         height: ROW_HEIGHT,
       }}
     >
-      <div className="flex flex-col justify-center gap-0 px-3 py-1 border-r">
-        <p className="text-[13px] font-semibold leading-tight truncate">
+      <div className="flex flex-col justify-center gap-0 px-3 py-0.5 border-r">
+        <p className="text-[12px] font-semibold leading-tight truncate">
           {emp.lastName}, <span className="font-normal">{emp.firstName}</span>
         </p>
+        <p className="text-[10px] text-muted-foreground leading-tight tabular-nums truncate">
+          {emp.contractId} &nbsp; {emp.id} &nbsp; {emp.tags.join("  ")}
+        </p>
         {emp.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1">
+          <div className="flex flex-wrap gap-0.5">
             {emp.tags.map(tag => (
-              <Badge key={tag} variant="secondary" className="text-[10px] px-1.5 py-0 h-4 font-normal">
+              <Badge key={tag} variant="secondary" className="text-[9px] px-1 py-0 h-3.5 font-normal leading-none">
                 {tag}
               </Badge>
             ))}
           </div>
         )}
-        <div className="flex items-center gap-2">
-          <span className="text-[11px] text-muted-foreground font-medium tabular-nums">{emp.hours}</span>
+        <div className="flex items-center gap-1.5">
+          <span className="text-[10px] text-muted-foreground font-medium tabular-nums">{emp.hours}</span>
           <HoursBar percent={emp.hoursPercent} />
         </div>
       </div>
