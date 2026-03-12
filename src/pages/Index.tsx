@@ -171,23 +171,38 @@ export default function Index() {
     document.documentElement.classList.toggle("dark", dark);
   }, [dark]);
 
-  const handleSolve = () => {
+  const [solveStartTime, setSolveStartTime] = useState<number>(0);
+
+  const handleSolve = async () => {
+    if (!requestData) return;
     setSolving(true);
-    setTimeout(async () => {
-      try {
-        const res = await fetch("/data/schedule-response.json");
-        const solverResponse: SolverResponse = await res.json();
-        if (requestData) {
-          const roster = parseSolverResponse(requestData, solverResponse);
-          setRosterData(roster);
+    setSolveStartTime(Date.now());
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/solve`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+          body: JSON.stringify(requestData),
         }
-      } catch (e) {
-        console.error("Failed to load solver response:", e);
+      );
+      if (!res.ok) {
+        const err = await res.text();
+        throw new Error(`Solver error ${res.status}: ${err}`);
       }
-      setSolving(false);
+      const solverResponse: SolverResponse = await res.json();
+      const roster = parseSolverResponse(requestData, solverResponse);
+      setRosterData(roster);
       setSolved(true);
-      setSidebarCollapsed(true); // Sidebar inklappen na solven
-    }, 36000);
+      setSidebarCollapsed(true);
+    } catch (e) {
+      console.error("Failed to solve:", e);
+    } finally {
+      setSolving(false);
+    }
   };
 
   return (
@@ -225,7 +240,7 @@ export default function Index() {
           <div className="flex-1 flex flex-col min-w-0 overflow-visible">
             {solved ? (
               <main className="flex-1 overflow-y-auto overflow-x-hidden p-5 space-y-5">
-                <KpiCards solved data={rosterData ?? undefined} solveTime={36000} />
+                <KpiCards solved data={rosterData ?? undefined} solveTime={solveStartTime ? Date.now() - solveStartTime : 0} />
                 <RosterTabs value={activeTab} onChange={setActiveTab} />
                 {activeTab === "roster" && <RosterGrid data={rosterData ?? undefined} />}
                 {activeTab === "dienst" && <ServiceRosterGrid data={rosterData ?? undefined} />}
