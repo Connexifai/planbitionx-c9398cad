@@ -21,6 +21,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { Download, Moon, Sun, MessageCircle, PanelRightClose } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import robotImg from "@/assets/robot-assistant.png";
 
@@ -212,7 +213,10 @@ export default function Index() {
   const [solveStartTime, setSolveStartTime] = useState<number>(0);
 
   const handleSolve = async () => {
-    if (!requestRawJson) return;
+    if (!requestRawJson) {
+      toast.error(t("planner.noJsonTitle", "Geen data geladen"), { description: t("planner.noJsonDesc", "Laad eerst een JSON-bestand via de sidebar voordat je oplost.") });
+      return;
+    }
     setSolving(true);
     setSolveStartTime(Date.now());
     try {
@@ -220,8 +224,6 @@ export default function Index() {
       const basePayload = JSON.parse(requestRawJson);
       const settingsPayload = buildSettingsPayload(atw, soft, solver);
       const mergedPayload = { ...basePayload, ...settingsPayload };
-      console.log("Settings payload:", JSON.stringify(settingsPayload, null, 2));
-      console.log("Merged payload keys:", Object.keys(mergedPayload));
 
       const res = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/solve`,
