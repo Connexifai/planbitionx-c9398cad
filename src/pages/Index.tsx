@@ -151,9 +151,11 @@ export default function Index() {
   useEffect(() => {
     if (jsonLoaded && !scheduleData) {
       fetch("/data/schedule-request.json")
-        .then((r) => r.json())
-        .then((raw) => {
+        .then((r) => r.text())
+        .then((text) => {
+          const raw = JSON.parse(text);
           setRequestData(raw);
+          setRequestRawJson(text);
           setScheduleData(parseRawScheduleJson(raw));
         })
         .catch(console.error);
