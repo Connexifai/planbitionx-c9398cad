@@ -15,7 +15,7 @@ serve(async (req) => {
   }
 
   try {
-    const body = await req.json();
+    const rawBody = await req.text();
 
     console.log("Sending solve request to external API...");
 
@@ -25,7 +25,7 @@ serve(async (req) => {
         "Content-Type": "application/json",
         "X-Api-Key": SOLVER_API_KEY,
       },
-      body: JSON.stringify(body),
+      body: rawBody,
     });
 
     if (!response.ok) {
