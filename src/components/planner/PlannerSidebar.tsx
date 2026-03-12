@@ -305,11 +305,13 @@ export function PlannerSidebar({
 
   const activeDef = sections.find(s => s.id === activeSection)!;
 
-  const contentMap: Record<SectionId, React.ReactNode> = {
-    json: <JsonSection onJsonLoaded={onJsonLoaded} />,
-    atw: <AtwSection />,
-    zachte: <ZachteSection />,
-    solver: <SolverSection />,
+  const renderSection = () => {
+    switch (activeSection) {
+      case "json": return <JsonSection onJsonLoaded={onJsonLoaded} />;
+      case "atw": return <AtwSection />;
+      case "zachte": return <ZachteSection />;
+      case "solver": return <SolverSection />;
+    }
   };
 
   return (
@@ -374,7 +376,7 @@ export function PlannerSidebar({
               </Tooltip>
             </div>
             <div className="flex-1 overflow-y-auto roster-scroll px-4 py-3">
-              {contentMap[activeSection]}
+              {renderSection()}
             </div>
           </div>
         )}
