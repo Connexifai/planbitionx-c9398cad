@@ -216,6 +216,7 @@ function computeStats(data: RosterData, t: (key: string) => string) {
     qualificationData,
     weekdayWeekend,
     shiftTypeCount: shiftLabels.size,
+    shiftTypeColors,
   };
 }
 
