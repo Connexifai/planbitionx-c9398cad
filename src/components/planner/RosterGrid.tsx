@@ -115,7 +115,7 @@ const EmployeeRow = memo(function EmployeeRow({
       {emp.shifts.map((shift, i) => (
         <div
           key={i}
-          className={`flex items-center justify-center px-1 py-2 border-r last:border-r-0 ${days[i]?.weekend ? "bg-weekend" : ""}`}
+          className={`flex items-center justify-center px-0.5 py-1 border-r last:border-r-0 ${days[i]?.weekend ? "bg-weekend" : ""}`}
         >
           <ShiftCell shift={shift} t={t} />
         </div>
