@@ -88,18 +88,59 @@ function LevelSelector({ levels, active }: { levels: string[]; active: number })
 
 /* ── Section content panels ───────────────────────────── */
 
-function JsonSection({ onJsonLoaded }: { onJsonLoaded?: () => void }) {
+function JsonSection({ onJsonLoaded }: { onJsonLoaded?: (rawJson?: string) => void }) {
   const { t } = useTranslation();
   const [loaded, setLoaded] = useState(false);
+  const [jsonText, setJsonText] = useState(`{\n  "Start": "2026-03-30T00:00:00",\n  "End": "2026-04-05T00:00:00",\n  "Shifts": [\n    {\n`);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
-  const handleLoad = () => {
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const text = ev.target?.result as string;
+      setJsonText(text);
+      setLoaded(true);
+      onJsonLoaded?.(text);
+    };
+    reader.readAsText(file);
+  };
+
+  const handleLoadFromTextarea = () => {
     setLoaded(true);
-    onJsonLoaded?.();
+    onJsonLoaded?.(jsonText);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    const file = e.dataTransfer.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const text = ev.target?.result as string;
+      setJsonText(text);
+      setLoaded(true);
+      onJsonLoaded?.(text);
+    };
+    reader.readAsText(file);
   };
 
   return (
     <div className="space-y-3">
-      <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-border bg-accent/50 px-4 py-6 text-center transition-colors hover:border-primary/30 hover:bg-accent cursor-pointer" onClick={handleLoad}>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".json,application/json"
+        className="hidden"
+        onChange={handleFileSelect}
+      />
+      <div
+        className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-border bg-accent/50 px-4 py-6 text-center transition-colors hover:border-primary/30 hover:bg-accent cursor-pointer"
+        onClick={() => fileInputRef.current?.click()}
+        onDragOver={(e) => e.preventDefault()}
+        onDrop={handleDrop}
+      >
         <Upload className="mb-2 h-8 w-8 text-muted-foreground" />
         <p className="text-sm font-medium">{t("sidebar.dragJson")}</p>
         <p className="text-xs text-muted-foreground">{t("sidebar.orClickBrowse")}</p>
@@ -107,13 +148,16 @@ function JsonSection({ onJsonLoaded }: { onJsonLoaded?: () => void }) {
       </div>
       <textarea
         className="w-full h-28 rounded-lg border bg-background px-3 py-2 text-xs font-mono resize-none focus:outline-none focus:ring-1 focus:ring-ring"
-        defaultValue={`{\n  "Start": "2026-03-30T00:00:00",\n  "End": "2026-04-05T00:00:00",\n  "Shifts": [\n    {\n`}
+        value={jsonText}
+        onChange={(e) => setJsonText(e.target.value)}
       />
       <div className="flex gap-2">
-        <Button variant={loaded ? "default" : "outline"} size="sm" className="flex-1 text-xs" onClick={handleLoad}>
+        <Button variant={loaded ? "default" : "outline"} size="sm" className="flex-1 text-xs" onClick={handleLoadFromTextarea}>
           {loaded ? t("sidebar.loaded") : t("sidebar.validateLoad")}
         </Button>
-        <Button variant="outline" size="sm" className="flex-1 text-xs">
+        <Button variant="outline" size="sm" className="flex-1 text-xs" onClick={() => {
+          try { setJsonText(JSON.stringify(JSON.parse(jsonText), null, 2)); } catch {}
+        }}>
           {t("sidebar.format")}
         </Button>
       </div>
