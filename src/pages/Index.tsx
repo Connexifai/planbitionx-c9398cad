@@ -90,9 +90,15 @@ function SolvingOverlay() {
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-background">
       {/* Pulsating X background */}
       <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
-        <div className="pulsating-x" />
+        <div className="pulsating-x">
+          <div className="pulsating-x-blob" />
+          <div className="pulsating-x-blob" />
+          <div className="pulsating-x-blob" />
+          <div className="pulsating-x-blob" />
+          <div className="pulsating-x-blob" />
+        </div>
       </div>
-      <div className="absolute inset-0 bg-background/40" />
+      <div className="absolute inset-0 bg-background/30" />
       <div className="animate-[fade-in_0.3s_ease-out] flex flex-col items-center gap-6">
         <div className="relative w-44 h-44">
           {/* Indeterminate spinning ring */}
