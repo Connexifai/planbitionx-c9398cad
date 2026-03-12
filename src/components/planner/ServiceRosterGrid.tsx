@@ -77,10 +77,12 @@ function DayFillRate({ filled, totalTarget }: { filled: number; totalTarget: num
   if (totalTarget === 0) return <span className="text-xs text-muted-foreground">—</span>;
   const pct = Math.round((filled / totalTarget) * 100);
   const color = pct >= 75 ? "text-kpi-assignments" : pct >= 50 ? "text-kpi-unfilled" : "text-destructive";
+  const bgColor = pct >= 75 ? "bg-kpi-assignments/20" : pct >= 50 ? "bg-kpi-unfilled/20" : "bg-destructive/20";
   return (
-    <span className={`text-xs font-semibold ${color}`}>
-      {filled}/{totalTarget} · {pct}%
-    </span>
+    <div className={`flex flex-col items-center justify-center ${bgColor} rounded-lg px-2 py-1.5 min-w-[44px]`}>
+      <span className={`text-[18px] font-extrabold leading-none ${color}`}>{pct}%</span>
+      <span className={`text-[10px] font-semibold ${color} opacity-80`}>{filled}/{totalTarget}</span>
+    </div>
   );
 }
 
