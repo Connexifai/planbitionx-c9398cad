@@ -88,14 +88,14 @@ const EmployeeRow = memo(function EmployeeRow({
         gridTemplateColumns: `230px repeat(${numDays}, minmax(85px, 1fr))`,
       }}
     >
-      <div className="flex flex-col justify-center gap-0 px-3 py-1 border-r">
-        <p className="text-[12px] font-semibold leading-tight truncate">
-          {emp.lastName}, <span className="font-normal">{emp.firstName}</span>
+      <div className="flex flex-col justify-center gap-0.5 px-3 py-1.5 border-r">
+        <p className="text-[13px] font-bold leading-snug truncate text-foreground">
+          {emp.lastName}, <span className="font-medium">{emp.firstName}</span>
         </p>
         {emp.tags.length > 0 && (
-          <div className="flex flex-wrap gap-0.5">
+          <div className="flex flex-wrap gap-1">
             {emp.tags.map(tag => (
-              <Badge key={tag} variant="secondary" className="text-[9px] px-1 py-0 h-3.5 font-normal leading-none">
+              <Badge key={tag} variant="secondary" className="text-[10px] px-1.5 py-0 h-4 font-medium leading-none">
                 {tag}
               </Badge>
             ))}
