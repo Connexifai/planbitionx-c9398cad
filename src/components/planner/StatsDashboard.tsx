@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
+  Line, ComposedChart,
 } from "recharts";
 import { Users, TrendingUp, AlertTriangle, Clock, Target, BarChart3 } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -296,27 +297,37 @@ export function StatsDashboard({ data }: StatsDashboardProps) {
           <CardContent className="flex-1 flex flex-col min-h-0">
             <div className="flex-1 min-h-0">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={stats.dailyFillRate} barGap={4}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 15%, 90%)" />
-                  <XAxis dataKey="dag" tick={{ fontSize: 11 }} />
-                  <YAxis tick={{ fontSize: 11 }} />
-                  <Tooltip
-                    contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid hsl(220,15%,90%)" }}
-                  />
-                  <Bar dataKey="vroeg" name={t("grid.early")} stackId="a" fill={stats.shiftTypeColors.vroeg} radius={[0, 0, 0, 0]} />
-                  <Bar dataKey="dagType" name={t("grid.day")} stackId="a" fill={stats.shiftTypeColors.dag} />
-                  <Bar dataKey="laat" name={t("grid.late")} stackId="a" fill={stats.shiftTypeColors.laat} />
-                  <Bar dataKey="nacht" name={t("grid.night")} stackId="a" fill={stats.shiftTypeColors.nacht} radius={[4, 4, 0, 0]} />
-                </BarChart>
+              <ComposedChart data={stats.dailyFillRate} barGap={4}>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 15%, 90%)" />
+                <XAxis dataKey="dag" tick={{ fontSize: 11 }} />
+                <YAxis yAxisId="left" tick={{ fontSize: 11 }} />
+                <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 11 }} domain={[0, 100]} tickFormatter={(v) => `${v}%`} />
+                <Tooltip
+                  contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid hsl(220,15%,90%)" }}
+                  formatter={(value: number, name: string) => {
+                    if (name === t("stats.fillRate")) return [`${value}%`, name];
+                    return [value, name];
+                  }}
+                />
+                <Bar yAxisId="left" dataKey="vroeg" name={t("grid.early")} stackId="a" fill={stats.shiftTypeColors.vroeg} radius={[0, 0, 0, 0]} />
+                <Bar yAxisId="left" dataKey="dagType" name={t("grid.day")} stackId="a" fill={stats.shiftTypeColors.dag} />
+                <Bar yAxisId="left" dataKey="laat" name={t("grid.late")} stackId="a" fill={stats.shiftTypeColors.laat} />
+                <Bar yAxisId="left" dataKey="nacht" name={t("grid.night")} stackId="a" fill={stats.shiftTypeColors.nacht} radius={[4, 4, 0, 0]} />
+                <Line yAxisId="right" type="monotone" dataKey="pct" name={t("stats.fillRate")} stroke="hsl(152, 60%, 46%)" strokeWidth={2.5} dot={{ r: 4, fill: "hsl(152, 60%, 46%)" }} />
+              </ComposedChart>
               </ResponsiveContainer>
             </div>
-            <div className="flex items-center justify-center gap-4 mt-2 shrink-0">
+            <div className="flex items-center justify-center gap-4 mt-2 shrink-0 flex-wrap">
               {Object.entries({ vroeg: t("grid.early"), dag: t("grid.day"), laat: t("grid.late"), nacht: t("grid.night") }).map(([key, label]) => (
                 <span key={key} className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
                   <span className="w-3 h-3 rounded-sm" style={{ backgroundColor: stats.shiftTypeColors[key] }} />
                   {label}
                 </span>
               ))}
+              <span className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                <span className="w-4 h-0.5 rounded-full" style={{ backgroundColor: "hsl(152, 60%, 46%)" }} />
+                {t("stats.fillRate")}
+              </span>
             </div>
           </CardContent>
         </Card>
