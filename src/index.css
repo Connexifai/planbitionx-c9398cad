@@ -217,65 +217,92 @@
   animation: orbit 4s ease-in-out infinite;
 }
 
-@keyframes pulse-x {
+@keyframes pulse-x-blob {
   0%, 100% {
-    transform: rotate(45deg) scale(0.85);
-    opacity: 0.15;
+    transform: scale(0.92);
+    opacity: 0.55;
   }
   50% {
-    transform: rotate(45deg) scale(1.15);
-    opacity: 0.35;
+    transform: scale(1.08);
+    opacity: 0.85;
   }
 }
 
-@keyframes pulse-x-glow {
+@keyframes pulse-x-blob-alt {
   0%, 100% {
-    opacity: 0;
-    transform: rotate(45deg) scale(0.9);
+    transform: scale(1.05);
+    opacity: 0.7;
   }
   50% {
-    opacity: 0.2;
-    transform: rotate(45deg) scale(1.2);
+    transform: scale(0.9);
+    opacity: 0.5;
   }
 }
 
 .pulsating-x {
-  position: relative;
-  width: 120vmax;
-  height: 120vmax;
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
 }
 
-.pulsating-x::before,
-.pulsating-x::after {
-  content: '';
+.pulsating-x-blob {
   position: absolute;
+  border-radius: 42%;
+  filter: blur(60px);
+}
+
+/* Top-left arm */
+.pulsating-x-blob:nth-child(1) {
+  width: 38vmax;
+  height: 38vmax;
+  top: 8%;
+  left: 12%;
+  background: radial-gradient(circle, hsl(var(--primary) / 0.5) 0%, hsl(var(--primary) / 0.05) 70%);
+  animation: pulse-x-blob 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Top-right arm */
+.pulsating-x-blob:nth-child(2) {
+  width: 35vmax;
+  height: 35vmax;
+  top: 10%;
+  right: 14%;
+  background: radial-gradient(circle, hsl(var(--primary) / 0.45) 0%, hsl(var(--primary) / 0.03) 70%);
+  animation: pulse-x-blob-alt 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Bottom-left arm */
+.pulsating-x-blob:nth-child(3) {
+  width: 36vmax;
+  height: 36vmax;
+  bottom: 8%;
+  left: 14%;
+  background: radial-gradient(circle, hsl(var(--primary) / 0.4) 0%, hsl(var(--primary) / 0.03) 70%);
+  animation: pulse-x-blob-alt 4s cubic-bezier(0.4, 0, 0.6, 1) infinite 0.5s;
+}
+
+/* Bottom-right arm */
+.pulsating-x-blob:nth-child(4) {
+  width: 40vmax;
+  height: 40vmax;
+  bottom: 6%;
+  right: 10%;
+  background: radial-gradient(circle, hsl(var(--primary) / 0.5) 0%, hsl(var(--primary) / 0.05) 70%);
+  animation: pulse-x-blob 4s cubic-bezier(0.4, 0, 0.6, 1) infinite 0.3s;
+}
+
+/* Center overlap glow */
+.pulsating-x-blob:nth-child(5) {
+  width: 28vmax;
+  height: 28vmax;
   top: 50%;
   left: 50%;
-  transform-origin: center;
-  border-radius: 2rem;
-  background: linear-gradient(
-    180deg,
-    hsl(var(--primary) / 0.6) 0%,
-    hsl(var(--primary) / 0.1) 100%
-  );
-  animation: pulse-x 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-.pulsating-x::before {
-  width: 18vmax;
-  height: 120vmax;
-  margin-left: -9vmax;
-  margin-top: -60vmax;
-}
-
-.pulsating-x::after {
-  width: 120vmax;
-  height: 18vmax;
-  margin-left: -60vmax;
-  margin-top: -9vmax;
-}
-
-/* Glow layer via box-shadow on a wrapper pseudo */
-.pulsating-x {
-  filter: blur(8px);
+  margin-top: -14vmax;
+  margin-left: -14vmax;
+  background: radial-gradient(circle, hsl(var(--primary) / 0.3) 0%, transparent 65%);
+  animation: pulse-x-blob 3.5s cubic-bezier(0.4, 0, 0.6, 1) infinite 0.2s;
+  filter: blur(40px);
 }
