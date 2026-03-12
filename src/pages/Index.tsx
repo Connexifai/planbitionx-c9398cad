@@ -148,8 +148,18 @@ export default function Index() {
   const [requestRawJson, setRequestRawJson] = useState<string | null>(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
 
-  useEffect(() => {
-    if (jsonLoaded && !scheduleData) {
+  const handleJsonLoaded = (rawJson?: string) => {
+    setJsonLoaded(true);
+    if (rawJson) {
+      try {
+        const raw = JSON.parse(rawJson);
+        setRequestData(raw);
+        setRequestRawJson(rawJson);
+        setScheduleData(parseRawScheduleJson(raw));
+      } catch (e) {
+        console.error("Invalid JSON:", e);
+      }
+    } else {
       fetch("/data/schedule-request.json")
         .then((r) => r.text())
         .then((text) => {
@@ -160,7 +170,7 @@ export default function Index() {
         })
         .catch(console.error);
     }
-  }, [jsonLoaded, scheduleData]);
+  };
 
   useEffect(() => {
     if (jsonLoaded) {
@@ -213,7 +223,7 @@ export default function Index() {
       {solving && <SolvingOverlay />}
       <PlannerSidebar 
         onSolve={handleSolve} 
-        onJsonLoaded={() => setJsonLoaded(true)} 
+        onJsonLoaded={handleJsonLoaded} 
         collapsed={sidebarCollapsed}
         onCollapsedChange={setSidebarCollapsed}
       />
