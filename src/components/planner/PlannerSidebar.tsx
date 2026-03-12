@@ -399,14 +399,9 @@ export function PlannerSidebar({
             </div>
           ) : (
             <div className="p-4 pt-4 pb-3 flex flex-col justify-center">
-              <div className="flex gap-2 mb-2">
-                <Button className="flex-1 h-10" style={{ background: "hsl(var(--kpi-assignments))" }} onClick={onSolve}>
-                  ▶ {t("sidebar.solve")}
-                </Button>
-                <Button variant="default" className="flex-1 h-10">
-                  {t("sidebar.sendToApi")}
-                </Button>
-              </div>
+              <Button className="w-full h-10 mb-2" style={{ background: "hsl(var(--kpi-assignments))" }} onClick={onSolve}>
+                ▶ {t("sidebar.solve")}
+              </Button>
               <p className="text-[10px] text-muted-foreground text-center">{t("sidebar.readyIn")}</p>
             </div>
           )}
