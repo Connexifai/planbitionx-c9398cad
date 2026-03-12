@@ -288,7 +288,7 @@ export function StatsDashboard({ data }: StatsDashboardProps) {
       </div>
 
       {/* ── Row 1: Fill Rate + Heatmap ── */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4" style={{ minHeight: 340 }}>
         <Card className="border-border/50 flex flex-col">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-semibold">{t("stats.occupancyPerDay")}</CardTitle>
