@@ -37,9 +37,9 @@ const ShiftCell = memo(function ShiftCell({ shift, t }: { shift: ShiftData; t: (
     <Tooltip>
       <TooltipTrigger asChild>
         <div className={`shift-badge ${cls} cursor-default flex-col items-start w-full gap-0.5`}>
-          <span className="font-bold capitalize text-sm tracking-tight">{shiftTypeLabel[shift.type]}</span>
-          <span className="text-sm opacity-90 font-medium">{shift.time}</span>
-          {role && <span className="text-xs opacity-80 capitalize font-semibold">{role}</span>}
+          <span className="font-semibold capitalize text-[13px] tracking-tight">{shiftTypeLabel[shift.type]}</span>
+          <span className="text-[12px] opacity-90 font-medium">{shift.time}</span>
+          {role && <span className="text-[10px] opacity-75 capitalize font-semibold">{role}</span>}
         </div>
       </TooltipTrigger>
       <TooltipContent side="top">
@@ -68,7 +68,7 @@ function FillRateIndicator({ filled, target, pct }: { filled: number; target: nu
   );
 }
 
-const ROW_HEIGHT = 110;
+const ROW_HEIGHT = 100;
 
 const EmployeeRow = memo(function EmployeeRow({
   emp,
@@ -87,7 +87,7 @@ const EmployeeRow = memo(function EmployeeRow({
     <div
       className={`grid border-b last:border-b-0 transition-colors hover:bg-accent/30 ${rowIdx % 2 === 0 ? "" : "bg-accent/10"}`}
       style={{
-        gridTemplateColumns: `240px repeat(${numDays}, minmax(90px, 1fr))`,
+        gridTemplateColumns: `230px repeat(${numDays}, minmax(85px, 1fr))`,
         height: ROW_HEIGHT,
       }}
     >
@@ -176,7 +176,7 @@ export function RosterGrid({ data }: RosterGridProps) {
         {/* Header */}
         <div
           className="sticky top-0 z-[5] grid border-b bg-card shadow-sm"
-          style={{ gridTemplateColumns: `240px repeat(${numDays}, minmax(90px, 1fr))` }}
+          style={{ gridTemplateColumns: `230px repeat(${numDays}, minmax(85px, 1fr))` }}
         >
           <div className="flex items-center gap-2 px-4 py-3 border-r">
             <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t("grid.employee")}</span>
