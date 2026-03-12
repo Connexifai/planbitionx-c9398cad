@@ -274,7 +274,6 @@ export function parseSolverResponse(request: RawSchedule, response: SolverRespon
     const empType = (emp.Qualifications || []).find((q) => q.Type === "EmployeeType")?.Value;
     const city = (emp.Qualifications || []).find((q) => q.Type === "City")?.Value;
     const tags = [...qualTags];
-    if (empType) tags.push(empType);
 
     const maxHours = emp.MaxHoursPerWeek || 48;
     const hoursPercent = Math.round((totalHours / maxHours) * 100);
