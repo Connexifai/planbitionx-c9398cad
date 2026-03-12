@@ -280,7 +280,7 @@ export function PlannerSidebar({
 }: { 
   onSolve?: () => void; 
   hideFooter?: boolean; 
-  onJsonLoaded?: () => void;
+  onJsonLoaded?: (rawJson?: string) => void;
   collapsed?: boolean;
   onCollapsedChange?: (collapsed: boolean) => void;
 }) {
