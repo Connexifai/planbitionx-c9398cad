@@ -17,6 +17,48 @@ serve(async (req) => {
   try {
     const rawBody = await req.text();
 
+    let payload: Record<string, unknown>;
+    try {
+      payload = JSON.parse(rawBody) as Record<string, unknown>;
+    } catch {
+      return new Response(
+        JSON.stringify({ error: "Invalid JSON payload" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const employees = Array.isArray(payload.Employees) ? payload.Employees : [];
+    payload.Employees = employees.map((employee) => {
+      if (!employee || typeof employee !== "object") return employee;
+
+      const typedEmployee = employee as Record<string, unknown>;
+      const historical = Array.isArray(typedEmployee.HistoricalShifts)
+        ? typedEmployee.HistoricalShifts
+        : [];
+
+      const normalizedHistorical = historical.map((item) => {
+        if (!item || typeof item !== "object") return item;
+        const shift = item as Record<string, unknown>;
+
+        const start = (shift.Start as string | undefined) ?? (shift.StartTime as string | undefined);
+        const end = (shift.End as string | undefined) ?? (shift.EndTime as string | undefined);
+        const rest = { ...shift };
+        delete rest.StartTime;
+        delete rest.EndTime;
+
+        return {
+          ...rest,
+          ...(start ? { Start: start } : {}),
+          ...(end ? { End: end } : {}),
+        };
+      });
+
+      return {
+        ...typedEmployee,
+        HistoricalShifts: normalizedHistorical,
+      };
+    });
+
     console.log("Sending solve request to external API...");
 
     const response = await fetch(SOLVER_URL, {
@@ -25,7 +67,7 @@ serve(async (req) => {
         "Content-Type": "application/json",
         "X-Api-Key": SOLVER_API_KEY,
       },
-      body: rawBody,
+      body: JSON.stringify(payload),
     });
 
     if (!response.ok) {
