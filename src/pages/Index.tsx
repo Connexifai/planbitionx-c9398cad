@@ -177,7 +177,7 @@ export default function Index() {
   const [solveStartTime, setSolveStartTime] = useState<number>(0);
 
   const handleSolve = async () => {
-    if (!requestData) return;
+    if (!requestRawJson) return;
     setSolving(true);
     setSolveStartTime(Date.now());
     try {
@@ -189,7 +189,7 @@ export default function Index() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
           },
-          body: JSON.stringify(requestData),
+          body: requestRawJson,
         }
       );
       if (!res.ok) {
