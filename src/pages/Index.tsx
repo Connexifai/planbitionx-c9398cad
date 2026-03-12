@@ -145,14 +145,17 @@ export default function Index() {
   const [scheduleData, setScheduleData] = useState<JsonScheduleData | null>(null);
   const [rosterData, setRosterData] = useState<RosterData | null>(null);
   const [requestData, setRequestData] = useState<any>(null);
+  const [requestRawJson, setRequestRawJson] = useState<string | null>(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
 
   useEffect(() => {
     if (jsonLoaded && !scheduleData) {
       fetch("/data/schedule-request.json")
-        .then((r) => r.json())
-        .then((raw) => {
+        .then((r) => r.text())
+        .then((text) => {
+          const raw = JSON.parse(text);
           setRequestData(raw);
+          setRequestRawJson(text);
           setScheduleData(parseRawScheduleJson(raw));
         })
         .catch(console.error);
@@ -174,7 +177,7 @@ export default function Index() {
   const [solveStartTime, setSolveStartTime] = useState<number>(0);
 
   const handleSolve = async () => {
-    if (!requestData) return;
+    if (!requestRawJson) return;
     setSolving(true);
     setSolveStartTime(Date.now());
     try {
@@ -186,7 +189,7 @@ export default function Index() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
           },
-          body: JSON.stringify(requestData),
+          body: requestRawJson,
         }
       );
       if (!res.ok) {
