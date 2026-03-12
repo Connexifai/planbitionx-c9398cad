@@ -118,7 +118,7 @@ function SolvingOverlay() {
           <img src={robotImg} alt="Solving..." className="absolute inset-4 object-contain drop-shadow-xl robot-float" />
         </div>
 
-        <h2 className="text-2xl font-bold text-foreground">{t("solving.title")}</h2>
+        <h2 className="text-2xl font-bold text-white drop-shadow-lg">{t("solving.title")}</h2>
 
         <div className="flex items-center gap-2">
           {solvePhases.map((step, i) => {
@@ -126,26 +126,26 @@ function SolvingOverlay() {
             return (
               <div key={i} className="flex items-center gap-2">
                 <div className={cn(
-                  "w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold border-2 transition-all duration-500",
-                  status === "done" ? "bg-primary border-primary text-primary-foreground scale-90" :
-                  status === "active" ? "border-primary text-primary animate-pulse bg-primary/10 scale-110" :
-                  "border-border text-muted-foreground bg-muted scale-90 opacity-50"
+                  "w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold border-2 transition-all duration-500 drop-shadow-md",
+                  status === "done" ? "bg-white border-white text-black scale-90" :
+                  status === "active" ? "border-white text-white animate-pulse bg-white/20 scale-110 shadow-[0_0_15px_rgba(255,255,255,0.5)]" :
+                  "border-white/40 text-white/60 bg-black/30 scale-90 opacity-50"
                 )} title={step.label}>
                   {status === "done" ? "✓" : step.icon}
                 </div>
                 {i < solvePhases.length - 1 && (
-                  <div className={cn("w-6 h-0.5 rounded-full transition-all duration-500", status === "done" ? "bg-primary" : "bg-border")} />
+                  <div className={cn("w-6 h-0.5 rounded-full transition-all duration-500", status === "done" ? "bg-white" : "bg-white/30")} />
                 )}
               </div>
             );
           })}
         </div>
 
-        <p className="text-sm text-muted-foreground font-medium animate-pulse">
+        <p className="text-sm text-white font-medium animate-pulse drop-shadow-md">
           {solvePhases[phase]?.label}…
         </p>
 
-        <span className="text-xs text-muted-foreground font-mono">{formatTime(elapsed)}</span>
+        <span className="text-xs text-white/80 font-mono drop-shadow">{formatTime(elapsed)}</span>
       </div>
     </div>
   );
