@@ -12,6 +12,8 @@ import type { JsonScheduleData } from "@/components/planner/JsonDataViewer";
 import { parseRawScheduleJson } from "@/lib/parseScheduleJson";
 import { parseSolverResponse } from "@/lib/parseSolverResponse";
 import type { RosterData, SolverResponse } from "@/lib/parseSolverResponse";
+import { defaultAtw, defaultSoft, defaultSolver, buildSettingsPayload } from "@/lib/solverSettings";
+import type { AtwConstraints, SoftConstraints, SolverSettings } from "@/lib/solverSettings";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
