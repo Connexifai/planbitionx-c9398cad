@@ -42,7 +42,9 @@ serve(async (req) => {
 
         const start = (shift.Start as string | undefined) ?? (shift.StartTime as string | undefined);
         const end = (shift.End as string | undefined) ?? (shift.EndTime as string | undefined);
-        const { StartTime, EndTime, ...rest } = shift;
+        const rest = { ...shift };
+        delete rest.StartTime;
+        delete rest.EndTime;
 
         return {
           ...rest,
