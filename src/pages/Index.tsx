@@ -141,11 +141,11 @@ function SolvingOverlay() {
           })}
         </div>
 
-        <p className="text-sm text-white font-medium animate-pulse drop-shadow-md">
+        <p className="text-lg text-white font-semibold animate-pulse drop-shadow-md">
           {solvePhases[phase]?.label}…
         </p>
 
-        <span className="text-xs text-white/80 font-mono drop-shadow">{formatTime(elapsed)}</span>
+        <span className="text-xl text-white font-mono drop-shadow font-bold">{formatTime(elapsed)}</span>
       </div>
     </div>
   );
