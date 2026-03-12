@@ -103,16 +103,29 @@ function computeStats(data: RosterData, t: (key: string) => string) {
   const scheduledEmployees = employees.filter((e) => e.shifts.some((s) => s.type !== null)).length;
 
   // Daily fill rate based on actual demand
+  const shiftTypeColors: Record<string, string> = {
+    vroeg: "hsl(32, 95%, 55%)",
+    dag: "hsl(217, 91%, 53%)",
+    laat: "hsl(270, 60%, 55%)",
+    nacht: "hsl(220, 25%, 35%)",
+  };
+
   const dailyFillRate = days.map((d, dayIdx) => {
     const filled = employees.filter((emp) => emp.shifts[dayIdx]?.type !== null).length;
-    // Sum demand for this day across all shifts
     let dayDemand = 0;
     data.demandMap.forEach((dayDemands) => {
       dayDemand += dayDemands[dayIdx] || 0;
     });
-    const target = dayDemand > 0 ? dayDemand : filled; // fallback
+    const target = dayDemand > 0 ? dayDemand : filled;
     const pct = target > 0 ? Math.round((filled / target) * 100) : 0;
-    return { dag: t(`days.${d.dayKey}`), bezet: filled, target, pct };
+
+    // Count by shift type
+    const vroeg = employees.filter((emp) => emp.shifts[dayIdx]?.type === "vroeg").length;
+    const dag = employees.filter((emp) => emp.shifts[dayIdx]?.type === "dag").length;
+    const laat = employees.filter((emp) => emp.shifts[dayIdx]?.type === "laat").length;
+    const nacht = employees.filter((emp) => emp.shifts[dayIdx]?.type === "nacht").length;
+
+    return { dag: t(`days.${d.dayKey}`), bezet: filled, target, pct, vroeg, dagType: dag, laat, nacht };
   });
 
   const avgFillRate = dailyFillRate.length > 0
