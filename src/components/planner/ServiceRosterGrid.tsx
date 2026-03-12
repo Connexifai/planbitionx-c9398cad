@@ -60,10 +60,11 @@ function getAssignmentNames(assignmentNamesMap: RosterData["assignmentNamesByShi
 function CountBadge({ count, target }: { count: number; target: number }) {
   if (target === 0 && count === 0) return <span className="text-xs text-muted-foreground">—</span>;
   const effective = target > 0 ? target : count;
-  const full = count >= effective;
+  const pct = effective > 0 ? Math.round((count / effective) * 100) : 0;
+  const full = pct >= 95;
   const color = full
     ? "text-kpi-assignments"
-    : count >= effective * 0.6
+    : pct >= 85
     ? "text-kpi-unfilled"
     : "text-destructive";
   return (
