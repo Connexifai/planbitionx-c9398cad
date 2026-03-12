@@ -217,8 +217,8 @@ export function parseSolverResponse(request: RawSchedule, response: SolverRespon
   const assignedByShiftDay: DemandMap = new Map();
   const assignmentNamesByShiftDay: AssignmentNamesMap = new Map();
 
-  for (const a of response.assignedShifts) {
-    const dateKey = format(parseISO(a.scheduleDate), "yyyy-MM-dd");
+  for (const a of assignedShifts) {
+    const dateKey = format(parseISO(a.startTime), "yyyy-MM-dd");
     const dayIdx = resolveDayIndex(dateKey);
     if (dayIdx === undefined) continue;
 
