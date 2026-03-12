@@ -347,9 +347,9 @@ export default function Index() {
             <>
               {solved && !chatOpen && (
                 <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2 cursor-pointer" onClick={() => setChatOpen(true)}>
-                  <div className="relative bg-background/60 backdrop-blur-xl border border-border/40 shadow-2xl rounded-3xl px-5 py-3 max-w-[240px] animate-[bounce_2s_ease-in-out_3] mr-4 ring-1 ring-primary/10">
-                    <p className="text-sm font-semibold leading-snug text-foreground/90 tracking-wide">{t("robot.clickMePost")}</p>
-                    <div className="absolute -bottom-2.5 right-6 w-5 h-5 bg-background/60 backdrop-blur-xl border-b border-r border-border/40 rotate-45 rounded-sm" />
+                  <div className="relative bg-card/95 backdrop-blur-md border border-border shadow-2xl rounded-3xl px-5 py-3 max-w-[240px] animate-[bounce_2s_ease-in-out_3] mr-4">
+                    <p className="text-sm font-semibold leading-snug text-foreground tracking-wide">{t("robot.clickMePost")}</p>
+                    <div className="absolute -bottom-2.5 right-6 w-5 h-5 bg-card/95 backdrop-blur-md border-b border-r border-border rotate-45 rounded-sm" />
                   </div>
                   <img
                     src={robotImg}
