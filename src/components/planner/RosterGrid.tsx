@@ -92,24 +92,26 @@ const EmployeeRow = memo(function EmployeeRow({
         height: ROW_HEIGHT,
       }}
     >
-      <div className="flex flex-col justify-center gap-1.5 px-4 py-3 border-r">
-        <div>
-          <p className="text-sm font-semibold leading-tight truncate">{emp.lastName}, {emp.firstName}</p>
-        </div>
-        <div className="flex flex-wrap gap-1">
-          {emp.tags.map(tag => (
-            <Badge key={tag} variant="secondary" className="text-[10px] px-1.5 py-0 h-4 font-normal">
-              {tag}
-            </Badge>
-          ))}
-          {emp.location && (
-            <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 font-normal">
-              {emp.location}
-            </Badge>
-          )}
-        </div>
+      <div className="flex flex-col justify-center gap-1 px-4 py-2.5 border-r">
+        <p className="text-[13px] font-semibold leading-tight truncate">
+          {emp.lastName}, <span className="font-normal">{emp.firstName}</span>
+        </p>
+        {(emp.tags.length > 0 || emp.location) && (
+          <div className="flex flex-wrap gap-1">
+            {emp.tags.map(tag => (
+              <Badge key={tag} variant="secondary" className="text-[10px] px-1.5 py-0 h-4 font-normal">
+                {tag}
+              </Badge>
+            ))}
+            {emp.location && (
+              <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 font-normal">
+                {emp.location}
+              </Badge>
+            )}
+          </div>
+        )}
         <div className="flex items-center gap-2">
-          <span className="text-[10px] text-muted-foreground">{emp.hours}</span>
+          <span className="text-[11px] text-muted-foreground font-medium tabular-nums">{emp.hours}</span>
           <HoursBar percent={emp.hoursPercent} />
         </div>
       </div>

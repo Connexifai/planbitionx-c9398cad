@@ -279,10 +279,19 @@ export function parseSolverResponse(request: RawSchedule, response: SolverRespon
     const maxHours = emp.MaxHoursPerWeek || 48;
     const hoursPercent = Math.round((totalHours / maxHours) * 100);
 
-    // Parse name: split on space, last part is last name, rest is first name(s)
-    const nameParts = emp.Name.trim().split(/\s+/);
-    const lastName = nameParts.length > 1 ? nameParts.pop()! : nameParts[0];
-    const firstName = nameParts.join(" ");
+    // Parse name: check for "FirstName, LastName" format first, then fallback to space splitting
+    const rawName = emp.Name.trim();
+    let firstName: string;
+    let lastName: string;
+    if (rawName.includes(",")) {
+      const [part1, part2] = rawName.split(",").map(s => s.trim());
+      firstName = part1;
+      lastName = part2;
+    } else {
+      const nameParts = rawName.split(/\s+/);
+      lastName = nameParts.length > 1 ? nameParts.pop()! : nameParts[0];
+      firstName = nameParts.join(" ");
+    }
 
     employees.push({
       name: emp.Name,
