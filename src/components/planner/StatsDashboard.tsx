@@ -297,18 +297,24 @@ export function StatsDashboard({ data }: StatsDashboardProps) {
           <CardContent className="flex-1 flex flex-col min-h-0">
             <div className="flex-1 min-h-0">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={stats.dailyFillRate} barGap={4}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 15%, 90%)" />
-                  <XAxis dataKey="dag" tick={{ fontSize: 11 }} />
-                  <YAxis tick={{ fontSize: 11 }} />
-                  <Tooltip
-                    contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid hsl(220,15%,90%)" }}
-                  />
-                  <Bar dataKey="vroeg" name={t("grid.early")} stackId="a" fill={stats.shiftTypeColors.vroeg} radius={[0, 0, 0, 0]} />
-                  <Bar dataKey="dagType" name={t("grid.day")} stackId="a" fill={stats.shiftTypeColors.dag} />
-                  <Bar dataKey="laat" name={t("grid.late")} stackId="a" fill={stats.shiftTypeColors.laat} />
-                  <Bar dataKey="nacht" name={t("grid.night")} stackId="a" fill={stats.shiftTypeColors.nacht} radius={[4, 4, 0, 0]} />
-                </BarChart>
+              <ComposedChart data={stats.dailyFillRate} barGap={4}>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 15%, 90%)" />
+                <XAxis dataKey="dag" tick={{ fontSize: 11 }} />
+                <YAxis yAxisId="left" tick={{ fontSize: 11 }} />
+                <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 11 }} domain={[0, 100]} tickFormatter={(v) => `${v}%`} />
+                <Tooltip
+                  contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid hsl(220,15%,90%)" }}
+                  formatter={(value: number, name: string) => {
+                    if (name === t("stats.fillRate")) return [`${value}%`, name];
+                    return [value, name];
+                  }}
+                />
+                <Bar yAxisId="left" dataKey="vroeg" name={t("grid.early")} stackId="a" fill={stats.shiftTypeColors.vroeg} radius={[0, 0, 0, 0]} />
+                <Bar yAxisId="left" dataKey="dagType" name={t("grid.day")} stackId="a" fill={stats.shiftTypeColors.dag} />
+                <Bar yAxisId="left" dataKey="laat" name={t("grid.late")} stackId="a" fill={stats.shiftTypeColors.laat} />
+                <Bar yAxisId="left" dataKey="nacht" name={t("grid.night")} stackId="a" fill={stats.shiftTypeColors.nacht} radius={[4, 4, 0, 0]} />
+                <Line yAxisId="right" type="monotone" dataKey="pct" name={t("stats.fillRate")} stroke="hsl(152, 60%, 46%)" strokeWidth={2.5} dot={{ r: 4, fill: "hsl(152, 60%, 46%)" }} />
+              </ComposedChart>
               </ResponsiveContainer>
             </div>
             <div className="flex items-center justify-center gap-4 mt-2 shrink-0">
