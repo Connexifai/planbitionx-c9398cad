@@ -60,10 +60,11 @@ function getAssignmentNames(assignmentNamesMap: RosterData["assignmentNamesByShi
 function CountBadge({ count, target }: { count: number; target: number }) {
   if (target === 0 && count === 0) return <span className="text-xs text-muted-foreground">—</span>;
   const effective = target > 0 ? target : count;
-  const full = count >= effective;
+  const pct = effective > 0 ? Math.round((count / effective) * 100) : 0;
+  const full = pct >= 95;
   const color = full
     ? "text-kpi-assignments"
-    : count >= effective * 0.6
+    : pct >= 85
     ? "text-kpi-unfilled"
     : "text-destructive";
   return (
@@ -76,8 +77,8 @@ function CountBadge({ count, target }: { count: number; target: number }) {
 function DayFillRate({ filled, totalTarget }: { filled: number; totalTarget: number }) {
   if (totalTarget === 0) return <span className="text-xs text-muted-foreground">—</span>;
   const pct = Math.round((filled / totalTarget) * 100);
-  const color = pct >= 75 ? "text-kpi-assignments" : pct >= 50 ? "text-kpi-unfilled" : "text-destructive";
-  const bgColor = pct >= 75 ? "bg-kpi-assignments/20" : pct >= 50 ? "bg-kpi-unfilled/20" : "bg-destructive/20";
+  const color = pct >= 95 ? "text-kpi-assignments" : pct >= 85 ? "text-kpi-unfilled" : "text-destructive";
+  const bgColor = pct >= 95 ? "bg-kpi-assignments/20" : pct >= 85 ? "bg-kpi-unfilled/20" : "bg-destructive/20";
   return (
     <div className={`flex flex-col items-center justify-center ${bgColor} rounded-lg px-2 py-1.5 min-w-[44px]`}>
       <span className={`text-[18px] font-extrabold leading-none ${color}`}>{pct}%</span>
