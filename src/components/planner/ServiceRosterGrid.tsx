@@ -166,10 +166,15 @@ export function ServiceRosterGrid({ data }: ServiceRosterGridProps) {
                 return (
                   <td
                     key={dayIdx}
-                    className={`border-r last:border-r-0 px-3 py-2 align-top ${
+                    className={`border-r last:border-r-0 px-3 py-2 align-top relative ${
                       d.weekend ? "bg-weekend" : ""
                     }`}
                   >
+                    {target > 0 && (() => {
+                      const pct = target > 0 ? Math.round((count / target) * 100) : 0;
+                      const color = pct >= 95 ? "text-kpi-assignments" : pct >= 85 ? "text-kpi-unfilled" : "text-destructive";
+                      return <span className={`absolute top-1 right-1.5 text-[10px] font-bold ${color}`}>{pct}%</span>;
+                    })()}
                     <div className="mb-1">
                       <CountBadge count={count} target={target} />
                     </div>
