@@ -1,7 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useTranslation } from "react-i18next";
-import { toTitleCase } from "@/lib/utils";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useRef, memo, useCallback } from "react";
 import type { RosterData, ShiftData, DayColumn, RosterEmployee, DemandMap } from "@/lib/parseSolverResponse";
@@ -94,7 +93,7 @@ const EmployeeRow = memo(function EmployeeRow({
     >
       <div className="flex flex-col justify-center gap-1.5 px-4 py-3 border-r">
         <div>
-          <p className="text-sm font-semibold leading-tight truncate">{toTitleCase(emp.name)}</p>
+          <p className="text-sm font-semibold leading-tight truncate">{emp.lastName}, {emp.firstName}</p>
         </div>
         <div className="flex flex-wrap gap-1">
           {emp.tags.map(tag => (
