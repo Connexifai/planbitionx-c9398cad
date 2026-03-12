@@ -15,8 +15,17 @@ export interface AssignedShift {
   contractId: string;
 }
 
+/** Raw solver API response (PascalCase) */
+interface SolverApiAssignment {
+  Start: string;
+  End: string;
+  PersonId: string;
+  ShiftId: string;
+}
+
 export interface SolverResponse {
-  assignedShifts: AssignedShift[];
+  Assignments: SolverApiAssignment[];
+  [key: string]: unknown;
 }
 
 interface RawShift {
@@ -131,9 +140,27 @@ export function parseSolverResponse(request: RawSchedule, response: SolverRespon
     dayIndexMap.set(format(d, "yyyy-MM-dd"), i);
   });
 
-  // Fallback when solver returns shifted dates (same relative day order, different calendar week)
+  // Build PersonId → ContractId lookup from request
+  const personToContract = new Map<string, string>();
+  for (const emp of request.Employees) {
+    personToContract.set(String(emp.PersonId), emp.ContractId);
+  }
+
+  // Normalize PascalCase API response → internal AssignedShift[]
+  const assignedShifts: AssignedShift[] = (response.Assignments || []).map((a) => {
+    const start = parseISO(a.Start);
+    return {
+      scheduleDate: format(start, "yyyy-MM-dd'T'HH:mm:ss"),
+      startTime: a.Start,
+      endTime: a.End,
+      shiftId: a.ShiftId,
+      contractId: personToContract.get(String(a.PersonId)) || String(a.PersonId),
+    };
+  });
+
+  // Fallback when solver returns shifted dates
   const assignmentDayOrder = Array.from(
-    new Set(response.assignedShifts.map((a) => format(parseISO(a.scheduleDate), "yyyy-MM-dd")))
+    new Set(assignedShifts.map((a) => format(parseISO(a.startTime), "yyyy-MM-dd")))
   ).sort((a, b) => a.localeCompare(b));
   const assignmentDayOrderMap = new Map<string, number>(assignmentDayOrder.map((d, i) => [d, i]));
 
@@ -173,7 +200,7 @@ export function parseSolverResponse(request: RawSchedule, response: SolverRespon
 
   // Group assigned shifts by contractId
   const assignmentsByContract = new Map<string, AssignedShift[]>();
-  for (const a of response.assignedShifts) {
+  for (const a of assignedShifts) {
     if (!assignmentsByContract.has(a.contractId)) {
       assignmentsByContract.set(a.contractId, []);
     }
@@ -190,8 +217,8 @@ export function parseSolverResponse(request: RawSchedule, response: SolverRespon
   const assignedByShiftDay: DemandMap = new Map();
   const assignmentNamesByShiftDay: AssignmentNamesMap = new Map();
 
-  for (const a of response.assignedShifts) {
-    const dateKey = format(parseISO(a.scheduleDate), "yyyy-MM-dd");
+  for (const a of assignedShifts) {
+    const dateKey = format(parseISO(a.startTime), "yyyy-MM-dd");
     const dayIdx = resolveDayIndex(dateKey);
     if (dayIdx === undefined) continue;
 
@@ -222,7 +249,7 @@ export function parseSolverResponse(request: RawSchedule, response: SolverRespon
     let totalHours = 0;
 
     for (const a of assignments) {
-      const dateKey = format(parseISO(a.scheduleDate), "yyyy-MM-dd");
+      const dateKey = format(parseISO(a.startTime), "yyyy-MM-dd");
       const dayIdx = resolveDayIndex(dateKey);
       if (dayIdx === undefined) continue;
 
