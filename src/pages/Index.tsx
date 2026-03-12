@@ -97,7 +97,7 @@ function SolvingOverlay() {
         ref={(el) => {
           if (el) {
             const handleTime = () => {
-              if (el.currentTime >= 3) el.currentTime = 0;
+              if (el.currentTime >= 5) el.currentTime = 0;
             };
             el.addEventListener("timeupdate", handleTime);
           }
