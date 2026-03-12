@@ -171,23 +171,38 @@ export default function Index() {
     document.documentElement.classList.toggle("dark", dark);
   }, [dark]);
 
-  const handleSolve = () => {
+  const [solveStartTime, setSolveStartTime] = useState<number>(0);
+
+  const handleSolve = async () => {
+    if (!requestData) return;
     setSolving(true);
-    setTimeout(async () => {
-      try {
-        const res = await fetch("/data/schedule-response.json");
-        const solverResponse: SolverResponse = await res.json();
-        if (requestData) {
-          const roster = parseSolverResponse(requestData, solverResponse);
-          setRosterData(roster);
+    setSolveStartTime(Date.now());
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/solve`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+          body: JSON.stringify(requestData),
         }
-      } catch (e) {
-        console.error("Failed to load solver response:", e);
+      );
+      if (!res.ok) {
+        const err = await res.text();
+        throw new Error(`Solver error ${res.status}: ${err}`);
       }
-      setSolving(false);
+      const solverResponse: SolverResponse = await res.json();
+      const roster = parseSolverResponse(requestData, solverResponse);
+      setRosterData(roster);
       setSolved(true);
-      setSidebarCollapsed(true); // Sidebar inklappen na solven
-    }, 36000);
+      setSidebarCollapsed(true);
+    } catch (e) {
+      console.error("Failed to solve:", e);
+    } finally {
+      setSolving(false);
+    }
   };
 
   return (
