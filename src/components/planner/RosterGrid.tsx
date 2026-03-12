@@ -70,7 +70,7 @@ function FillRateIndicator({ filled, target, pct }: { filled: number; target: nu
   );
 }
 
-const ROW_HEIGHT = 100;
+const ROW_HEIGHT = 82;
 
 const EmployeeRow = memo(function EmployeeRow({
   emp,
@@ -93,7 +93,7 @@ const EmployeeRow = memo(function EmployeeRow({
         height: ROW_HEIGHT,
       }}
     >
-      <div className="flex flex-col justify-center gap-1 px-4 py-2.5 border-r">
+      <div className="flex flex-col justify-center gap-0.5 px-3 py-1.5 border-r">
         <p className="text-[13px] font-semibold leading-tight truncate">
           {emp.lastName}, <span className="font-normal">{emp.firstName}</span>
         </p>
@@ -115,7 +115,7 @@ const EmployeeRow = memo(function EmployeeRow({
       {emp.shifts.map((shift, i) => (
         <div
           key={i}
-          className={`flex items-center justify-center px-1 py-2 border-r last:border-r-0 ${days[i]?.weekend ? "bg-weekend" : ""}`}
+          className={`flex items-center justify-center px-0.5 py-1 border-r last:border-r-0 ${days[i]?.weekend ? "bg-weekend" : ""}`}
         >
           <ShiftCell shift={shift} t={t} />
         </div>
