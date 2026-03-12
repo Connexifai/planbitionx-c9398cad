@@ -288,27 +288,29 @@ export function StatsDashboard({ data }: StatsDashboardProps) {
       </div>
 
       {/* ── Row 1: Fill Rate + Heatmap ── */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-        <Card className="border-border/50">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4" style={{ minHeight: 340 }}>
+        <Card className="border-border/50 flex flex-col">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-semibold">{t("stats.occupancyPerDay")}</CardTitle>
           </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={220}>
-              <BarChart data={stats.dailyFillRate} barGap={4}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 15%, 90%)" />
-                <XAxis dataKey="dag" tick={{ fontSize: 11 }} />
-                <YAxis tick={{ fontSize: 11 }} />
-                <Tooltip
-                  contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid hsl(220,15%,90%)" }}
-                />
-                <Bar dataKey="vroeg" name={t("grid.early")} stackId="a" fill={stats.shiftTypeColors.vroeg} radius={[0, 0, 0, 0]} />
-                <Bar dataKey="dagType" name={t("grid.day")} stackId="a" fill={stats.shiftTypeColors.dag} />
-                <Bar dataKey="laat" name={t("grid.late")} stackId="a" fill={stats.shiftTypeColors.laat} />
-                <Bar dataKey="nacht" name={t("grid.night")} stackId="a" fill={stats.shiftTypeColors.nacht} radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-            <div className="flex items-center justify-center gap-4 mt-2">
+          <CardContent className="flex-1 flex flex-col min-h-0">
+            <div className="flex-1 min-h-0">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={stats.dailyFillRate} barGap={4}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 15%, 90%)" />
+                  <XAxis dataKey="dag" tick={{ fontSize: 11 }} />
+                  <YAxis tick={{ fontSize: 11 }} />
+                  <Tooltip
+                    contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid hsl(220,15%,90%)" }}
+                  />
+                  <Bar dataKey="vroeg" name={t("grid.early")} stackId="a" fill={stats.shiftTypeColors.vroeg} radius={[0, 0, 0, 0]} />
+                  <Bar dataKey="dagType" name={t("grid.day")} stackId="a" fill={stats.shiftTypeColors.dag} />
+                  <Bar dataKey="laat" name={t("grid.late")} stackId="a" fill={stats.shiftTypeColors.laat} />
+                  <Bar dataKey="nacht" name={t("grid.night")} stackId="a" fill={stats.shiftTypeColors.nacht} radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="flex items-center justify-center gap-4 mt-2 shrink-0">
               {Object.entries({ vroeg: t("grid.early"), dag: t("grid.day"), laat: t("grid.late"), nacht: t("grid.night") }).map(([key, label]) => (
                 <span key={key} className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
                   <span className="w-3 h-3 rounded-sm" style={{ backgroundColor: stats.shiftTypeColors[key] }} />
