@@ -93,7 +93,7 @@ const EmployeeRow = memo(function EmployeeRow({
         height: ROW_HEIGHT,
       }}
     >
-      <div className="flex flex-col justify-center gap-1 px-4 py-2.5 border-r">
+      <div className="flex flex-col justify-center gap-0.5 px-3 py-1.5 border-r">
         <p className="text-[13px] font-semibold leading-tight truncate">
           {emp.lastName}, <span className="font-normal">{emp.firstName}</span>
         </p>
