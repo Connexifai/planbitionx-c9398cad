@@ -64,9 +64,12 @@ function HoursBar({ percent }: { percent: number }) {
 
 function FillRateIndicator({ filled, target, pct }: { filled: number; target: number; pct: number }) {
   const color = pct >= 80 ? "text-kpi-assignments" : pct >= 50 ? "text-kpi-unfilled" : "text-destructive";
-  const bgColor = pct >= 80 ? "bg-kpi-assignments/15" : pct >= 50 ? "bg-kpi-unfilled/15" : "bg-destructive/15";
+  const bgColor = pct >= 80 ? "bg-kpi-assignments/20" : pct >= 50 ? "bg-kpi-unfilled/20" : "bg-destructive/20";
   return (
-    <span className={`text-[11px] font-bold ${color} ${bgColor} px-1.5 py-0.5 rounded`}>{filled}/{target} · {pct}%</span>
+    <div className={`flex flex-col items-center justify-center ${bgColor} rounded-lg px-2 py-1.5 min-w-[44px]`}>
+      <span className={`text-[18px] font-extrabold leading-none ${color}`}>{pct}%</span>
+      <span className={`text-[10px] font-semibold ${color} opacity-80`}>{filled}/{target}</span>
+    </div>
   );
 }
 
