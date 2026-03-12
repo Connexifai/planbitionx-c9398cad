@@ -2,7 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useTranslation } from "react-i18next";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { useRef, memo, useCallback } from "react";
+import { useRef, memo } from "react";
 import type { RosterData, ShiftData, DayColumn, RosterEmployee, DemandMap } from "@/lib/parseSolverResponse";
 
 type ShiftType = "vroeg" | "dag" | "laat" | "nacht" | null;
@@ -70,17 +70,13 @@ function FillRateIndicator({ filled, target, pct }: { filled: number; target: nu
   );
 }
 
-const ROW_HEIGHT = 74;
-
 const EmployeeRow = memo(function EmployeeRow({
   emp,
-  rowIdx,
   numDays,
   days,
   t,
 }: {
   emp: RosterEmployee;
-  rowIdx: number;
   numDays: number;
   days: DayColumn[];
   t: (key: string) => string;
@@ -90,7 +86,6 @@ const EmployeeRow = memo(function EmployeeRow({
       className="grid border-b border-border/60 transition-colors hover:bg-accent/30"
       style={{
         gridTemplateColumns: `230px repeat(${numDays}, minmax(85px, 1fr))`,
-        height: ROW_HEIGHT,
       }}
     >
       <div className="flex flex-col justify-center gap-0 px-3 py-0.5 border-r">
@@ -142,8 +137,9 @@ export function RosterGrid({ data }: RosterGridProps) {
   const rowVirtualizer = useVirtualizer({
     count: employees.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => ROW_HEIGHT,
+    estimateSize: () => 74,
     overscan: 5,
+    measureElement: (el) => el.getBoundingClientRect().height,
   });
 
   if (!data) {
@@ -202,18 +198,18 @@ export function RosterGrid({ data }: RosterGridProps) {
             return (
               <div
                 key={emp.id}
+                ref={rowVirtualizer.measureElement}
+                data-index={virtualRow.index}
                 style={{
                   position: "absolute",
                   top: 0,
                   left: 0,
                   width: "100%",
-                  height: `${virtualRow.size}px`,
                   transform: `translateY(${virtualRow.start}px)`,
                 }}
               >
                 <EmployeeRow
                   emp={emp}
-                  rowIdx={virtualRow.index}
                   numDays={numDays}
                   days={days}
                   t={t}
