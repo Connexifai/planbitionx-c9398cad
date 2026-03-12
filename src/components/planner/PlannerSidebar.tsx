@@ -6,7 +6,6 @@ import {
   Settings2,
   FileJson,
   PanelLeftClose,
-  PanelLeftOpen,
   Play,
 } from "lucide-react";
 import {
@@ -19,6 +18,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
+import type { AtwConstraints, SoftConstraints, SolverSettings } from "@/lib/solverSettings";
+import { defaultAtw, defaultSoft, defaultSolver } from "@/lib/solverSettings";
 
 type SectionId = "json" | "atw" | "zachte" | "solver";
 
@@ -31,13 +32,16 @@ interface RuleRowProps {
   unit?: string;
   enabled?: boolean;
   secondValue?: number;
+  onToggle?: (v: boolean) => void;
+  onChange?: (v: number) => void;
+  onSecondChange?: (v: number) => void;
 }
 
-function RuleRow({ label, sublabel, value, unit = "min", enabled = true, secondValue }: RuleRowProps) {
+function RuleRow({ label, sublabel, value, unit = "min", enabled = true, secondValue, onToggle, onChange, onSecondChange }: RuleRowProps) {
   return (
     <div className="flex items-center justify-between gap-2 py-2">
       <div className="flex items-center gap-2 min-w-0">
-        <Switch defaultChecked={enabled} className="scale-75" />
+        <Switch checked={enabled} onCheckedChange={onToggle} className="scale-75" />
         <div className="min-w-0">
           <p className="text-sm font-medium truncate">{label}</p>
           {sublabel && <p className="text-xs text-muted-foreground truncate">{sublabel}</p>}
@@ -47,7 +51,8 @@ function RuleRow({ label, sublabel, value, unit = "min", enabled = true, secondV
         <div className="flex items-center gap-1 shrink-0">
           <Input
             type="number"
-            defaultValue={value}
+            value={value}
+            onChange={(e) => onChange?.(Number(e.target.value))}
             className="h-8 w-16 text-xs text-right"
           />
           {secondValue !== undefined && (
@@ -55,7 +60,8 @@ function RuleRow({ label, sublabel, value, unit = "min", enabled = true, secondV
               <span className="text-xs text-muted-foreground">/</span>
               <Input
                 type="number"
-                defaultValue={secondValue}
+                value={secondValue}
+                onChange={(e) => onSecondChange?.(Number(e.target.value))}
                 className="h-8 w-16 text-xs text-right"
               />
             </>
@@ -69,7 +75,7 @@ function RuleRow({ label, sublabel, value, unit = "min", enabled = true, secondV
 
 /* ── Level selector ───────────────────────────────────── */
 
-function LevelSelector({ levels, active }: { levels: string[]; active: number }) {
+function LevelSelector({ levels, active, onChange }: { levels: string[]; active: number; onChange?: (i: number) => void }) {
   return (
     <div className="flex gap-1">
       {levels.map((level, i) => (
@@ -78,6 +84,7 @@ function LevelSelector({ levels, active }: { levels: string[]; active: number })
           variant={i === active ? "default" : "outline"}
           size="sm"
           className="flex-1 text-xs h-7"
+          onClick={() => onChange?.(i)}
         >
           {level}
         </Button>
@@ -165,102 +172,104 @@ function JsonSection({ onJsonLoaded }: { onJsonLoaded?: (rawJson?: string) => vo
   );
 }
 
-function AtwSection() {
+function AtwSection({ atw, setAtw }: { atw: AtwConstraints; setAtw: React.Dispatch<React.SetStateAction<AtwConstraints>> }) {
   const { t } = useTranslation();
+  const update = (patch: Partial<AtwConstraints>) => setAtw((prev) => ({ ...prev, ...patch }));
   return (
     <div className="space-y-1">
-      <p className="text-xs text-muted-foreground mb-2">
-        {t("sidebar.toggleRuleHint")}
-      </p>
-      <RuleRow label={t("sidebar.maxShiftDuration")} sublabel={t("sidebar.maxShiftDurationSub")} value={720} />
-      <RuleRow label={t("sidebar.maxNightShift")} sublabel={t("sidebar.maxNightShiftSub")} value={600} />
-      <RuleRow label={t("sidebar.nightShiftException")} sublabel={t("sidebar.nightShiftExceptionSub")} enabled={false} />
-      <RuleRow label={t("sidebar.maxWeekHours")} sublabel={t("sidebar.maxWeekHoursSub")} value={3600} />
-      <RuleRow label={t("sidebar.minRestBetween")} sublabel={t("sidebar.minRestBetweenSub")} value={660} />
-      <RuleRow label={t("sidebar.shortenedRest")} sublabel={t("sidebar.shortenedRestSub")} value={480} enabled={false} />
-      <RuleRow label={t("sidebar.restAfterNight")} sublabel={t("sidebar.restAfterNightSub")} value={840} />
-      <RuleRow label={t("sidebar.breakRules")} sublabel={t("sidebar.breakRulesSub")} value={330} secondValue={600} enabled={false} />
-      <RuleRow label={t("sidebar.rest36h")} sublabel={t("sidebar.rest36hSub")} value={2160} />
-      <RuleRow label={t("sidebar.rest46h")} sublabel={t("sidebar.rest46hSub")} value={2760} />
+      <p className="text-xs text-muted-foreground mb-2">{t("sidebar.toggleRuleHint")}</p>
+      <RuleRow label={t("sidebar.maxShiftDuration")} sublabel={t("sidebar.maxShiftDurationSub")} value={atw.maxShiftDurationMinutes} enabled={atw.maxShiftDurationEnabled} onToggle={(v) => update({ maxShiftDurationEnabled: v })} onChange={(v) => update({ maxShiftDurationMinutes: v })} />
+      <RuleRow label={t("sidebar.maxNightShift")} sublabel={t("sidebar.maxNightShiftSub")} value={atw.maxNightShiftMinutes} enabled={atw.maxNightShiftEnabled} onToggle={(v) => update({ maxNightShiftEnabled: v })} onChange={(v) => update({ maxNightShiftMinutes: v })} />
+      <RuleRow label={t("sidebar.nightShiftException")} sublabel={t("sidebar.nightShiftExceptionSub")} enabled={atw.nightShiftExceptionEnabled} onToggle={(v) => update({ nightShiftExceptionEnabled: v })} />
+      <RuleRow label={t("sidebar.maxWeekHours")} sublabel={t("sidebar.maxWeekHoursSub")} value={atw.maxWeekHoursMinutes} enabled={atw.maxWeekHoursEnabled} onToggle={(v) => update({ maxWeekHoursEnabled: v })} onChange={(v) => update({ maxWeekHoursMinutes: v })} />
+      <RuleRow label={t("sidebar.minRestBetween")} sublabel={t("sidebar.minRestBetweenSub")} value={atw.minRestBetweenMinutes} enabled={atw.minRestBetweenEnabled} onToggle={(v) => update({ minRestBetweenEnabled: v })} onChange={(v) => update({ minRestBetweenMinutes: v })} />
+      <RuleRow label={t("sidebar.shortenedRest")} sublabel={t("sidebar.shortenedRestSub")} value={atw.shortenedRestMinutes} enabled={atw.shortenedRestEnabled} onToggle={(v) => update({ shortenedRestEnabled: v })} onChange={(v) => update({ shortenedRestMinutes: v })} />
+      <RuleRow label={t("sidebar.restAfterNight")} sublabel={t("sidebar.restAfterNightSub")} value={atw.restAfterNightMinutes} enabled={atw.restAfterNightEnabled} onToggle={(v) => update({ restAfterNightEnabled: v })} onChange={(v) => update({ restAfterNightMinutes: v })} />
+      <RuleRow label={t("sidebar.breakRules")} sublabel={t("sidebar.breakRulesSub")} value={atw.breakRulesMinutes1} secondValue={atw.breakRulesMinutes2} enabled={atw.breakRulesEnabled} onToggle={(v) => update({ breakRulesEnabled: v })} onChange={(v) => update({ breakRulesMinutes1: v })} onSecondChange={(v) => update({ breakRulesMinutes2: v })} />
+      <RuleRow label={t("sidebar.rest36h")} sublabel={t("sidebar.rest36hSub")} value={atw.rest36hMinutes} enabled={atw.rest36hEnabled} onToggle={(v) => update({ rest36hEnabled: v })} onChange={(v) => update({ rest36hMinutes: v })} />
+      <RuleRow label={t("sidebar.rest46h")} sublabel={t("sidebar.rest46hSub")} value={atw.rest46hMinutes} enabled={atw.rest46hEnabled} onToggle={(v) => update({ rest46hEnabled: v })} onChange={(v) => update({ rest46hMinutes: v })} />
     </div>
   );
 }
 
-function ZachteSection() {
+function ZachteSection({ soft, setSoft }: { soft: SoftConstraints; setSoft: React.Dispatch<React.SetStateAction<SoftConstraints>> }) {
   const { t } = useTranslation();
+  const update = (patch: Partial<SoftConstraints>) => setSoft((prev) => ({ ...prev, ...patch }));
   return (
     <div className="space-y-4">
       <div>
         <p className="text-sm font-medium mb-1">{t("sidebar.minimizeShiftChange")}</p>
         <p className="text-xs text-muted-foreground mb-1.5">{t("sidebar.offLowMedHigh")}</p>
-        <LevelSelector levels={[t("sidebar.off"), "L", "M", "H"]} active={0} />
+        <LevelSelector levels={[t("sidebar.off"), "L", "M", "H"]} active={soft.minimizeShiftChange} onChange={(i) => update({ minimizeShiftChange: i })} />
       </div>
       <div>
         <p className="text-sm font-medium mb-1">{t("sidebar.forwardRotation")}</p>
         <p className="text-xs text-muted-foreground mb-1.5">{t("sidebar.forwardRotationSub")}</p>
-        <LevelSelector levels={[t("sidebar.off"), "L", "M", "H"]} active={3} />
+        <LevelSelector levels={[t("sidebar.off"), "L", "M", "H"]} active={soft.forwardRotation} onChange={(i) => update({ forwardRotation: i })} />
       </div>
       <div>
         <p className="text-sm font-medium mb-1">{t("sidebar.crossWeekRotation")}</p>
         <p className="text-xs text-muted-foreground mb-1.5">{t("sidebar.crossWeekRotationSub")}</p>
-        <LevelSelector levels={[t("sidebar.off"), "L", "M", "H"]} active={0} />
+        <LevelSelector levels={[t("sidebar.off"), "L", "M", "H"]} active={soft.crossWeekRotation} onChange={(i) => update({ crossWeekRotation: i })} />
       </div>
       <div>
         <p className="text-sm font-medium mb-1">{t("sidebar.shiftConsistency")}</p>
         <p className="text-xs text-muted-foreground mb-1.5">{t("sidebar.shiftConsistencySub")}</p>
-        <LevelSelector levels={[t("sidebar.off"), "L", "M", "H"]} active={3} />
+        <LevelSelector levels={[t("sidebar.off"), "L", "M", "H"]} active={soft.shiftConsistency} onChange={(i) => update({ shiftConsistency: i })} />
       </div>
-      <RuleRow label={t("sidebar.minRotationBlock")} sublabel={t("sidebar.minRotationBlockSub")} value={2} unit="" />
-      <RuleRow label={t("sidebar.maxRotationBlock")} sublabel={t("sidebar.maxRotationBlockSub")} value={5} unit="" />
+      <RuleRow label={t("sidebar.minRotationBlock")} sublabel={t("sidebar.minRotationBlockSub")} value={soft.minRotationBlock} unit="" onChange={(v) => update({ minRotationBlock: v })} />
+      <RuleRow label={t("sidebar.maxRotationBlock")} sublabel={t("sidebar.maxRotationBlockSub")} value={soft.maxRotationBlock} unit="" onChange={(v) => update({ maxRotationBlock: v })} />
       <div>
         <p className="text-sm font-medium mb-1">{t("sidebar.rest14hPreference")}</p>
         <p className="text-xs text-muted-foreground mb-1.5">{t("sidebar.rest14hPreferenceSub")}</p>
-        <LevelSelector levels={[t("sidebar.off"), "L", "M", "H"]} active={2} />
+        <LevelSelector levels={[t("sidebar.off"), "L", "M", "H"]} active={soft.rest14hPreference} onChange={(i) => update({ rest14hPreference: i })} />
       </div>
       <div>
         <p className="text-sm font-medium mb-1">{t("sidebar.singleNightShifts")}</p>
         <p className="text-xs text-muted-foreground mb-1.5">{t("sidebar.singleNightShiftsSub")}</p>
-        <LevelSelector levels={[t("sidebar.off"), "L", "M", "H"]} active={3} />
+        <LevelSelector levels={[t("sidebar.off"), "L", "M", "H"]} active={soft.singleNightShifts} onChange={(i) => update({ singleNightShifts: i })} />
       </div>
       <div className="flex items-center justify-between">
         <div>
           <p className="text-sm font-medium">{t("sidebar.distributeOpen")}</p>
           <p className="text-xs text-muted-foreground">{t("sidebar.distributeOpenSub")}</p>
         </div>
-        <Switch defaultChecked />
+        <Switch checked={soft.distributeOpen} onCheckedChange={(v) => update({ distributeOpen: v })} />
       </div>
     </div>
   );
 }
 
-function SolverSection() {
+function SolverSection({ solver, setSolver }: { solver: SolverSettings; setSolver: React.Dispatch<React.SetStateAction<SolverSettings>> }) {
   const { t } = useTranslation();
+  const update = (patch: Partial<SolverSettings>) => setSolver((prev) => ({ ...prev, ...patch }));
   return (
     <div className="space-y-4">
       <div>
         <p className="text-sm font-medium mb-1">{t("sidebar.timeLimit")}</p>
         <p className="text-xs text-muted-foreground mb-1.5">{t("sidebar.timeLimitSub")}</p>
-        <LevelSelector levels={["30s", "1m", "2m", "5m"]} active={0} />
+        <LevelSelector levels={["30s", "1m", "2m", "5m"]} active={solver.timeLimitIndex} onChange={(i) => update({ timeLimitIndex: i })} />
       </div>
       <div>
         <p className="text-sm font-medium mb-1">{t("sidebar.plateauStop")}</p>
         <p className="text-xs text-muted-foreground mb-1.5">{t("sidebar.plateauStopSub")}</p>
-        <LevelSelector levels={[t("sidebar.off"), "15s", "30s", "1m"]} active={0} />
+        <LevelSelector levels={[t("sidebar.off"), "15s", "30s", "1m"]} active={solver.plateauStopIndex} onChange={(i) => update({ plateauStopIndex: i })} />
       </div>
       <div className="flex items-center justify-between">
         <div>
           <p className="text-sm font-medium">{t("sidebar.aiExplanation")}</p>
           <p className="text-xs text-muted-foreground">{t("sidebar.aiExplanationSub")}</p>
         </div>
-        <Switch />
+        <Switch checked={solver.aiExplanation} onCheckedChange={(v) => update({ aiExplanation: v })} />
       </div>
-      <RuleRow label={t("sidebar.seedRepeat")} sublabel={t("sidebar.seedRepeatSub")} value={42} unit="" />
+      <RuleRow label={t("sidebar.seedRepeat")} sublabel={t("sidebar.seedRepeatSub")} value={solver.seed} unit="" onChange={(v) => update({ seed: v })} />
       <div>
         <p className="text-sm font-medium mb-1">{t("sidebar.callbackUrl")}</p>
         <div className="flex items-center gap-1.5 rounded-lg border bg-background px-3 py-1.5 text-xs">
           <span className="text-kpi-assignments">🔒</span>
           <Input
-            defaultValue="https://jouw-server.nl/webhook"
+            value={solver.callbackUrl}
+            onChange={(e) => update({ callbackUrl: e.target.value })}
             className="h-6 border-0 bg-transparent p-0 text-xs shadow-none focus-visible:ring-0"
           />
         </div>
@@ -271,23 +280,35 @@ function SolverSection() {
 
 /* ── Main sidebar ─────────────────────────────────────── */
 
-export function PlannerSidebar({ 
-  onSolve, 
-  hideFooter, 
+export function PlannerSidebar({
+  onSolve,
+  hideFooter,
   onJsonLoaded,
   collapsed: collapsedProp,
-  onCollapsedChange 
-}: { 
-  onSolve?: () => void; 
-  hideFooter?: boolean; 
+  onCollapsedChange,
+  atw,
+  setAtw,
+  soft,
+  setSoft,
+  solver,
+  setSolver,
+}: {
+  onSolve?: () => void;
+  hideFooter?: boolean;
   onJsonLoaded?: (rawJson?: string) => void;
   collapsed?: boolean;
   onCollapsedChange?: (collapsed: boolean) => void;
+  atw: AtwConstraints;
+  setAtw: React.Dispatch<React.SetStateAction<AtwConstraints>>;
+  soft: SoftConstraints;
+  setSoft: React.Dispatch<React.SetStateAction<SoftConstraints>>;
+  solver: SolverSettings;
+  setSolver: React.Dispatch<React.SetStateAction<SolverSettings>>;
 }) {
   const { t } = useTranslation();
   const [activeSection, setActiveSection] = useState<SectionId>("json");
   const [internalCollapsed, setInternalCollapsed] = useState(true);
-  
+
   const contentCollapsed = collapsedProp !== undefined ? collapsedProp : internalCollapsed;
   const setContentCollapsed = (value: boolean) => {
     if (collapsedProp === undefined) {
@@ -308,9 +329,9 @@ export function PlannerSidebar({
   const renderSection = () => {
     switch (activeSection) {
       case "json": return <JsonSection onJsonLoaded={onJsonLoaded} />;
-      case "atw": return <AtwSection />;
-      case "zachte": return <ZachteSection />;
-      case "solver": return <SolverSection />;
+      case "atw": return <AtwSection atw={atw} setAtw={setAtw} />;
+      case "zachte": return <ZachteSection soft={soft} setSoft={setSoft} />;
+      case "solver": return <SolverSection solver={solver} setSolver={setSolver} />;
     }
   };
 
