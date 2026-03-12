@@ -103,16 +103,29 @@ function computeStats(data: RosterData, t: (key: string) => string) {
   const scheduledEmployees = employees.filter((e) => e.shifts.some((s) => s.type !== null)).length;
 
   // Daily fill rate based on actual demand
+  const shiftTypeColors: Record<string, string> = {
+    vroeg: "hsl(32, 95%, 55%)",
+    dag: "hsl(217, 91%, 53%)",
+    laat: "hsl(270, 60%, 55%)",
+    nacht: "hsl(220, 25%, 35%)",
+  };
+
   const dailyFillRate = days.map((d, dayIdx) => {
     const filled = employees.filter((emp) => emp.shifts[dayIdx]?.type !== null).length;
-    // Sum demand for this day across all shifts
     let dayDemand = 0;
     data.demandMap.forEach((dayDemands) => {
       dayDemand += dayDemands[dayIdx] || 0;
     });
-    const target = dayDemand > 0 ? dayDemand : filled; // fallback
+    const target = dayDemand > 0 ? dayDemand : filled;
     const pct = target > 0 ? Math.round((filled / target) * 100) : 0;
-    return { dag: t(`days.${d.dayKey}`), bezet: filled, target, pct };
+
+    // Count by shift type
+    const vroeg = employees.filter((emp) => emp.shifts[dayIdx]?.type === "vroeg").length;
+    const dag = employees.filter((emp) => emp.shifts[dayIdx]?.type === "dag").length;
+    const laat = employees.filter((emp) => emp.shifts[dayIdx]?.type === "laat").length;
+    const nacht = employees.filter((emp) => emp.shifts[dayIdx]?.type === "nacht").length;
+
+    return { dag: t(`days.${d.dayKey}`), bezet: filled, target, pct, vroeg, dagType: dag, laat, nacht };
   });
 
   const avgFillRate = dailyFillRate.length > 0
@@ -203,6 +216,7 @@ function computeStats(data: RosterData, t: (key: string) => string) {
     qualificationData,
     weekdayWeekend,
     shiftTypeCount: shiftLabels.size,
+    shiftTypeColors,
   };
 }
 
@@ -284,14 +298,24 @@ export function StatsDashboard({ data }: StatsDashboardProps) {
               <BarChart data={stats.dailyFillRate} barGap={4}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 15%, 90%)" />
                 <XAxis dataKey="dag" tick={{ fontSize: 11 }} />
-                <YAxis tick={{ fontSize: 11 }} domain={[0, 100]} tickFormatter={(v) => `${v}%`} />
+                <YAxis tick={{ fontSize: 11 }} />
                 <Tooltip
-                  formatter={(value: number) => [`${value}%`, t("stats.fillRate")]}
                   contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid hsl(220,15%,90%)" }}
                 />
-                <Bar dataKey="pct" radius={[4, 4, 0, 0]} fill="hsl(217, 91%, 53%)" />
+                <Bar dataKey="vroeg" name={t("grid.early")} stackId="a" fill={stats.shiftTypeColors.vroeg} radius={[0, 0, 0, 0]} />
+                <Bar dataKey="dagType" name={t("grid.day")} stackId="a" fill={stats.shiftTypeColors.dag} />
+                <Bar dataKey="laat" name={t("grid.late")} stackId="a" fill={stats.shiftTypeColors.laat} />
+                <Bar dataKey="nacht" name={t("grid.night")} stackId="a" fill={stats.shiftTypeColors.nacht} radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
+            <div className="flex items-center justify-center gap-4 mt-2">
+              {Object.entries({ vroeg: t("grid.early"), dag: t("grid.day"), laat: t("grid.late"), nacht: t("grid.night") }).map(([key, label]) => (
+                <span key={key} className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                  <span className="w-3 h-3 rounded-sm" style={{ backgroundColor: stats.shiftTypeColors[key] }} />
+                  {label}
+                </span>
+              ))}
+            </div>
           </CardContent>
         </Card>
 
