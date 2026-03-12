@@ -216,6 +216,11 @@ export default function Index() {
     setSolving(true);
     setSolveStartTime(Date.now());
     try {
+      // Merge sidebar settings into the request payload
+      const basePayload = JSON.parse(requestRawJson);
+      const settingsPayload = buildSettingsPayload(atw, soft, solver);
+      const mergedPayload = { ...basePayload, ...settingsPayload };
+
       const res = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/solve`,
         {
@@ -224,7 +229,7 @@ export default function Index() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
           },
-          body: requestRawJson,
+          body: JSON.stringify(mergedPayload),
         }
       );
       if (!res.ok) {
@@ -234,6 +239,8 @@ export default function Index() {
       const solverResponse: SolverResponse = await res.json();
       const roster = parseSolverResponse(requestData, solverResponse);
       setRosterData(roster);
+      setSolverExplanations((solverResponse as any).Explanations || []);
+      setSolverStatistics((solverResponse as any).Statistics || null);
       setSolved(true);
       setSidebarCollapsed(true);
     } catch (e) {
