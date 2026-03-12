@@ -15,8 +15,17 @@ export interface AssignedShift {
   contractId: string;
 }
 
+/** Raw solver API response (PascalCase) */
+interface SolverApiAssignment {
+  Start: string;
+  End: string;
+  PersonId: string;
+  ShiftId: string;
+}
+
 export interface SolverResponse {
-  assignedShifts: AssignedShift[];
+  Assignments: SolverApiAssignment[];
+  [key: string]: unknown;
 }
 
 interface RawShift {
