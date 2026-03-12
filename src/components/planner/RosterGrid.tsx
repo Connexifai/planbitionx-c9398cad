@@ -70,7 +70,7 @@ function FillRateIndicator({ filled, target, pct }: { filled: number; target: nu
   );
 }
 
-const ROW_HEIGHT = 82;
+const ROW_HEIGHT = 64;
 
 const EmployeeRow = memo(function EmployeeRow({
   emp,
