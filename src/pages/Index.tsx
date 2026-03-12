@@ -44,12 +44,12 @@ function RobotQuoteBubble() {
   const typed = useTypingText(quote, 45);
 
   return (
-    <div className="relative bg-background/60 backdrop-blur-xl border border-border/40 shadow-2xl rounded-3xl px-6 py-4 w-[480px] animate-fade-in ring-1 ring-primary/10">
-      <p className="text-sm font-medium text-foreground/90 leading-relaxed tracking-wide">
+    <div className="relative bg-card/95 backdrop-blur-md border border-border shadow-2xl rounded-3xl px-6 py-4 w-[480px] animate-fade-in">
+      <p className="text-sm font-medium text-foreground leading-relaxed tracking-wide">
         {typed}
         <span className="inline-block w-[2px] h-4 bg-primary ml-0.5 animate-pulse align-middle rounded-full" />
       </p>
-      <div className="absolute top-1/2 -right-2.5 -translate-y-1/2 w-5 h-5 bg-background/60 backdrop-blur-xl border-r border-b border-border/40 rotate-45 rounded-sm" />
+      <div className="absolute top-1/2 -right-2.5 -translate-y-1/2 w-5 h-5 bg-card/95 backdrop-blur-md border-r border-b border-border rotate-45 rounded-sm" />
     </div>
   );
 }
