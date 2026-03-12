@@ -86,7 +86,7 @@ const EmployeeRow = memo(function EmployeeRow({
 }) {
   return (
     <div
-      className={`grid border-b last:border-b-0 transition-colors hover:bg-accent/30 ${rowIdx % 2 === 0 ? "" : "bg-accent/10"}`}
+      className="grid border-b border-border/60 transition-colors hover:bg-accent/30"
       style={{
         gridTemplateColumns: `230px repeat(${numDays}, minmax(85px, 1fr))`,
         height: ROW_HEIGHT,
@@ -96,18 +96,13 @@ const EmployeeRow = memo(function EmployeeRow({
         <p className="text-[13px] font-semibold leading-tight truncate">
           {emp.lastName}, <span className="font-normal">{emp.firstName}</span>
         </p>
-        {(emp.tags.length > 0 || emp.location) && (
+        {emp.tags.length > 0 && (
           <div className="flex flex-wrap gap-1">
             {emp.tags.map(tag => (
               <Badge key={tag} variant="secondary" className="text-[10px] px-1.5 py-0 h-4 font-normal">
                 {tag}
               </Badge>
             ))}
-            {emp.location && (
-              <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 font-normal">
-                {emp.location}
-              </Badge>
-            )}
           </div>
         )}
         <div className="flex items-center gap-2">
