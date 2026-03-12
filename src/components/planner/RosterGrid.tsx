@@ -1,8 +1,9 @@
 import { Badge } from "@/components/ui/badge";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useTranslation } from "react-i18next";
 import { toTitleCase } from "@/lib/utils";
+import { useVirtualizer } from "@tanstack/react-virtual";
+import { useRef, memo, useCallback } from "react";
 import type { RosterData, ShiftData, DayColumn, RosterEmployee, DemandMap } from "@/lib/parseSolverResponse";
 
 type ShiftType = "vroeg" | "dag" | "laat" | "nacht" | null;
@@ -14,7 +15,7 @@ const shiftClassMap: Record<string, string> = {
   nacht: "shift-night",
 };
 
-function ShiftCell({ shift, t }: { shift: ShiftData; t: (key: string) => string }) {
+const ShiftCell = memo(function ShiftCell({ shift, t }: { shift: ShiftData; t: (key: string) => string }) {
   if (!shift.type) {
     return (
       <div className="flex h-full items-center justify-center">
@@ -48,7 +49,7 @@ function ShiftCell({ shift, t }: { shift: ShiftData; t: (key: string) => string 
       </TooltipContent>
     </Tooltip>
   );
-}
+});
 
 function HoursBar({ percent }: { percent: number }) {
   const color = percent > 100 ? "bg-destructive" : percent > 90 ? "bg-kpi-assignments" : "bg-primary";
@@ -68,12 +69,81 @@ function FillRateIndicator({ filled, target, pct }: { filled: number; target: nu
   );
 }
 
+const ROW_HEIGHT = 88;
+
+const EmployeeRow = memo(function EmployeeRow({
+  emp,
+  rowIdx,
+  numDays,
+  days,
+  t,
+}: {
+  emp: RosterEmployee;
+  rowIdx: number;
+  numDays: number;
+  days: DayColumn[];
+  t: (key: string) => string;
+}) {
+  return (
+    <div
+      className={`grid border-b last:border-b-0 transition-colors hover:bg-accent/30 ${rowIdx % 2 === 0 ? "" : "bg-accent/10"}`}
+      style={{
+        gridTemplateColumns: `220px repeat(${numDays}, minmax(80px, 1fr))`,
+        height: ROW_HEIGHT,
+      }}
+    >
+      <div className="flex flex-col justify-center gap-1.5 px-4 py-3 border-r">
+        <div>
+          <p className="text-sm font-semibold leading-tight truncate">{toTitleCase(emp.name)}</p>
+        </div>
+        <div className="flex flex-wrap gap-1">
+          {emp.tags.map(tag => (
+            <Badge key={tag} variant="secondary" className="text-[10px] px-1.5 py-0 h-4 font-normal">
+              {tag}
+            </Badge>
+          ))}
+          {emp.location && (
+            <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 font-normal">
+              {emp.location}
+            </Badge>
+          )}
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] text-muted-foreground">{emp.hours}</span>
+          <HoursBar percent={emp.hoursPercent} />
+        </div>
+      </div>
+
+      {emp.shifts.map((shift, i) => (
+        <div
+          key={i}
+          className={`flex items-center justify-center px-1 py-2 border-r last:border-r-0 ${days[i]?.weekend ? "bg-weekend" : ""}`}
+        >
+          <ShiftCell shift={shift} t={t} />
+        </div>
+      ))}
+    </div>
+  );
+});
+
 interface RosterGridProps {
   data?: RosterData;
 }
 
 export function RosterGrid({ data }: RosterGridProps) {
   const { t } = useTranslation();
+  const parentRef = useRef<HTMLDivElement>(null);
+
+  const employees = data?.employees ?? [];
+  const days = data?.days ?? [];
+  const numDays = days.length;
+
+  const rowVirtualizer = useVirtualizer({
+    count: employees.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => ROW_HEIGHT,
+    overscan: 5,
+  });
 
   if (!data) {
     return (
@@ -83,10 +153,8 @@ export function RosterGrid({ data }: RosterGridProps) {
     );
   }
 
-  const { days, employees, demandMap, plannedByDay, assignedByDay } = data;
-  const numDays = days.length;
+  const { demandMap, plannedByDay, assignedByDay } = data;
 
-  // Compute total demand per day across all shifts
   const dayDemands = days.map((_, dayIdx) => {
     let total = 0;
     demandMap.forEach((dayArr) => { total += dayArr[dayIdx] || 0; });
@@ -100,16 +168,17 @@ export function RosterGrid({ data }: RosterGridProps) {
     return { filled, target, pct: target > 0 ? Math.round((filled / target) * 100) : 0 };
   });
 
-  const getEmployeeFillRate = (emp: RosterEmployee) => {
-    const filled = emp.shifts.filter(s => s.type !== null).length;
-    return numDays > 0 ? Math.round((filled / numDays) * 100) : 0;
-  };
-
   return (
-    <div className="roster-scroll w-full max-w-full rounded-xl border border-border/50 bg-card shadow-sm overflow-x-auto overflow-y-auto max-h-[calc(100vh-280px)]">
+    <div
+      ref={parentRef}
+      className="roster-scroll w-full max-w-full rounded-xl border border-border/50 bg-card shadow-sm overflow-x-auto overflow-y-auto max-h-[calc(100vh-280px)]"
+    >
       <div style={{ minWidth: `${220 + numDays * 90}px` }}>
         {/* Header */}
-        <div className={`sticky top-0 z-[5] grid border-b bg-card shadow-sm`} style={{ gridTemplateColumns: `220px repeat(${numDays}, minmax(80px, 1fr))` }}>
+        <div
+          className="sticky top-0 z-[5] grid border-b bg-card shadow-sm"
+          style={{ gridTemplateColumns: `220px repeat(${numDays}, minmax(80px, 1fr))` }}
+        >
           <div className="flex items-center gap-2 px-4 py-3 border-r">
             <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t("grid.employee")}</span>
           </div>
@@ -125,50 +194,33 @@ export function RosterGrid({ data }: RosterGridProps) {
           ))}
         </div>
 
-        {/* Rows */}
-        {employees.map((emp, rowIdx) => {
-          const fillRate = getEmployeeFillRate(emp);
-          return (
-            <div
-              key={emp.id}
-              className={`grid border-b last:border-b-0 transition-colors hover:bg-accent/30 ${rowIdx % 2 === 0 ? "" : "bg-accent/10"}`}
-              style={{ gridTemplateColumns: `220px repeat(${numDays}, minmax(80px, 1fr))` }}
-            >
-              {/* Employee info */}
-              <div className="flex flex-col justify-center gap-1.5 px-4 py-3 border-r">
-                <div>
-                  <p className="text-sm font-semibold leading-tight truncate">{toTitleCase(emp.name)}</p>
-                </div>
-                <div className="flex flex-wrap gap-1">
-                  {emp.tags.map(tag => (
-                    <Badge key={tag} variant="secondary" className="text-[10px] px-1.5 py-0 h-4 font-normal">
-                      {tag}
-                    </Badge>
-                  ))}
-                  {emp.location && (
-                    <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 font-normal">
-                      {emp.location}
-                    </Badge>
-                  )}
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-[10px] text-muted-foreground">{emp.hours}</span>
-                  <HoursBar percent={emp.hoursPercent} />
-                </div>
+        {/* Virtualized rows */}
+        <div style={{ height: `${rowVirtualizer.getTotalSize()}px`, position: "relative" }}>
+          {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+            const emp = employees[virtualRow.index];
+            return (
+              <div
+                key={emp.id}
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: `${virtualRow.size}px`,
+                  transform: `translateY(${virtualRow.start}px)`,
+                }}
+              >
+                <EmployeeRow
+                  emp={emp}
+                  rowIdx={virtualRow.index}
+                  numDays={numDays}
+                  days={days}
+                  t={t}
+                />
               </div>
-
-              {/* Shift cells */}
-              {emp.shifts.map((shift, i) => (
-                <div
-                  key={i}
-                  className={`flex items-center justify-center px-1 py-2 border-r last:border-r-0 ${days[i]?.weekend ? "bg-weekend" : ""}`}
-                >
-                  <ShiftCell shift={shift} t={t} />
-                </div>
-              ))}
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
     </div>
   );
