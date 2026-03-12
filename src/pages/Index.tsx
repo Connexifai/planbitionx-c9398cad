@@ -12,6 +12,8 @@ import type { JsonScheduleData } from "@/components/planner/JsonDataViewer";
 import { parseRawScheduleJson } from "@/lib/parseScheduleJson";
 import { parseSolverResponse } from "@/lib/parseSolverResponse";
 import type { RosterData, SolverResponse } from "@/lib/parseSolverResponse";
+import { defaultAtw, defaultSoft, defaultSolver, buildSettingsPayload } from "@/lib/solverSettings";
+import type { AtwConstraints, SoftConstraints, SolverSettings } from "@/lib/solverSettings";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -165,6 +167,11 @@ export default function Index() {
   const [requestData, setRequestData] = useState<any>(null);
   const [requestRawJson, setRequestRawJson] = useState<string | null>(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
+  const [solverExplanations, setSolverExplanations] = useState<any[]>([]);
+  const [solverStatistics, setSolverStatistics] = useState<any>(null);
+  const [atw, setAtw] = useState<AtwConstraints>(defaultAtw);
+  const [soft, setSoft] = useState<SoftConstraints>(defaultSoft);
+  const [solver, setSolver] = useState<SolverSettings>(defaultSolver);
 
   const handleJsonLoaded = (rawJson?: string) => {
     setJsonLoaded(true);
@@ -209,6 +216,11 @@ export default function Index() {
     setSolving(true);
     setSolveStartTime(Date.now());
     try {
+      // Merge sidebar settings into the request payload
+      const basePayload = JSON.parse(requestRawJson);
+      const settingsPayload = buildSettingsPayload(atw, soft, solver);
+      const mergedPayload = { ...basePayload, ...settingsPayload };
+
       const res = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/solve`,
         {
@@ -217,7 +229,7 @@ export default function Index() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
           },
-          body: requestRawJson,
+          body: JSON.stringify(mergedPayload),
         }
       );
       if (!res.ok) {
@@ -227,6 +239,8 @@ export default function Index() {
       const solverResponse: SolverResponse = await res.json();
       const roster = parseSolverResponse(requestData, solverResponse);
       setRosterData(roster);
+      setSolverExplanations((solverResponse as any).Explanations || []);
+      setSolverStatistics((solverResponse as any).Statistics || null);
       setSolved(true);
       setSidebarCollapsed(true);
     } catch (e) {
@@ -244,6 +258,12 @@ export default function Index() {
         onJsonLoaded={handleJsonLoaded} 
         collapsed={sidebarCollapsed}
         onCollapsedChange={setSidebarCollapsed}
+        atw={atw}
+        setAtw={setAtw}
+        soft={soft}
+        setSoft={setSoft}
+        solver={solver}
+        setSolver={setSolver}
       />
 
       <div className="flex-1 flex flex-col min-w-0">
@@ -276,7 +296,7 @@ export default function Index() {
                 {activeTab === "roster" && <RosterGrid data={rosterData ?? undefined} />}
                 {activeTab === "dienst" && <ServiceRosterGrid data={rosterData ?? undefined} />}
                 {activeTab === "stats" && <StatsDashboard data={rosterData ?? undefined} />}
-                {activeTab === "uitleg" && <ExplanationView data={rosterData ?? undefined} />}
+                {activeTab === "uitleg" && <ExplanationView data={rosterData ?? undefined} solverExplanations={solverExplanations} solverStatistics={solverStatistics} />}
               </main>
             ) : (
               <div className="flex-1 flex flex-col min-h-0">
