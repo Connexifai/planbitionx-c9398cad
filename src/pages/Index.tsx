@@ -214,7 +214,7 @@ export default function Index() {
 
   const handleSolve = async () => {
     if (!requestRawJson) {
-      toast({ title: t("planner.noJsonTitle", "Geen data geladen"), description: t("planner.noJsonDesc", "Laad eerst een JSON-bestand via de sidebar voordat je oplost."), variant: "destructive" });
+      toast.error(t("planner.noJsonTitle", "Geen data geladen"), { description: t("planner.noJsonDesc", "Laad eerst een JSON-bestand via de sidebar voordat je oplost.") });
       return;
     }
     setSolving(true);
