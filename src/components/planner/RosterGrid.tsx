@@ -64,8 +64,9 @@ function HoursBar({ percent }: { percent: number }) {
 
 function FillRateIndicator({ filled, target, pct }: { filled: number; target: number; pct: number }) {
   const color = pct >= 80 ? "text-kpi-assignments" : pct >= 50 ? "text-kpi-unfilled" : "text-destructive";
+  const bgColor = pct >= 80 ? "bg-kpi-assignments/15" : pct >= 50 ? "bg-kpi-unfilled/15" : "bg-destructive/15";
   return (
-    <span className={`text-[10px] font-semibold ${color}`}>{filled}/{target} · {pct}%</span>
+    <span className={`text-[11px] font-bold ${color} ${bgColor} px-1.5 py-0.5 rounded`}>{filled}/{target} · {pct}%</span>
   );
 }
 
@@ -173,7 +174,7 @@ export function RosterGrid({ data }: RosterGridProps) {
       <div style={{ minWidth: `${220 + numDays * 90}px` }}>
         {/* Header */}
         <div
-          className="sticky top-0 z-[5] grid border-b bg-card shadow-sm"
+          className="sticky top-0 z-[5] grid border-b-2 border-border bg-card shadow-sm"
           style={{ gridTemplateColumns: `230px repeat(${numDays}, minmax(85px, 1fr))` }}
         >
           <div className="flex items-center gap-2 px-4 py-3 border-r">
@@ -182,10 +183,10 @@ export function RosterGrid({ data }: RosterGridProps) {
           {days.map((d, i) => (
             <div
               key={i}
-              className={`flex flex-col items-center justify-center py-2.5 text-center border-r last:border-r-0 ${d.weekend ? "bg-weekend" : ""}`}
+              className={`flex flex-col items-center justify-center gap-0.5 py-3 text-center border-r last:border-r-0 ${d.weekend ? "bg-weekend" : ""}`}
             >
-              <span className="text-xs font-semibold text-foreground">{t(`days.${d.dayKey}`)}</span>
-              <span className="text-[10px] text-muted-foreground">{d.date}</span>
+              <span className="text-[13px] font-bold text-foreground">{t(`days.${d.dayKey}`)}</span>
+              <span className="text-[12px] font-medium text-muted-foreground">{d.date}</span>
               <FillRateIndicator filled={dayFillRates[i].filled} target={dayFillRates[i].target} pct={dayFillRates[i].pct} />
             </div>
           ))}
