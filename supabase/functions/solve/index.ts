@@ -59,6 +59,9 @@ serve(async (req) => {
       };
     });
 
+    console.log("Settings in payload:", JSON.stringify(payload.Settings));
+    console.log("HardConstraints in payload:", JSON.stringify(payload.HardConstraints));
+    console.log("SoftConstraints in payload:", JSON.stringify(payload.SoftConstraints));
     console.log("Sending solve request to external API...");
 
     const response = await fetch(SOLVER_URL, {
