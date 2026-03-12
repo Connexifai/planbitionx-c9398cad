@@ -61,6 +61,8 @@ export interface ShiftData {
 
 export interface RosterEmployee {
   name: string;
+  firstName: string;
+  lastName: string;
   id: number;
   contractId: string;
   tags: string[];
