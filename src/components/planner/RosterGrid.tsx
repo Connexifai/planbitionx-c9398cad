@@ -36,11 +36,11 @@ const ShiftCell = memo(function ShiftCell({ shift, t }: { shift: ShiftData; t: (
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <div className={`shift-badge ${cls} cursor-default flex-col items-start w-full gap-0.5`}>
-          <span className="font-semibold capitalize text-[13px] tracking-tight">
+        <div className={`shift-badge ${cls} cursor-default flex-col items-start w-full gap-0 py-0.5 px-1.5`}>
+          <span className="font-semibold capitalize text-[12px] tracking-tight leading-none">
             {shiftTypeLabel[shift.type]}{role && <span className="opacity-70 font-medium"> [{role}]</span>}
           </span>
-          <span className="text-[12px] opacity-90 font-medium">{shift.time}</span>
+          <span className="text-[11px] opacity-90 font-medium leading-none">{shift.time}</span>
         </div>
       </TooltipTrigger>
       <TooltipContent side="top">
