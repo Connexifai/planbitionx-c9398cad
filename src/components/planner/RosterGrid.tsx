@@ -87,7 +87,7 @@ const EmployeeRow = memo(function EmployeeRow({
     <div
       className={`grid border-b last:border-b-0 transition-colors hover:bg-accent/30 ${rowIdx % 2 === 0 ? "" : "bg-accent/10"}`}
       style={{
-        gridTemplateColumns: `240px repeat(${numDays}, minmax(90px, 1fr))`,
+        gridTemplateColumns: `230px repeat(${numDays}, minmax(85px, 1fr))`,
         height: ROW_HEIGHT,
       }}
     >
