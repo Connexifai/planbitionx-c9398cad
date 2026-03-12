@@ -137,8 +137,9 @@ export function RosterGrid({ data }: RosterGridProps) {
   const rowVirtualizer = useVirtualizer({
     count: employees.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => ROW_HEIGHT,
+    estimateSize: () => 74,
     overscan: 5,
+    measureElement: (el) => el.getBoundingClientRect().height,
   });
 
   if (!data) {
