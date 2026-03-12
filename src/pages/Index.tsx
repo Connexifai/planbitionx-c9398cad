@@ -105,10 +105,9 @@ function SolvingOverlay() {
       >
         <source src="/videos/login-bg.mp4" type="video/mp4" />
       </video>
-      <div className="absolute inset-0 bg-background/30" />
-      <div className="animate-[fade-in_0.3s_ease-out] flex flex-col items-center gap-6">
+      <div className="absolute inset-0 bg-background/50" />
+      <div className="animate-[fade-in_0.3s_ease-out] relative z-10 flex flex-col items-center gap-6 bg-background/60 backdrop-blur-md rounded-3xl px-12 py-10 shadow-2xl border border-border/50">
         <div className="relative w-44 h-44">
-          {/* Indeterminate spinning ring */}
           <svg className="w-full h-full animate-spin" style={{ animationDuration: "3s" }} viewBox="0 0 100 100">
             <circle cx="50" cy="50" r="42" fill="none" strokeWidth="4" className="stroke-muted" />
             <circle cx="50" cy="50" r="42" fill="none" strokeWidth="4" className="stroke-primary" strokeLinecap="round"
@@ -118,7 +117,7 @@ function SolvingOverlay() {
           <img src={robotImg} alt="Solving..." className="absolute inset-4 object-contain drop-shadow-xl robot-float" />
         </div>
 
-        <h2 className="text-2xl font-bold text-foreground">{t("solving.title")}</h2>
+        <h2 className="text-2xl font-bold text-foreground drop-shadow-sm">{t("solving.title")}</h2>
 
         <div className="flex items-center gap-2">
           {solvePhases.map((step, i) => {
@@ -129,19 +128,19 @@ function SolvingOverlay() {
                   "w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold border-2 transition-all duration-500",
                   status === "done" ? "bg-primary border-primary text-primary-foreground scale-90" :
                   status === "active" ? "border-primary text-primary animate-pulse bg-primary/10 scale-110" :
-                  "border-border text-muted-foreground bg-muted scale-90 opacity-50"
+                  "border-muted-foreground/30 text-muted-foreground bg-muted scale-90 opacity-60"
                 )} title={step.label}>
                   {status === "done" ? "✓" : step.icon}
                 </div>
                 {i < solvePhases.length - 1 && (
-                  <div className={cn("w-6 h-0.5 rounded-full transition-all duration-500", status === "done" ? "bg-primary" : "bg-border")} />
+                  <div className={cn("w-6 h-0.5 rounded-full transition-all duration-500", status === "done" ? "bg-primary" : "bg-muted-foreground/30")} />
                 )}
               </div>
             );
           })}
         </div>
 
-        <p className="text-sm text-muted-foreground font-medium animate-pulse">
+        <p className="text-sm text-foreground font-medium animate-pulse">
           {solvePhases[phase]?.label}…
         </p>
 
