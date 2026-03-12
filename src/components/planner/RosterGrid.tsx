@@ -176,7 +176,7 @@ export function RosterGrid({ data }: RosterGridProps) {
         {/* Header */}
         <div
           className="sticky top-0 z-[5] grid border-b bg-card shadow-sm"
-          style={{ gridTemplateColumns: `220px repeat(${numDays}, minmax(80px, 1fr))` }}
+          style={{ gridTemplateColumns: `240px repeat(${numDays}, minmax(90px, 1fr))` }}
         >
           <div className="flex items-center gap-2 px-4 py-3 border-r">
             <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t("grid.employee")}</span>
