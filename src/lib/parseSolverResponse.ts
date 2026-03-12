@@ -200,7 +200,7 @@ export function parseSolverResponse(request: RawSchedule, response: SolverRespon
 
   // Group assigned shifts by contractId
   const assignmentsByContract = new Map<string, AssignedShift[]>();
-  for (const a of response.assignedShifts) {
+  for (const a of assignedShifts) {
     if (!assignmentsByContract.has(a.contractId)) {
       assignmentsByContract.set(a.contractId, []);
     }
