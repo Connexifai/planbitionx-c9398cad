@@ -127,9 +127,11 @@ export function ServiceRosterGrid({ data }: ServiceRosterGridProps) {
                     d.weekend ? "bg-weekend" : ""
                   }`}
                 >
-                  <div className="flex flex-col items-center gap-0.5">
-                    <span className="text-sm font-bold text-foreground">{t(`days.${d.dayKey}`)}</span>
-                    <span className="text-[11px] text-muted-foreground">{d.date}</span>
+                  <div className="flex items-center justify-between gap-1 px-2">
+                    <div className="flex flex-col items-start">
+                      <span className="text-sm font-bold text-foreground leading-tight">{t(`days.${d.dayKey}`)}</span>
+                      <span className="text-[11px] font-medium text-muted-foreground">{d.date}</span>
+                    </div>
                     <DayFillRate filled={dayFilled} totalTarget={dayTotalDemand} />
                   </div>
                 </th>
