@@ -70,13 +70,12 @@ function IPhone17({ employee, onApprove, onReject }: {
           <div className="absolute inset-[1px] rounded-[3.2rem] overflow-hidden bg-background flex flex-col">
 
             {/* Dynamic Island */}
-            <div className="relative flex justify-center pt-[10px] pb-[2px] z-20">
+            <div className="relative flex justify-center pt-[12px] pb-[4px] z-20">
               <div
-                className="w-[100px] h-[28px] bg-black rounded-full flex items-center justify-center gap-2"
+                className="w-[126px] h-[34px] bg-black rounded-full flex items-center justify-center gap-2"
                 style={{ boxShadow: "0 0 0 0.5px hsl(0 0% 15%)" }}
               >
-                {/* Camera dot */}
-                <div className="w-[10px] h-[10px] rounded-full" style={{
+                <div className="w-[12px] h-[12px] rounded-full" style={{
                   background: "radial-gradient(circle at 35% 35%, hsl(220 20% 25%), hsl(220 20% 8%))",
                   boxShadow: "inset 0 0 2px rgba(255,255,255,0.1)",
                 }} />
@@ -84,12 +83,12 @@ function IPhone17({ employee, onApprove, onReject }: {
             </div>
 
             {/* Status bar */}
-            <div className="flex items-center justify-between px-7 pt-[2px] pb-[6px]">
-              <span className="text-[12px] font-semibold text-foreground tracking-tight">{timeStr}</span>
-              <div className="flex items-center gap-[5px]">
-                <Signal className="h-[13px] w-[13px] text-foreground" strokeWidth={2.5} />
-                <Wifi className="h-[13px] w-[13px] text-foreground" strokeWidth={2.5} />
-                <Battery className="h-[13px] w-[13px] text-foreground" strokeWidth={2.5} />
+            <div className="flex items-center justify-between px-8 pt-[3px] pb-[8px]">
+              <span className="text-[14px] font-semibold text-foreground tracking-tight">{timeStr}</span>
+              <div className="flex items-center gap-[6px]">
+                <Signal className="h-[15px] w-[15px] text-foreground" strokeWidth={2.5} />
+                <Wifi className="h-[15px] w-[15px] text-foreground" strokeWidth={2.5} />
+                <Battery className="h-[15px] w-[15px] text-foreground" strokeWidth={2.5} />
               </div>
             </div>
 
