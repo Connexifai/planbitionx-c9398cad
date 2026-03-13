@@ -55,12 +55,12 @@ export function KpiCards({ solved = false, data, solveTime }: KpiCardsProps) {
   const timeStr = solveTime ? `${(solveTime / 1000).toFixed(1)}s` : "0s";
 
   return (
-    <div className="grid grid-cols-2 gap-4 lg:grid-cols-5">
-      <KpiCard label={t("kpi.occupancy")} value={solved ? occupancyPct : "0%"} subtitle={solved ? `${filledSlots} / ${totalDemand} slots` : "—"} icon={<TrendingUp className="h-5 w-5" />} colorClass="text-kpi-occupancy" bgClass="bg-kpi-occupancy/10" />
-      <KpiCard label={t("kpi.assignments")} value={solved ? filledSlots : "0"} subtitle={solved ? t("kpi.ofSlots", { count: totalDemand }) : "—"} icon={<Users className="h-5 w-5" />} colorClass="text-kpi-assignments" bgClass="bg-kpi-assignments/10" />
-      <KpiCard label={t("kpi.atwViolations")} value="0" subtitle={solved ? t("kpi.compliant") : "—"} icon={<AlertTriangle className="h-5 w-5" />} colorClass="text-kpi-violations" bgClass="bg-kpi-violations/10" />
-      <KpiCard label={t("kpi.unfilled")} value={solved ? unfilledCount : "0"} subtitle={solved ? t("kpi.clickDetails") : "—"} icon={<HelpCircle className="h-5 w-5" />} colorClass="text-kpi-unfilled" bgClass="bg-kpi-unfilled/10" />
-      <KpiCard label={t("kpi.solveTime")} value={solved ? timeStr : "0s"} subtitle={solved ? t("kpi.solverTime") : "—"} icon={<Clock className="h-5 w-5" />} colorClass="text-kpi-time" bgClass="bg-kpi-time/10" />
+    <div className="flex flex-wrap gap-4">
+      <div className="flex-1 min-w-[180px]"><KpiCard label={t("kpi.occupancy")} value={solved ? occupancyPct : "0%"} subtitle={solved ? `${filledSlots} / ${totalDemand} slots` : "—"} icon={<TrendingUp className="h-5 w-5" />} colorClass="text-kpi-occupancy" bgClass="bg-kpi-occupancy/10" /></div>
+      <div className="flex-1 min-w-[180px]"><KpiCard label={t("kpi.assignments")} value={solved ? filledSlots : "0"} subtitle={solved ? t("kpi.ofSlots", { count: totalDemand }) : "—"} icon={<Users className="h-5 w-5" />} colorClass="text-kpi-assignments" bgClass="bg-kpi-assignments/10" /></div>
+      <div className="flex-1 min-w-[180px]"><KpiCard label={t("kpi.atwViolations")} value="0" subtitle={solved ? t("kpi.compliant") : "—"} icon={<AlertTriangle className="h-5 w-5" />} colorClass="text-kpi-violations" bgClass="bg-kpi-violations/10" /></div>
+      <div className="flex-1 min-w-[180px]"><KpiCard label={t("kpi.unfilled")} value={solved ? unfilledCount : "0"} subtitle={solved ? t("kpi.clickDetails") : "—"} icon={<HelpCircle className="h-5 w-5" />} colorClass="text-kpi-unfilled" bgClass="bg-kpi-unfilled/10" /></div>
+      <div className="flex-1 min-w-[180px]"><KpiCard label={t("kpi.solveTime")} value={solved ? timeStr : "0s"} subtitle={solved ? t("kpi.solverTime") : "—"} icon={<Clock className="h-5 w-5" />} colorClass="text-kpi-time" bgClass="bg-kpi-time/10" /></div>
     </div>
   );
 }
