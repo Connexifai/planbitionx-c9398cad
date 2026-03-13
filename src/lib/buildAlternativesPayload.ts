@@ -153,16 +153,9 @@ export function buildAlternativesPayload(
     const empAssignments = assignmentsByEmployee.get(empId) || [];
     const isTarget = empId === String(constraint.employeeId);
 
-    // For the target employee, filter out conflicting assignments
-    const keptAssignments = isTarget
-      ? empAssignments.filter((a) => {
-          const name = shiftNameMap.get(a.compositeId) || "";
-          return !assignmentMatchesConstraint(a, name, constraint);
-        })
-      : empAssignments;
-
-    // AssignedShifts = list of composite "ShiftId|Start" IDs
-    const assignedShifts = keptAssignments.map((a) => a.compositeId);
+    // All assignments stay in AssignedShifts — the API detects conflicts
+    // itself based on the constraint + present shift.
+    const assignedShifts = empAssignments.map((a) => a.compositeId);
 
     // Constraints
     const existingConstraints = Array.isArray(emp.Constraints) ? [...emp.Constraints] : [];
