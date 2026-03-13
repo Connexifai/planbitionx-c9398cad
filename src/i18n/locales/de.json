@@ -134,7 +134,7 @@
   "robot": {
     "uploadJson": "Laden Sie eine JSON-Datei hoch, um zu beginnen",
     "clickMe": "Hey! 👋 Klicken Sie auf mich, um Ihre Dienstplan-Wünsche im Chat mitzuteilen!",
-    "clickMePost": "Hey! 👋 Klicken Sie auf mich, ich helfe Ihnen mit dem Dienstplan!",
+    "clickMePost": "Hey! 👋 Klicken Sie auf mich, ich helfe Ihnen bei Störungen oder Anfragen zur Dienstplanänderung!",
     "quotes": [
       "Unsere KI erstellt so straffe Pläne, selbst Schweizer Käse bekommt Stresslöcher.",
       "Unsere KI plant so präzise… es würde ein Lineal neidisch machen.",

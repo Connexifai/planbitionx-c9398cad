@@ -134,7 +134,7 @@
   "robot": {
     "uploadJson": "Téléchargez un fichier JSON pour commencer",
     "clickMe": "Hey ! 👋 Cliquez sur moi pour partager vos préférences de planning dans le chat !",
-    "clickMePost": "Hey ! 👋 Cliquez sur moi, je vous aide avec le planning !",
+    "clickMePost": "Hey ! 👋 Cliquez sur moi, je vous aide avec les perturbations ou les demandes de modification du planning !",
     "quotes": [
       "Notre IA fait des plannings si serrés que même le gruyère a des trous de stress.",
       "Notre IA planifie si précisément… qu'une règle en serait jalouse.",

@@ -134,7 +134,7 @@
   "robot": {
     "uploadJson": "Sube un archivo JSON para empezar",
     "clickMe": "¡Hola! 👋 ¡Haz clic en mí para compartir tus preferencias de turno en el chat!",
-    "clickMePost": "¡Hola! 👋 ¡Haz clic en mí, te ayudo con el cuadrante!",
+    "clickMePost": "¡Hola! 👋 ¡Haz clic en mí, te ayudo con las alteraciones o las solicitudes de cambio del cuadrante!",
     "quotes": [
       "Nuestra IA hace planificaciones tan ajustadas que hasta el queso suizo tiene agujeros de estrés.",
       "Nuestra IA planifica con tanta precisión… que una regla tendría envidia.",
