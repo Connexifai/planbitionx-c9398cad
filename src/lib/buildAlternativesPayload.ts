@@ -198,6 +198,8 @@ export function buildAlternativesPayload(
     Employees: employees,
     SchedulingOptions: {
       ...(originalRequest?.SchedulingOptions || {}),
+      // Ensure solver has time to search — default to 30s if not set
+      TimeLimitSeconds: (originalRequest?.SchedulingOptions as any)?.TimeLimitSeconds ?? 30,
       MaxAlternatives: Math.max(1, Math.min(10, maxAlternatives)),
       SearchScope: searchScope,
     },
