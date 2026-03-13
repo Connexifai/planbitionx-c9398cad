@@ -43,6 +43,7 @@ export interface Alternative {
   Rank: number;
   ChangesFromBaseline: number;
   Summary?: string;
+  ConflictShiftFilled?: boolean;
   Score: {
     FillRatePercentage: number;
     HardViolations: number;

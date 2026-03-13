@@ -146,21 +146,7 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
     }
 
     const response: AlternativesResponse = await altRes.json();
-
-    // Compute the synthetic "removed" changes for the target employee
-    const removedChanges = getRemovedAssignments(
-      solverAssignments,
-      constraint,
-      requestData?.Shifts || []
-    );
-
-    // Enrich each alternative with the removed changes + normalize IDs
-    return {
-      ...response,
-      Alternatives: (response.Alternatives || []).map((alt) =>
-        enrichAlternative(alt, removedChanges)
-      ),
-    };
+    return response;
   }, [requestData, solverAssignments]);
 
   /** Handle "Zoek verder" — re-search with full scope */
