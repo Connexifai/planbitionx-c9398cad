@@ -104,6 +104,7 @@ serve(async (req) => {
 
     const data = await response.json();
     console.log("Solver alternatives response received successfully");
+    console.log("Full solver response:", JSON.stringify(data).slice(0, 10000));
 
     return new Response(JSON.stringify(data), {
       status: 200,
