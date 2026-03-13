@@ -1,15 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 import {
   CheckCircle2,
-  AlertTriangle,
   Clock,
   Star,
   Users,
@@ -18,11 +10,14 @@ import {
   CalendarCheck,
   TrendingUp,
   Info,
+  ChevronDown,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { toTitleCase } from "@/lib/utils";
-import type { RosterData, RosterEmployee, ShiftData } from "@/lib/parseSolverResponse";
-import { useMemo } from "react";
+import type { RosterData } from "@/lib/parseSolverResponse";
+import { useMemo, useState, useRef, useCallback, memo } from "react";
+import { useVirtualizer } from "@tanstack/react-virtual";
+import { cn } from "@/lib/utils";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -74,7 +69,6 @@ function buildFromSolverExplanations(
   solverExplanations: SolverExplanation[],
   data: RosterData
 ): EmployeeExplanation[] {
-  // Group by EmployeeId
   const grouped = new Map<string, SolverExplanation[]>();
   for (const exp of solverExplanations) {
     if (!grouped.has(exp.EmployeeId)) grouped.set(exp.EmployeeId, []);
@@ -82,13 +76,11 @@ function buildFromSolverExplanations(
   }
 
   const employeeMap = new Map(data.employees.map(e => [e.contractId, e]));
-
   const results: EmployeeExplanation[] = [];
+
   for (const [empId, explanations] of grouped) {
     const emp = employeeMap.get(empId);
     const name = emp ? `${emp.lastName}, ${emp.firstName}` : empId;
-
-    // Deduplicate reasons across all shifts
     const uniqueReasons = new Set<string>();
     for (const exp of explanations) {
       for (const r of exp.Reasons) uniqueReasons.add(r);
@@ -99,22 +91,14 @@ function buildFromSolverExplanations(
       return { icon, label: text.split(":")[0].trim(), detail: text, weight };
     });
 
-    // Sort: high first, then medium, then low
     const weightOrder = { high: 0, medium: 1, low: 2 };
     reasons.sort((a, b) => weightOrder[a.weight] - weightOrder[b.weight]);
 
-    results.push({
-      name,
-      id: empId,
-      reasons,
-      shiftCount: explanations.length,
-    });
+    results.push({ name, id: empId, reasons, shiftCount: explanations.length });
   }
 
   return results.sort((a, b) => b.shiftCount - a.shiftCount);
 }
-
-// ── Fallback: generate from roster data ────────────────────────────────────────
 
 function generateFallbackExplanations(data: RosterData, t: (key: string) => string): EmployeeExplanation[] {
   const { days, employees } = data;
@@ -125,7 +109,6 @@ function generateFallbackExplanations(data: RosterData, t: (key: string) => stri
     if (assignedShifts.length === 0) continue;
 
     const reasons: Reason[] = [];
-
     const qualTags = emp.tags.filter(t => !["Own Employee", "Flex", "Temp"].includes(t));
     if (qualTags.length > 0) {
       reasons.push({ icon: Star, label: t("explanation.qualification"), detail: t("explanation.qualifiedFor") + ": " + qualTags.join(", "), weight: "high" });
@@ -150,15 +133,10 @@ function generateFallbackExplanations(data: RosterData, t: (key: string) => stri
       weight: fillPct >= 60 ? "high" : "medium",
     });
 
-    results.push({
-      name: `${emp.lastName}, ${emp.firstName}`,
-      id: emp.contractId,
-      reasons,
-      shiftCount: assignedShifts.length,
-    });
+    results.push({ name: `${emp.lastName}, ${emp.firstName}`, id: emp.contractId, reasons, shiftCount: assignedShifts.length });
   }
 
-  return results.sort((a, b) => b.shiftCount - a.shiftCount).slice(0, 30);
+  return results.sort((a, b) => b.shiftCount - a.shiftCount);
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
@@ -215,6 +193,61 @@ function StatsSummary({ stats }: { stats: SolverStatistics }) {
   );
 }
 
+// ── Single employee row (memoized) ─────────────────────────────────────────────
+
+const EmployeeRow = memo(function EmployeeRow({
+  emp,
+  isOpen,
+  onToggle,
+  weightLabel,
+}: {
+  emp: EmployeeExplanation;
+  isOpen: boolean;
+  onToggle: () => void;
+  weightLabel: Record<string, string>;
+}) {
+  return (
+    <div className="border border-border/50 rounded-xl bg-card overflow-hidden">
+      <button
+        onClick={onToggle}
+        className="w-full flex items-center gap-3 px-4 py-3 hover:bg-muted/30 transition-colors text-left"
+      >
+        <div className="flex flex-col items-start gap-1 min-w-0 flex-1">
+          <span className="text-sm font-semibold text-foreground truncate">{toTitleCase(emp.name)}</span>
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] px-1.5 py-0 h-4 inline-flex items-center rounded-md border border-border text-muted-foreground">
+              {emp.shiftCount} diensten
+            </span>
+            <span className="text-[10px] text-muted-foreground">{emp.reasons.length} redenen</span>
+          </div>
+        </div>
+        <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform shrink-0", isOpen && "rotate-180")} />
+      </button>
+      {isOpen && (
+        <div className="px-4 pb-4 pt-0 space-y-2 animate-fade-in">
+          {emp.reasons.map((reason, i) => (
+            <div
+              key={i}
+              className={`flex items-start gap-2.5 rounded-lg border px-3 py-2.5 ${weightColor[reason.weight]}`}
+            >
+              <reason.icon className="h-4 w-4 mt-0.5 shrink-0" />
+              <div className="min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-semibold">{reason.label}</span>
+                  <span className={`text-[9px] px-1.5 py-0 h-4 inline-flex items-center rounded-md border border-current/30 ${weightColor[reason.weight]}`}>
+                    {weightLabel[reason.weight]}
+                  </span>
+                </div>
+                <p className="text-[11px] mt-0.5 opacity-80 leading-relaxed">{reason.detail}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+});
+
 // ── Main Component ─────────────────────────────────────────────────────────────
 
 export interface ExplanationViewProps {
@@ -225,6 +258,8 @@ export interface ExplanationViewProps {
 
 export function ExplanationView({ data, solverExplanations, solverStatistics }: ExplanationViewProps) {
   const { t } = useTranslation();
+  const [openIds, setOpenIds] = useState<Set<string>>(new Set());
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   const explanations = useMemo(() => {
     if (!data) return [];
@@ -236,11 +271,27 @@ export function ExplanationView({ data, solverExplanations, solverStatistics }: 
 
   const hasSolverData = solverExplanations && solverExplanations.length > 0;
 
-  const weightLabel: Record<string, string> = {
+  const weightLabel: Record<string, string> = useMemo(() => ({
     high: t("explanation.decisive"),
     medium: t("explanation.considered"),
     low: t("explanation.additional"),
-  };
+  }), [t]);
+
+  const toggleId = useCallback((id: string) => {
+    setOpenIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }, []);
+
+  const virtualizer = useVirtualizer({
+    count: explanations.length,
+    getScrollElement: () => scrollRef.current,
+    estimateSize: (i) => openIds.has(explanations[i].id) ? 200 : 68,
+    overscan: 5,
+  });
 
   if (!data || explanations.length === 0) {
     return (
@@ -252,10 +303,8 @@ export function ExplanationView({ data, solverExplanations, solverStatistics }: 
 
   return (
     <div className="space-y-4">
-      {/* Solver statistics */}
       {solverStatistics && <StatsSummary stats={solverStatistics} />}
 
-      {/* Header */}
       <Card className="border-border/50">
         <CardContent className="p-4">
           <div className="flex items-start gap-3">
@@ -275,7 +324,6 @@ export function ExplanationView({ data, solverExplanations, solverStatistics }: 
         </CardContent>
       </Card>
 
-      {/* Legend */}
       <div className="flex flex-wrap gap-3 text-[11px]">
         {Object.entries(weightLabel).map(([key, label]) => (
           <span key={key} className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border ${weightColor[key]}`}>
@@ -284,53 +332,41 @@ export function ExplanationView({ data, solverExplanations, solverStatistics }: 
         ))}
       </div>
 
-      {/* Explanations */}
-      <ScrollArea className="max-h-[calc(100vh-380px)]">
-        <Accordion type="multiple" defaultValue={explanations.length > 0 ? [explanations[0].id] : []} className="space-y-2">
-          {explanations.map((emp) => (
-            <AccordionItem
-              key={emp.id}
-              value={emp.id}
-              className="border border-border/50 rounded-xl bg-card overflow-hidden"
-            >
-              <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-muted/30">
-                <div className="flex items-center gap-3 flex-1 min-w-0">
-                  <div className="flex flex-col items-start gap-1 min-w-0 flex-1">
-                    <span className="text-sm font-semibold text-foreground truncate">{toTitleCase(emp.name)}</span>
-                    <div className="flex items-center gap-2">
-                      <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4">
-                        {emp.shiftCount} {t("explanation.shifts", "diensten")}
-                      </Badge>
-                      <span className="text-[10px] text-muted-foreground">{emp.reasons.length} {t("explanation.reasonCount", "redenen")}</span>
-                    </div>
-                  </div>
-                </div>
-              </AccordionTrigger>
-              <AccordionContent className="px-4 pb-4 pt-0">
-                <div className="space-y-2">
-                  {emp.reasons.map((reason, i) => (
-                    <div
-                      key={i}
-                      className={`flex items-start gap-2.5 rounded-lg border px-3 py-2.5 ${weightColor[reason.weight]}`}
-                    >
-                      <reason.icon className="h-4 w-4 mt-0.5 shrink-0" />
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs font-semibold">{reason.label}</span>
-                          <Badge variant="outline" className="text-[9px] px-1.5 py-0 h-4 border-current/30">
-                            {weightLabel[reason.weight]}
-                          </Badge>
-                        </div>
-                        <p className="text-[11px] mt-0.5 opacity-80 leading-relaxed">{reason.detail}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-          ))}
-        </Accordion>
-      </ScrollArea>
+      <div
+        ref={scrollRef}
+        className="overflow-y-auto roster-scroll"
+        style={{ maxHeight: "calc(100vh - 380px)" }}
+      >
+        <div
+          style={{ height: virtualizer.getTotalSize(), position: "relative" }}
+        >
+          {virtualizer.getVirtualItems().map((virtualRow) => {
+            const emp = explanations[virtualRow.index];
+            return (
+              <div
+                key={emp.id}
+                data-index={virtualRow.index}
+                ref={virtualizer.measureElement}
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  transform: `translateY(${virtualRow.start}px)`,
+                }}
+                className="pb-2"
+              >
+                <EmployeeRow
+                  emp={emp}
+                  isOpen={openIds.has(emp.id)}
+                  onToggle={() => toggleId(emp.id)}
+                  weightLabel={weightLabel}
+                />
+              </div>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 }
