@@ -121,12 +121,18 @@ const EmployeeRow = memo(function EmployeeRow({
   days,
   t,
   constraints,
+  highlightDayDate,
+  highlightAction,
+  isAnimatingRow,
 }: {
   emp: RosterEmployee;
   numDays: number;
   days: DayColumn[];
   t: (key: string) => string;
   constraints: EmployeeConstraint[];
+  highlightDayDate?: string;
+  highlightAction?: "added" | "removed";
+  isAnimatingRow?: boolean;
 }) {
   // Check which day cells have constraint violations
   const dayConstraintFlags = useMemo(() => {
