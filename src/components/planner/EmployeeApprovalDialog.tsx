@@ -161,25 +161,25 @@ function IPhone17({ employee, onApprove, onReject }: {
                       <div className="flex divide-x divide-border/40">
                         <button
                           onClick={onReject}
-                          className="flex-1 flex items-center justify-center gap-1.5 py-3.5 text-destructive text-[14px] font-medium active:bg-muted/50 transition-colors"
+                          className="flex-1 flex items-center justify-center gap-1.5 py-4 text-destructive text-[16px] font-medium active:bg-muted/50 transition-colors"
                         >
                           Afwijzen
                         </button>
                         <button
                           onClick={onApprove}
-                          className="flex-1 flex items-center justify-center gap-1.5 py-3.5 text-primary text-[14px] font-semibold active:bg-muted/50 transition-colors"
+                          className="flex-1 flex items-center justify-center gap-1.5 py-4 text-primary text-[16px] font-semibold active:bg-muted/50 transition-colors"
                         >
                           Akkoord
                         </button>
                       </div>
                     ) : employee.status === "approved" ? (
-                      <div className="flex items-center justify-center gap-2 py-3.5 text-primary text-[14px] font-semibold animate-fade-in">
-                        <CheckCircle2 className="h-4 w-4" />
+                      <div className="flex items-center justify-center gap-2 py-4 text-primary text-[16px] font-semibold animate-fade-in">
+                        <CheckCircle2 className="h-5 w-5" />
                         Akkoord gegeven
                       </div>
                     ) : (
-                      <div className="flex items-center justify-center gap-2 py-3.5 text-destructive text-[14px] font-semibold animate-fade-in">
-                        <XCircle className="h-4 w-4" />
+                      <div className="flex items-center justify-center gap-2 py-4 text-destructive text-[16px] font-semibold animate-fade-in">
+                        <XCircle className="h-5 w-5" />
                         Afgewezen
                       </div>
                     )}
