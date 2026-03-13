@@ -274,6 +274,14 @@ export default function Index() {
   return (
     <div className="h-screen flex w-full">
       {solving && <SolvingOverlay />}
+      {/* Smooth entrance overlay after login */}
+      <div
+        className={cn(
+          "fixed inset-0 z-[200] bg-background pointer-events-none transition-opacity duration-1000 ease-out",
+          entranceVisible ? "opacity-100" : "opacity-0"
+        )}
+        style={{ display: entranceVisible ? undefined : 'none' }}
+      />
       <PlannerSidebar 
         onSolve={handleSolve} 
         onJsonLoaded={handleJsonLoaded} 
