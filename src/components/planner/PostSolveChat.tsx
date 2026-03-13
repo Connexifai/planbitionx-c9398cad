@@ -313,35 +313,11 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
           {
             id: resultMsgId,
             role: "assistant",
-            content: "⚠️ Geen directe alternatieven gevonden in de directe omgeving, ik zoek nu automatisch breder.",
+            content: "⚠️ Geen directe alternatieven gevonden in de directe omgeving. Wil je breder zoeken?",
+            showSearchFull: true,
+            pendingConstraint: constraint,
           },
         ]);
-
-        const fullResponse = await fetchAlternatives(constraint, "full");
-        const fullPrepared = prepareAlternatives(fullResponse.Alternatives || []);
-
-        if (fullPrepared.visibleAlts.length === 0) {
-          setMessages((prev) => [
-            ...prev,
-            {
-              id: resultMsgId + 1,
-              role: "assistant",
-              content: "❌ Ook met een breder zoekbereik zijn er geen alternatieven gevonden.",
-            },
-          ]);
-        } else {
-          setMessages((prev) => [
-            ...prev,
-            {
-              id: resultMsgId + 1,
-              role: "assistant",
-              content: `🔎 Met breder zoeken heb ik **${formatAlternativeCount(fullPrepared)}** gevonden:`,
-              alternatives: fullPrepared.visibleAlts,
-              baseline: fullResponse.Baseline,
-              constraintSummary: intent.summary,
-            },
-          ]);
-        }
       } else {
         setMessages((prev) => [
           ...prev,
