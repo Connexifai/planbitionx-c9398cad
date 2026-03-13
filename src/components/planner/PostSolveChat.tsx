@@ -146,6 +146,9 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
   ]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [approvalDialogOpen, setApprovalDialogOpen] = useState(false);
+  const [approvalAlternative, setApprovalAlternative] = useState<Alternative | null>(null);
+  const [lastConstraint, setLastConstraint] = useState<AlternativeConstraint | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
