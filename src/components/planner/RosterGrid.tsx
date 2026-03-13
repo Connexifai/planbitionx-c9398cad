@@ -203,10 +203,18 @@ const EmployeeRow = memo(function EmployeeRow({
         const hasShiftAssigned = shift.type !== null;
         const showViolationRing = hasConstraintOnCell && hasShiftAssigned;
 
+        const isHighlighted = highlightDayDate && dayDate === highlightDayDate;
+
         return (
           <div
             key={i}
-            className={`flex items-center justify-center px-0.5 py-0.5 border-r last:border-r-0 relative ${days[i]?.weekend ? "bg-weekend" : ""} ${showViolationRing ? (cellStrength === "hard" ? "ring-2 ring-inset ring-destructive/50 bg-destructive/10" : "ring-2 ring-inset ring-kpi-unfilled/40 bg-kpi-unfilled/10") : ""}`}
+            className={cn(
+              "flex items-center justify-center px-0.5 py-0.5 border-r last:border-r-0 relative transition-all duration-500",
+              days[i]?.weekend && "bg-weekend",
+              showViolationRing && (cellStrength === "hard" ? "ring-2 ring-inset ring-destructive/50 bg-destructive/10" : "ring-2 ring-inset ring-kpi-unfilled/40 bg-kpi-unfilled/10"),
+              isHighlighted && highlightAction === "added" && "roster-cell-highlight-added",
+              isHighlighted && highlightAction === "removed" && "roster-cell-highlight-removed",
+            )}
           >
             {hasConstraintOnCell && (
               <Tooltip>
