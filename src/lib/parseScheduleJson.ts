@@ -71,7 +71,7 @@ export function parseRawScheduleJson(raw: RawSchedule): JsonScheduleData {
       existing.totalDemand += s.Demand;
       existing.count += 1;
     } else {
-      shiftMap.set(key, { name: s.Name, type, startTime, endTime, totalDemand: s.Demand, count: 1 });
+      shiftMap.set(key, { name: shiftName, type, startTime, endTime, totalDemand: s.Demand, count: 1 });
     }
   }
 
