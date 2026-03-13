@@ -53,6 +53,18 @@ Antwoord ALTIJD in valid JSON met dit formaat:
 Als je verduidelijking nodig hebt, zet needsClarification op true en geef een lege constraints array.
 Als de gebruiker gewoon chat zonder constraints te benoemen, geef dan een behulpzaam antwoord in message met lege constraints.
 
+## BELANGRIJK: Conversatiecontext
+
+Je ontvangt de VOLLEDIGE gesprekshistorie. Als jij eerder om verduidelijking hebt gevraagd (bijv. "Wie bedoel je?" bij een ambigue naam), dan is het volgende bericht van de gebruiker een ANTWOORD op die vraag. 
+Combineer het antwoord met het OORSPRONKELIJKE verzoek uit de eerdere berichten. 
+Voorbeeld:
+- Gebruiker: "camille wil woensdag vrij"
+- Jij: "Er zijn meerdere medewerkers met de naam Camille. Wie bedoel je?"
+- Gebruiker: "Camille Dupont"
+→ Verwerk dit als: Camille Dupont wil woensdag vrij (avoid_day, dayOfWeek=2)
+
+Verlies NOOIT de oorspronkelijke constraint-informatie uit eerdere berichten wanneer je een verduidelijkingsantwoord verwerkt.
+
 Antwoord altijd in het Nederlands tenzij de gebruiker Engels spreekt.`;
 
 serve(async (req) => {
