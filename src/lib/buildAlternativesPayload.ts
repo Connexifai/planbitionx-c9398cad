@@ -1,13 +1,15 @@
 import { format, getDay, parseISO } from "date-fns";
 
 /**
- * Builds a /solve/alternatives request payload from:
- * - The original solve request (with Shifts, Employees, etc.)
- * - The solver's Assignments response
- * - The user's constraint (which employee, what they want)
+ * Builds a /solve/alternatives request payload.
+ *
+ * Key rules (from API docs):
+ * 1. AssignedShifts = list of original shift IDs (frozen assignments)
+ * 2. Remove conflicting shift from target employee's AssignedShifts
+ * 3. Add Constraint to target employee
+ * 4. Shifts use original IDs (no instance suffixes)
+ * 5. SearchScope: "narrow" | "full" | "auto"
  */
-
-const SHIFT_INSTANCE_SEPARATOR = "__instance__";
 
 export interface AlternativeConstraint {
   employeeId: string;
@@ -32,6 +34,7 @@ export interface AlternativeChange {
   ShiftId: string;
   ShiftName: string;
   Action: "added" | "removed";
+  Reason?: string;
   Start?: string;
   End?: string;
 }
@@ -39,6 +42,7 @@ export interface AlternativeChange {
 export interface Alternative {
   Rank: number;
   ChangesFromBaseline: number;
+  Summary?: string;
   Score: {
     FillRatePercentage: number;
     HardViolations: number;
@@ -55,10 +59,9 @@ export interface AlternativesResponse {
   };
 }
 
-function toBaseShiftId(shiftId: string): string {
-  const idx = shiftId.indexOf(SHIFT_INSTANCE_SEPARATOR);
-  return idx === -1 ? shiftId : shiftId.slice(0, idx);
-}
+export type SearchScope = "narrow" | "full" | "auto";
+
+// ─── Helpers ───────────────────────────────────────────────────
 
 function classifyShiftKind(shiftName: string, shiftStart: string): "early" | "day" | "late" | "night" {
   const lower = (shiftName || "").toLowerCase();
@@ -70,58 +73,12 @@ function classifyShiftKind(shiftName: string, shiftStart: string): "early" | "da
   return "day";
 }
 
-function buildShiftInstances(shifts: any[]) {
-  const instanceShifts = shifts.map((shift: any) => {
-    const baseId = String(shift.Id);
-    const start = String(shift.Start ?? "");
-    return {
-      ...shift,
-      Id: `${baseId}${SHIFT_INSTANCE_SEPARATOR}${start}`,
-    };
-  });
-
-  const byBaseAndStart = new Map<string, string>();
-  const firstByBase = new Map<string, string>();
-
-  for (const shift of instanceShifts) {
-    const instanceId = String(shift.Id);
-    const baseId = toBaseShiftId(instanceId);
-    const start = String(shift.Start ?? "");
-    byBaseAndStart.set(`${baseId}|${start}`, instanceId);
-    if (!firstByBase.has(baseId)) {
-      firstByBase.set(baseId, instanceId);
-    }
-  }
-
-  return { instanceShifts, byBaseAndStart, firstByBase };
-}
-
-function resolveAssignmentInstanceShiftId(
-  assignment: SolverAssignment,
-  byBaseAndStart: Map<string, string>,
-  firstByBase: Map<string, string>
-): string | null {
-  const baseShiftId = toBaseShiftId(String(assignment.ShiftId));
-  const start = String(assignment.Start ?? "");
-
-  const exact = byBaseAndStart.get(`${baseShiftId}|${start}`);
-  if (exact) return exact;
-
-  // Fallback when seconds formatting differs
-  const minutePrefix = start.slice(0, 16);
-  for (const [key, instanceId] of byBaseAndStart.entries()) {
-    const [base, shiftStart] = key.split("|");
-    if (base === baseShiftId && shiftStart.slice(0, 16) === minutePrefix) {
-      return instanceId;
-    }
-  }
-
-  return firstByBase.get(baseShiftId) || null;
-}
-
+/**
+ * Determines if an assignment matches the constraint (i.e. should be removed).
+ */
 function assignmentMatchesConstraint(
   assignment: SolverAssignment,
-  shift: any,
+  shiftName: string,
   constraint: AlternativeConstraint
 ): boolean {
   if (constraint.type === "avoid_date") {
@@ -135,82 +92,60 @@ function assignmentMatchesConstraint(
   }
 
   if (constraint.type === "avoid_shift_kind") {
-    const kind = classifyShiftKind(String(shift?.Name ?? ""), String(shift?.Start ?? assignment.Start));
+    const kind = classifyShiftKind(shiftName, assignment.Start);
     return kind === constraint.shiftKind;
   }
 
   return false;
 }
 
-export function normalizeAlternativeShiftIds(alternative: Alternative): Alternative {
-  return {
-    ...alternative,
-    Assignments: (alternative.Assignments || []).map((a) => ({
-      ...a,
-      ShiftId: toBaseShiftId(String(a.ShiftId)),
-    })),
-    Changes: (alternative.Changes || []).map((c) => ({
-      ...c,
-      ShiftId: toBaseShiftId(String(c.ShiftId)),
-    })),
-  };
-}
+// ─── Payload builder ───────────────────────────────────────────
 
 export function buildAlternativesPayload(
   originalRequest: any,
   solverAssignments: SolverAssignment[],
   constraint: AlternativeConstraint,
-  maxAlternatives: number = 5
+  maxAlternatives: number = 5,
+  searchScope: SearchScope = "narrow"
 ): any {
   const sourceShifts = Array.isArray(originalRequest?.Shifts) ? originalRequest.Shifts : [];
   const sourceEmployees = Array.isArray(originalRequest?.Employees) ? originalRequest.Employees : [];
 
-  const { instanceShifts, byBaseAndStart, firstByBase } = buildShiftInstances(sourceShifts);
-
-  const normalizedAssignments = (Array.isArray(solverAssignments) ? solverAssignments : [])
-    .map((assignment) => {
-      const instanceShiftId = resolveAssignmentInstanceShiftId(assignment, byBaseAndStart, firstByBase);
-      if (!instanceShiftId) return null;
-      return {
-        ...assignment,
-        PersonId: String(assignment.PersonId),
-        ShiftId: instanceShiftId,
-      };
-    })
-    .filter((a): a is SolverAssignment => Boolean(a));
-
-  const assignmentShiftMap = new Map<string, any>();
-  for (const shift of instanceShifts) {
-    assignmentShiftMap.set(String(shift.Id), shift);
+  // Build a shift lookup by ID+Start for name resolution
+  const shiftLookup = new Map<string, string>();
+  for (const s of sourceShifts) {
+    shiftLookup.set(`${s.Id}|${s.Start}`, s.Name || "");
   }
 
+  // Group solver assignments by employee
   const assignmentsByEmployee = new Map<string, SolverAssignment[]>();
-  for (const assignment of normalizedAssignments) {
-    const employeeId = String(assignment.PersonId);
-    if (!assignmentsByEmployee.has(employeeId)) {
-      assignmentsByEmployee.set(employeeId, []);
-    }
-    assignmentsByEmployee.get(employeeId)!.push(assignment);
+  for (const a of (solverAssignments || [])) {
+    const empId = String(a.PersonId);
+    if (!assignmentsByEmployee.has(empId)) assignmentsByEmployee.set(empId, []);
+    assignmentsByEmployee.get(empId)!.push(a);
   }
 
   const employees = sourceEmployees.map((emp: any) => {
     const empId = String(emp.PersonId ?? emp.Id);
     const empAssignments = assignmentsByEmployee.get(empId) || [];
+    const isTarget = empId === String(constraint.employeeId);
 
+    // For the target employee, filter out conflicting assignments
+    const keptAssignments = isTarget
+      ? empAssignments.filter((a) => {
+          const name = shiftLookup.get(`${a.ShiftId}|${a.Start}`) || "";
+          return !assignmentMatchesConstraint(a, name, constraint);
+        })
+      : empAssignments;
+
+    // AssignedShifts = list of original shift IDs (just the ID strings)
+    const assignedShifts = keptAssignments.map((a) => String(a.ShiftId));
+
+    // Constraints
     const existingConstraints = Array.isArray(emp.Constraints) ? [...emp.Constraints] : [];
-
-    const filteredAssignments =
-      empId === String(constraint.employeeId)
-        ? empAssignments.filter((a) => {
-            const shift = assignmentShiftMap.get(String(a.ShiftId));
-            return !assignmentMatchesConstraint(a, shift, constraint);
-          })
-        : empAssignments;
-
-    const assignedShifts = filteredAssignments.map((a) => String(a.ShiftId));
-
     const constraints = [...existingConstraints];
-    if (empId === String(constraint.employeeId)) {
+
+    if (isTarget) {
       const newConstraint: any = {
         type: constraint.type,
         strength: constraint.strength,
@@ -236,13 +171,19 @@ export function buildAlternativesPayload(
 
   return {
     ...originalRequest,
-    Start: originalRequest?.Start,
-    End: originalRequest?.End,
-    Shifts: instanceShifts,
+    Shifts: sourceShifts, // Original shifts, no instance IDs
     Employees: employees,
     SchedulingOptions: {
       ...(originalRequest?.SchedulingOptions || {}),
       MaxAlternatives: Math.max(1, Math.min(10, maxAlternatives)),
+      SearchScope: searchScope,
     },
   };
+}
+
+/**
+ * Legacy normalizer — now a no-op since we no longer use instance IDs.
+ */
+export function normalizeAlternativeShiftIds(alternative: Alternative): Alternative {
+  return alternative;
 }
