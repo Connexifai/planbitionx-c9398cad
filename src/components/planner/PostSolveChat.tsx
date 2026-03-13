@@ -305,6 +305,7 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
         shiftKind: intent.shiftKind ?? undefined,
         strength: "hard",
       };
+      setLastConstraint(constraint);
 
       // Step 3: First search with "narrow" scope (fast, local solutions)
       const altResponse = await fetchAlternatives(constraint, "narrow");
