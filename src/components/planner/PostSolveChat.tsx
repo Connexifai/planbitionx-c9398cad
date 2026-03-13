@@ -57,12 +57,21 @@ function formatShiftTime(start?: string, end?: string): string {
 }
 
 function classifyAlternative(alt: Alternative, constraintEmployee?: string): ClassifiedAlternative {
-  // If the solver provides a Summary, use it as explanation
+  // "Dienst open laten" option
+  if (alt.ConflictShiftFilled === false) {
+    return {
+      type: "direct_replacement",
+      icon: AlertCircle,
+      label: "Dienst open laten",
+      explanation: alt.Summary || "De dienst wordt niet opgevuld en blijft open.",
+    };
+  }
+
   const changes = alt.Changes || [];
   const added = changes.filter((c) => c.Action === "added");
   const removed = changes.filter((c) => c.Action === "removed");
 
-  if (removed.length === 0 && added.length >= 1) {
+  if (removed.length <= 1 && added.length >= 1 && added.length <= 2) {
     const replacers = [...new Set(added.map((c) => c.EmployeeName))];
     return {
       type: "direct_replacement",
