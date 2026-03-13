@@ -273,7 +273,7 @@ export function EmployeeApprovalDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[400px] p-0 border-none bg-transparent shadow-none [&>button]:hidden overflow-visible">
+      <DialogContent className="max-w-[480px] p-0 border-none bg-transparent shadow-none [&>button]:hidden overflow-visible">
         <div className="flex flex-col items-center gap-5">
           {/* Header info above phone */}
           <div className="text-center space-y-1.5 animate-fade-in">
