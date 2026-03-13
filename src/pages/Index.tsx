@@ -247,6 +247,24 @@ export default function Index() {
       const settingsPayload = buildSettingsPayload(atw, soft, solver);
       const mergedPayload = { ...basePayload, ...settingsPayload };
 
+      // Inject per-employee constraints from AI briefing chat
+      if (employeeConstraints.length > 0 && Array.isArray(mergedPayload.Employees)) {
+        // Group constraints by personId
+        const constraintsByPerson = new Map<number, any[]>();
+        for (const ec of employeeConstraints) {
+          const list = constraintsByPerson.get(ec.personId) || [];
+          list.push(ec.constraint);
+          constraintsByPerson.set(ec.personId, list);
+        }
+        mergedPayload.Employees = mergedPayload.Employees.map((emp: any) => {
+          const personConstraints = constraintsByPerson.get(emp.PersonId);
+          if (personConstraints) {
+            return { ...emp, Constraints: [...(emp.Constraints || []), ...personConstraints] };
+          }
+          return emp;
+        });
+      }
+
       const res = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/solve`,
         {
