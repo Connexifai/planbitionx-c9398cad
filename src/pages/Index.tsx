@@ -192,6 +192,9 @@ export default function Index() {
   const [solver, setSolver] = useState<SolverSettings>(defaultSolver);
 
   const handleJsonLoaded = (rawJson?: string) => {
+    setSolved(false);
+    setRosterData(null);
+    setSolveDurationMs(0);
     setJsonLoaded(true);
     if (rawJson) {
       try {
