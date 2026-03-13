@@ -45,10 +45,10 @@ function IPhone17({ employee, onApprove, onReject }: {
   const timeStr = `${now.getHours()}:${String(now.getMinutes()).padStart(2, "0")}`;
 
   return (
-    <div className="relative mx-auto animate-fade-in" style={{ width: 310, height: 640 }}>
+    <div className="relative mx-auto animate-fade-in" style={{ width: 407, height: 833 }}>
       {/* Outer titanium frame */}
       <div
-        className="absolute inset-0 rounded-[3.2rem]"
+        className="absolute inset-0 rounded-[3.6rem]"
         style={{
           background: "linear-gradient(145deg, hsl(220 10% 25%), hsl(220 8% 35%), hsl(220 10% 28%))",
           boxShadow: `
@@ -60,24 +60,22 @@ function IPhone17({ employee, onApprove, onReject }: {
         }}
       >
         {/* Side buttons - volume */}
-        <div className="absolute -left-[2.5px] top-[120px] w-[2.5px] h-[28px] rounded-l-sm" style={{ background: "hsl(220 10% 30%)" }} />
-        <div className="absolute -left-[2.5px] top-[160px] w-[2.5px] h-[28px] rounded-l-sm" style={{ background: "hsl(220 10% 30%)" }} />
+        <div className="absolute -left-[3px] top-[155px] w-[3px] h-[34px] rounded-l-sm" style={{ background: "hsl(220 10% 30%)" }} />
+        <div className="absolute -left-[3px] top-[205px] w-[3px] h-[34px] rounded-l-sm" style={{ background: "hsl(220 10% 30%)" }} />
         {/* Side button - power */}
-        <div className="absolute -right-[2.5px] top-[150px] w-[2.5px] h-[42px] rounded-r-sm" style={{ background: "hsl(220 10% 30%)" }} />
+        <div className="absolute -right-[3px] top-[190px] w-[3px] h-[52px] rounded-r-sm" style={{ background: "hsl(220 10% 30%)" }} />
 
         {/* Screen bezel area */}
-        <div className="absolute inset-[3px] rounded-[3rem] bg-black overflow-hidden">
-          {/* Actual screen */}
-          <div className="absolute inset-[1px] rounded-[2.9rem] overflow-hidden bg-background flex flex-col">
+        <div className="absolute inset-[4px] rounded-[3.3rem] bg-black overflow-hidden">
+          <div className="absolute inset-[1px] rounded-[3.2rem] overflow-hidden bg-background flex flex-col">
 
             {/* Dynamic Island */}
-            <div className="relative flex justify-center pt-[10px] pb-[2px] z-20">
+            <div className="relative flex justify-center pt-[12px] pb-[4px] z-20">
               <div
-                className="w-[100px] h-[28px] bg-black rounded-full flex items-center justify-center gap-2"
+                className="w-[126px] h-[34px] bg-black rounded-full flex items-center justify-center gap-2"
                 style={{ boxShadow: "0 0 0 0.5px hsl(0 0% 15%)" }}
               >
-                {/* Camera dot */}
-                <div className="w-[10px] h-[10px] rounded-full" style={{
+                <div className="w-[12px] h-[12px] rounded-full" style={{
                   background: "radial-gradient(circle at 35% 35%, hsl(220 20% 25%), hsl(220 20% 8%))",
                   boxShadow: "inset 0 0 2px rgba(255,255,255,0.1)",
                 }} />
@@ -85,57 +83,57 @@ function IPhone17({ employee, onApprove, onReject }: {
             </div>
 
             {/* Status bar */}
-            <div className="flex items-center justify-between px-7 pt-[2px] pb-[6px]">
-              <span className="text-[12px] font-semibold text-foreground tracking-tight">{timeStr}</span>
-              <div className="flex items-center gap-[5px]">
-                <Signal className="h-[13px] w-[13px] text-foreground" strokeWidth={2.5} />
-                <Wifi className="h-[13px] w-[13px] text-foreground" strokeWidth={2.5} />
-                <Battery className="h-[13px] w-[13px] text-foreground" strokeWidth={2.5} />
+            <div className="flex items-center justify-between px-8 pt-[3px] pb-[8px]">
+              <span className="text-[14px] font-semibold text-foreground tracking-tight">{timeStr}</span>
+              <div className="flex items-center gap-[6px]">
+                <Signal className="h-[15px] w-[15px] text-foreground" strokeWidth={2.5} />
+                <Wifi className="h-[15px] w-[15px] text-foreground" strokeWidth={2.5} />
+                <Battery className="h-[15px] w-[15px] text-foreground" strokeWidth={2.5} />
               </div>
             </div>
 
             {/* App content */}
             <div className="flex-1 flex flex-col overflow-hidden">
               {/* iOS notification banner style */}
-              <div className="mx-3 mt-1 mb-2">
+              <div className="mx-4 mt-2 mb-3">
                 <div className="rounded-2xl bg-card border border-border/60 shadow-lg overflow-hidden" style={{
                   boxShadow: "0 4px 20px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04)",
                 }}>
                   {/* App header bar */}
-                  <div className="flex items-center gap-2.5 px-4 py-2.5 bg-primary/5 border-b border-border/40">
-                    <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center">
-                      <span className="text-[10px] font-black text-primary-foreground">PX</span>
+                  <div className="flex items-center gap-3 px-5 py-3 bg-primary/5 border-b border-border/40">
+                    <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center">
+                      <span className="text-[12px] font-black text-primary-foreground">PX</span>
                     </div>
                     <div>
-                      <div className="text-[12px] font-semibold text-foreground leading-tight">Planbition X</div>
-                      <div className="text-[10px] text-muted-foreground leading-tight">Roosterwijziging</div>
+                      <div className="text-[14px] font-semibold text-foreground leading-tight">Planbition X</div>
+                      <div className="text-[12px] text-muted-foreground leading-tight">Roosterwijziging</div>
                     </div>
-                    <div className="ml-auto text-[10px] text-muted-foreground">nu</div>
+                    <div className="ml-auto text-[12px] text-muted-foreground">nu</div>
                   </div>
 
                   {/* Message content */}
-                  <div className="px-4 py-3 space-y-3">
-                    <p className="text-[13px] font-medium text-foreground leading-snug">
+                  <div className="px-5 py-4 space-y-4">
+                    <p className="text-[15px] font-medium text-foreground leading-snug">
                       Hoi {employee.name.split(" ")[0]} 👋
                     </p>
-                    <p className="text-[12px] text-muted-foreground leading-relaxed">
+                    <p className="text-[14px] text-muted-foreground leading-relaxed">
                       Er is een roosterwijziging waar jouw akkoord voor nodig is:
                     </p>
 
                     {/* Changes */}
-                    <div className="space-y-1.5">
+                    <div className="space-y-2">
                       {employee.changes.map((change, i) => (
                         <div
                           key={i}
                           className={cn(
-                            "flex items-center gap-2 px-3 py-2 rounded-xl text-[11px]",
+                            "flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-[13px]",
                             change.Action === "added"
                               ? "bg-primary/8 border border-primary/15"
                               : "bg-destructive/8 border border-destructive/15"
                           )}
                         >
                           <span className={cn(
-                            "text-[13px] font-bold w-4 text-center",
+                            "text-[15px] font-bold w-4 text-center",
                             change.Action === "added" ? "text-primary" : "text-destructive"
                           )}>
                             {change.Action === "added" ? "+" : "−"}
@@ -143,7 +141,7 @@ function IPhone17({ employee, onApprove, onReject }: {
                           <div className="flex-1 min-w-0">
                             <span className="font-semibold text-foreground">{change.ShiftName}</span>
                             {change.Start && (
-                              <div className="text-[10px] text-muted-foreground mt-0.5">
+                              <div className="text-[12px] text-muted-foreground mt-0.5">
                                 {formatDate(change.Start)} · {formatTime(change.Start, change.End)}
                               </div>
                             )}
@@ -152,7 +150,7 @@ function IPhone17({ employee, onApprove, onReject }: {
                       ))}
                     </div>
 
-                    <p className="text-[12px] text-muted-foreground text-center pt-1">
+                    <p className="text-[14px] text-muted-foreground text-center pt-1">
                       Ga je akkoord met deze wijziging?
                     </p>
                   </div>
@@ -163,25 +161,25 @@ function IPhone17({ employee, onApprove, onReject }: {
                       <div className="flex divide-x divide-border/40">
                         <button
                           onClick={onReject}
-                          className="flex-1 flex items-center justify-center gap-1.5 py-3.5 text-destructive text-[14px] font-medium active:bg-muted/50 transition-colors"
+                          className="flex-1 flex items-center justify-center gap-1.5 py-4 text-destructive text-[16px] font-medium active:bg-muted/50 transition-colors"
                         >
                           Afwijzen
                         </button>
                         <button
                           onClick={onApprove}
-                          className="flex-1 flex items-center justify-center gap-1.5 py-3.5 text-primary text-[14px] font-semibold active:bg-muted/50 transition-colors"
+                          className="flex-1 flex items-center justify-center gap-1.5 py-4 text-primary text-[16px] font-semibold active:bg-muted/50 transition-colors"
                         >
                           Akkoord
                         </button>
                       </div>
                     ) : employee.status === "approved" ? (
-                      <div className="flex items-center justify-center gap-2 py-3.5 text-primary text-[14px] font-semibold animate-fade-in">
-                        <CheckCircle2 className="h-4 w-4" />
+                      <div className="flex items-center justify-center gap-2 py-4 text-primary text-[16px] font-semibold animate-fade-in">
+                        <CheckCircle2 className="h-5 w-5" />
                         Akkoord gegeven
                       </div>
                     ) : (
-                      <div className="flex items-center justify-center gap-2 py-3.5 text-destructive text-[14px] font-semibold animate-fade-in">
-                        <XCircle className="h-4 w-4" />
+                      <div className="flex items-center justify-center gap-2 py-4 text-destructive text-[16px] font-semibold animate-fade-in">
+                        <XCircle className="h-5 w-5" />
                         Afgewezen
                       </div>
                     )}
@@ -195,7 +193,7 @@ function IPhone17({ employee, onApprove, onReject }: {
 
             {/* Home indicator */}
             <div className="flex justify-center pb-[8px] pt-[4px]">
-              <div className="w-[120px] h-[4px] rounded-full bg-foreground/20" />
+              <div className="w-[140px] h-[5px] rounded-full bg-foreground/20" />
             </div>
           </div>
         </div>
@@ -275,7 +273,7 @@ export function EmployeeApprovalDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[400px] p-0 border-none bg-transparent shadow-none [&>button]:hidden overflow-visible">
+      <DialogContent className="max-w-[480px] p-0 border-none bg-transparent shadow-none [&>button]:hidden overflow-visible">
         <div className="flex flex-col items-center gap-5">
           {/* Header info above phone */}
           <div className="text-center space-y-1.5 animate-fade-in">
