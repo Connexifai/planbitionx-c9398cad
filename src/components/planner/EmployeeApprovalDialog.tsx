@@ -193,7 +193,7 @@ function IPhone17({ employee, onApprove, onReject }: {
 
             {/* Home indicator */}
             <div className="flex justify-center pb-[8px] pt-[4px]">
-              <div className="w-[120px] h-[4px] rounded-full bg-foreground/20" />
+              <div className="w-[140px] h-[5px] rounded-full bg-foreground/20" />
             </div>
           </div>
         </div>
