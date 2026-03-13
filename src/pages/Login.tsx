@@ -36,6 +36,7 @@ export default function Login() {
     e.preventDefault();
     setLoading(true);
     setExiting(true);
+    sessionStorage.setItem("just_logged_in", "true");
     setTimeout(() => navigate("/"), 800);
   };
 

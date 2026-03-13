@@ -167,7 +167,14 @@ export default function Index() {
   const [rosterData, setRosterData] = useState<RosterData | null>(null);
   const [requestData, setRequestData] = useState<any>(null);
   const [requestRawJson, setRequestRawJson] = useState<string | null>(null);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    const justLoggedIn = sessionStorage.getItem("just_logged_in");
+    if (justLoggedIn) {
+      sessionStorage.removeItem("just_logged_in");
+      return false;
+    }
+    return true;
+  });
   const [solverExplanations, setSolverExplanations] = useState<any[]>([]);
   const [solverStatistics, setSolverStatistics] = useState<any>(null);
   const [atw, setAtw] = useState<AtwConstraints>(defaultAtw);
