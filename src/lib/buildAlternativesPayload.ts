@@ -4,10 +4,10 @@ import { format, getDay, parseISO } from "date-fns";
  * Builds a /solve/alternatives request payload.
  *
  * Key rules (from API docs):
- * 1. AssignedShifts = list of original shift IDs (frozen assignments)
- * 2. Remove conflicting shift from target employee's AssignedShifts
- * 3. Add Constraint to target employee
- * 4. Shifts use original IDs (no instance suffixes)
+ * 1. AssignedShifts must include the employee's current assignments (including conflicts)
+ * 2. Add constraint to target employee (solver detects conflicts itself)
+ * 3. Shifts use original IDs (no instance suffixes)
+ * 4. AssignedShifts use unique ShiftId|Start IDs
  * 5. SearchScope: "narrow" | "full" | "auto"
  */
 
