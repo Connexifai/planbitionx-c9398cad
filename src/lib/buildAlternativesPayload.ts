@@ -211,10 +211,53 @@ export function buildAlternativesPayload(
 
 
 /**
- * Strips date-based unique IDs back to original shift IDs for roster display.
+ * Finds the assignments that were removed from the target employee
+ * (i.e. the conflicting shifts). Returns synthetic "removed" changes
+ * so the UI can show "Kevin verwijderd van Dagdienst woensdag".
  */
-export function normalizeAlternativeShiftIds(alternative: Alternative): Alternative {
-  return {
+export function getRemovedAssignments(
+  solverAssignments: SolverAssignment[],
+  constraint: AlternativeConstraint,
+  shifts: any[]
+): AlternativeChange[] {
+  const empId = String(constraint.employeeId);
+  const empAssignments = (solverAssignments || []).filter(
+    (a) => String(a.PersonId) === empId
+  );
+
+  // Build shift name lookup
+  const shiftNameByIdStart = new Map<string, string>();
+  for (const s of (shifts || [])) {
+    shiftNameByIdStart.set(`${s.Id}|${s.Start}`, s.Name || "");
+  }
+
+  return empAssignments
+    .filter((a) => {
+      const name = shiftNameByIdStart.get(`${a.ShiftId}|${a.Start}`) || "";
+      return assignmentMatchesConstraint(a, name, constraint);
+    })
+    .map((a) => ({
+      EmployeeId: empId,
+      EmployeeName: constraint.employeeName,
+      ShiftId: String(a.ShiftId),
+      ShiftName: shiftNameByIdStart.get(`${a.ShiftId}|${a.Start}`) || "",
+      Action: "removed" as const,
+      Reason: `${constraint.employeeName} is vrijgespeeld van deze dienst`,
+      Start: a.Start,
+      End: a.End,
+    }));
+}
+
+/**
+ * Enriches an alternative with the synthetic "removed" changes for the
+ * target employee's conflicting shifts, and strips date-suffixed IDs.
+ */
+export function enrichAlternative(
+  alternative: Alternative,
+  removedChanges: AlternativeChange[]
+): Alternative {
+  // Normalize IDs
+  const normalized: Alternative = {
     ...alternative,
     Assignments: (alternative.Assignments || []).map((a) => ({
       ...a,
@@ -225,4 +268,17 @@ export function normalizeAlternativeShiftIds(alternative: Alternative): Alternat
       ShiftId: toOriginalShiftId(String(c.ShiftId)),
     })),
   };
+
+  // Prepend the synthetic removals so the target employee's change is shown first
+  normalized.Changes = [...removedChanges, ...normalized.Changes];
+  normalized.ChangesFromBaseline = normalized.Changes.length;
+
+  return normalized;
+}
+
+/**
+ * @deprecated Use enrichAlternative instead
+ */
+export function normalizeAlternativeShiftIds(alternative: Alternative): Alternative {
+  return enrichAlternative(alternative, []);
 }
