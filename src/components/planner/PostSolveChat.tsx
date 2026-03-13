@@ -280,14 +280,28 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
       const intent = await parseRes.json();
 
       if (!intent.understood) {
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: Date.now() + 1,
-            role: "assistant",
-            content: `⚠️ ${intent.reason || "Ik kon je verzoek niet begrijpen. Kun je het anders formuleren?"}`,
-          },
-        ]);
+        if (intent.ambiguous && intent.candidates?.length > 0) {
+          // Ambiguous — ask user to pick
+          setMessages((prev) => [
+            ...prev,
+            {
+              id: Date.now() + 1,
+              role: "assistant",
+              content: `🤔 Er zijn meerdere medewerkers met die naam. Wie bedoel je?`,
+              candidates: intent.candidates,
+              originalMessage: msg,
+            },
+          ]);
+        } else {
+          setMessages((prev) => [
+            ...prev,
+            {
+              id: Date.now() + 1,
+              role: "assistant",
+              content: `⚠️ ${intent.reason || "Ik kon je verzoek niet begrijpen. Kun je het anders formuleren?"}`,
+            },
+          ]);
+        }
         setIsTyping(false);
         return;
       }
