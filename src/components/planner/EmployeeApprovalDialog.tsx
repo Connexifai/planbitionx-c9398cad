@@ -48,7 +48,7 @@ function IPhone17({ employee, onApprove, onReject }: {
     <div className="relative mx-auto animate-fade-in" style={{ width: 407, height: 833 }}>
       {/* Outer titanium frame */}
       <div
-        className="absolute inset-0 rounded-[3.2rem]"
+        className="absolute inset-0 rounded-[3.6rem]"
         style={{
           background: "linear-gradient(145deg, hsl(220 10% 25%), hsl(220 8% 35%), hsl(220 10% 28%))",
           boxShadow: `
