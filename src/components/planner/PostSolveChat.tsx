@@ -203,10 +203,10 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
 
       const altResponse: AlternativesResponse = await altRes.json();
 
-      // Filter: only valid solutions (no hard violations)
-      const validAlts = (altResponse.Alternatives || []).filter(
-        (a) => a.Score.HardViolations === 0
-      );
+      // Filter: only valid solutions (no hard violations), take top 5
+      const validAlts = (altResponse.Alternatives || [])
+        .filter((a) => a.Score.HardViolations === 0)
+        .slice(0, 5);
 
       if (validAlts.length === 0) {
         setMessages((prev) => [
