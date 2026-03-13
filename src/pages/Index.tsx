@@ -397,6 +397,25 @@ export default function Index() {
               <Switch checked={dark} onCheckedChange={setDark} className="scale-75" />
               <Moon className="h-3.5 w-3.5 text-muted-foreground" />
             </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Avatar className="h-8 w-8 cursor-pointer ml-2">
+                  <AvatarFallback className="bg-primary text-primary-foreground text-xs font-semibold">
+                    {user?.email?.charAt(0).toUpperCase() || "U"}
+                  </AvatarFallback>
+                </Avatar>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <div className="px-3 py-2 text-sm text-muted-foreground truncate">
+                  {user?.email}
+                </div>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={signOut} className="cursor-pointer text-destructive focus:text-destructive">
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Uitloggen
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </header>
 
