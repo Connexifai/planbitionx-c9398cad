@@ -159,7 +159,14 @@ const EmployeeRow = memo(function EmployeeRow({
 
   return (
     <div
-      className="grid border-b border-border/60 transition-colors hover:bg-accent/30"
+      className={cn(
+        "grid border-b border-border/60 transition-colors hover:bg-accent/30",
+        isAnimatingRow && "bg-primary/5"
+      )}
+      style={{
+        gridTemplateColumns: `230px repeat(${numDays}, minmax(85px, 1fr))`,
+      }}
+    >
       style={{
         gridTemplateColumns: `230px repeat(${numDays}, minmax(85px, 1fr))`,
       }}
