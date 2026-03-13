@@ -459,7 +459,21 @@ export default function Index() {
                       </Tooltip>
                     </div>
                     <div className="flex-1 min-h-0">
-                      {solved ? <PostSolveChat /> : (
+                      {solved ? (
+                        <PostSolveChat
+                          requestData={requestData}
+                          solverAssignments={solverAssignments}
+                          onApplyAlternative={(alt) => {
+                            // Re-parse the alternative's assignments into roster data
+                            const newRoster = parseSolverResponse(requestData, { Assignments: alt.Assignments });
+                            setRosterData(newRoster);
+                            setSolverAssignments(alt.Assignments);
+                            toast.success(`Alternatief #${alt.Rank} doorgevoerd`, {
+                              description: `${alt.ChangesFromBaseline} wijziging${alt.ChangesFromBaseline !== 1 ? "en" : ""} toegepast`,
+                            });
+                          }}
+                        />
+                      ) : (
                         <AiBriefingChat
                           employees={requestData?.Employees || []}
                           schedulePeriod={requestData ? `${requestData.Start} - ${requestData.End}` : ""}
