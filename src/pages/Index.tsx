@@ -200,16 +200,39 @@ export default function Index() {
 
   const handleApplyAlternative = useCallback((alt: any) => {
     const normalizedAlt = normalizeAlternativeShiftIds(alt);
-    const changes = normalizedAlt.Changes || [];
+    const changes: Array<{ Action: string; EmployeeId: string; ShiftId: string; Start?: string; End?: string }> = normalizedAlt.Changes || [];
+
+    // Apply changes to current assignments instead of replacing with (empty) alt.Assignments
+    const applyChangesToAssignments = () => {
+      let updated = [...solverAssignments];
+
+      for (const change of changes) {
+        if (change.Action === "removed") {
+          updated = updated.filter(
+            (a) => !(String(a.PersonId) === String(change.EmployeeId) && String(a.ShiftId) === String(change.ShiftId) && a.Start === change.Start)
+          );
+        } else if (change.Action === "added" && change.Start && change.End) {
+          updated.push({
+            PersonId: change.EmployeeId,
+            ShiftId: change.ShiftId,
+            Start: change.Start,
+            End: change.End,
+          });
+        }
+      }
+
+      return updated;
+    };
 
     // Start animation: apply roster data just before final "done" so cells are visible during flight
     startAnimation(
       changes,
       () => {
-        // Called right before final step — apply new roster
-        const newRoster = parseSolverResponse(requestData, { Assignments: normalizedAlt.Assignments });
+        // Called right before final step — apply changes to current roster
+        const updatedAssignments = applyChangesToAssignments();
+        const newRoster = parseSolverResponse(requestData, { Assignments: updatedAssignments });
         setRosterData(newRoster);
-        setSolverAssignments(normalizedAlt.Assignments);
+        setSolverAssignments(updatedAssignments);
       },
       () => {
         toast.success(`Alternatief #${alt.Rank} doorgevoerd`, {
@@ -217,7 +240,7 @@ export default function Index() {
         });
       }
     );
-  }, [requestData, startAnimation]);
+  }, [requestData, solverAssignments, startAnimation]);
 
   const handleJsonLoaded = (rawJson?: string) => {
     setSolved(false);
