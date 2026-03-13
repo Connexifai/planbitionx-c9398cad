@@ -330,6 +330,35 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
       };
       setLastConstraint(constraint);
 
+      // Pre-check: does the employee actually have conflicting shifts?
+      const removedShifts = getRemovedAssignments(
+        solverAssignments,
+        constraint,
+        requestData?.Shifts || []
+      );
+
+      if (removedShifts.length === 0) {
+        const dayNames = ["maandag", "dinsdag", "woensdag", "donderdag", "vrijdag", "zaterdag", "zondag"];
+        let detail = "";
+        if (constraint.type === "avoid_day" && constraint.dayOfWeek !== undefined) {
+          detail = `op ${dayNames[constraint.dayOfWeek]}`;
+        } else if (constraint.type === "avoid_date" && constraint.date) {
+          detail = `op ${constraint.date}`;
+        } else if (constraint.type === "avoid_shift_kind" && constraint.shiftKind) {
+          detail = `in een ${constraint.shiftKind}-dienst`;
+        }
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: Date.now() + 2,
+            role: "assistant",
+            content: `ℹ️ **${constraint.employeeName}** is in het huidige rooster niet ingepland ${detail}. Er is dus geen conflict om op te lossen.\n\nProbeer een andere medewerker of dag.`,
+          },
+        ]);
+        setIsTyping(false);
+        return;
+      }
+
       // Step 3: First search with "narrow" scope (fast, local solutions)
       const altResponse = await fetchAlternatives(constraint, "narrow");
       const narrowPrepared = prepareAlternatives(altResponse.Alternatives || []);
