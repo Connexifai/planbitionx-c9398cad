@@ -640,6 +640,45 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
                 </div>
               )}
 
+              {/* Disambiguation candidates */}
+              {msg.candidates && msg.candidates.length > 0 && (
+                <div className="mt-3 ml-11 flex flex-wrap gap-2">
+                  {msg.candidates.map((c) => (
+                    <Button
+                      key={c.id}
+                      variant="outline"
+                      size="sm"
+                      className="gap-2 text-xs"
+                      disabled={isTyping}
+                      onClick={() => {
+                        // Replace the original message with the full name and re-send
+                        const original = msg.originalMessage || "";
+                        // Build a clarified message using the full name
+                        const clarified = original.replace(
+                          /\b\w+\b/i,
+                          (match) => {
+                            // Replace the first word that partially matches the candidate name
+                            if (c.name.toLowerCase().includes(match.toLowerCase())) return c.name;
+                            return match;
+                          }
+                        );
+                        // If no replacement happened, just prepend the full name
+                        const finalMsg = clarified === original
+                          ? `${c.name}: ${original}`
+                          : clarified;
+                        // Remove candidates from this message
+                        setMessages((prev) =>
+                          prev.map((m) => m.id === msg.id ? { ...m, candidates: undefined } : m)
+                        );
+                        handleSend(finalMsg);
+                      }}
+                    >
+                      👤 {c.name}
+                    </Button>
+                  ))}
+                </div>
+              )}
+
               {/* "Zoek verder" button */}
               {msg.showSearchFull && msg.pendingConstraint && (
                 <div className="mt-3 ml-11">
