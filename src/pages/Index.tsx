@@ -189,6 +189,7 @@ export default function Index() {
   }, [entranceVisible]);
   const [solverExplanations, setSolverExplanations] = useState<any[]>([]);
   const [solverStatistics, setSolverStatistics] = useState<any>(null);
+  const [solverAssignments, setSolverAssignments] = useState<any[]>([]);
   const [atw, setAtw] = useState<AtwConstraints>(defaultAtw);
   const [soft, setSoft] = useState<SoftConstraints>(defaultSoft);
   const [solver, setSolver] = useState<SolverSettings>(defaultSolver);
