@@ -90,7 +90,7 @@ function SolvingOverlay() {
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-background">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black">
       {/* First ~3 seconds of login video, looped */}
       <video
         autoPlay
