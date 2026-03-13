@@ -293,6 +293,7 @@ export function RosterGrid({ data, employeeConstraints = [] }: RosterGridProps) 
                   numDays={numDays}
                   days={days}
                   t={t}
+                  constraints={employeeConstraints.filter(c => c.personId === emp.id)}
                 />
               </div>
             );
