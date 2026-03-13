@@ -177,7 +177,10 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
       ]);
 
       const altResponse = await fetchAlternatives(constraint, "full");
-      const validAlts = (altResponse.Alternatives || []).slice(0, 5);
+      const allAlts = altResponse.Alternatives || [];
+      const filledAlts = allAlts.filter((a) => a.ConflictShiftFilled !== false).slice(0, 5);
+      const openAlt = allAlts.find((a) => a.ConflictShiftFilled === false);
+      const validAlts = openAlt ? [...filledAlts, openAlt] : filledAlts;
 
       if (validAlts.length === 0) {
         setMessages((prev) => [
