@@ -27,7 +27,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import robotImg from "@/assets/robot-assistant.png";
 import { useRosterAnimation } from "@/hooks/useRosterAnimation";
-import { normalizeAlternativeShiftIds } from "@/lib/buildAlternativesPayload";
+import { normalizeAlternativeShiftIds, type AlternativeChange } from "@/lib/buildAlternativesPayload";
 
 function useTypingText(text: string, speed = 40) {
   const [displayed, setDisplayed] = useState("");
