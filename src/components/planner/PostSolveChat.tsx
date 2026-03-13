@@ -1,13 +1,14 @@
 import { useState, useRef, useEffect } from "react";
-import { SendHorizontal, Bot, User, ArrowRightLeft, Lightbulb, CheckCircle2, AlertTriangle, Loader2 } from "lucide-react";
+import { SendHorizontal, Bot, User, ArrowRightLeft, Lightbulb, CheckCircle2, UserPlus, Repeat2, GitBranch } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 import ReactMarkdown from "react-markdown";
-import robotImg from "@/assets/robot-assistant.png";
 import { buildAlternativesPayload, normalizeAlternativeShiftIds } from "@/lib/buildAlternativesPayload";
-import type { AlternativeConstraint, Alternative, AlternativesResponse } from "@/lib/buildAlternativesPayload";
+import type { AlternativeConstraint, Alternative, AlternativesResponse, AlternativeChange } from "@/lib/buildAlternativesPayload";
+import { format, parseISO } from "date-fns";
+import { nl } from "date-fns/locale";
 
 interface Message {
   id: number;
@@ -15,6 +16,7 @@ interface Message {
   content: string;
   alternatives?: Alternative[];
   baseline?: AlternativesResponse["Baseline"];
+  constraintSummary?: string;
 }
 
 export interface PostSolveChatProps {
@@ -22,6 +24,79 @@ export interface PostSolveChatProps {
   solverAssignments: any[];
   onApplyAlternative?: (alternative: Alternative) => void;
 }
+
+// ─── Helpers to classify and explain alternatives ──────────────
+
+type ChangeType = "direct_replacement" | "swap" | "chain";
+
+interface ClassifiedAlternative {
+  type: ChangeType;
+  icon: typeof UserPlus;
+  label: string;
+  explanation: string;
+}
+
+function formatShiftDate(isoDate?: string): string {
+  if (!isoDate) return "";
+  try {
+    return format(parseISO(isoDate), "EEEE d MMM", { locale: nl });
+  } catch {
+    return isoDate.split("T")[0] || "";
+  }
+}
+
+function formatShiftTime(start?: string, end?: string): string {
+  if (!start) return "";
+  const s = start.split("T")[1]?.slice(0, 5) || "";
+  const e = end?.split("T")[1]?.slice(0, 5) || "";
+  return e ? `${s}–${e}` : s;
+}
+
+function classifyAlternative(alt: Alternative, constraintEmployee?: string): ClassifiedAlternative {
+  const changes = alt.Changes || [];
+  const added = changes.filter((c) => c.Action === "added");
+  const removed = changes.filter((c) => c.Action === "removed");
+
+  // Only additions, no removals → direct replacement
+  if (removed.length === 0 && added.length >= 1) {
+    const replacers = [...new Set(added.map((c) => c.EmployeeName))];
+    return {
+      type: "direct_replacement",
+      icon: UserPlus,
+      label: "Directe vervanging",
+      explanation:
+        added.length === 1
+          ? `${replacers[0]} neemt de dienst over op ${formatShiftDate(added[0].Start)}. Geen andere wijzigingen nodig.`
+          : `${replacers.join(" en ")} nemen de dienst${added.length > 1 ? "en" : ""} over. Geen verdere impact op het rooster.`,
+    };
+  }
+
+  // Exactly 1 removed + 1 added for the same shift → simple swap
+  if (removed.length === 1 && added.length === 1 && removed[0].ShiftId === added[0].ShiftId) {
+    return {
+      type: "swap",
+      icon: Repeat2,
+      label: "Dienstruil",
+      explanation: `${removed[0].EmployeeName} en ${added[0].EmployeeName} wisselen van dienst op ${formatShiftDate(added[0].Start)}.`,
+    };
+  }
+
+  // Multiple changes → chain / multi-day reshuffle
+  const uniqueEmployees = [...new Set(changes.map((c) => c.EmployeeName))];
+  const uniqueDays = [...new Set(changes.filter((c) => c.Start).map((c) => formatShiftDate(c.Start)))];
+
+  return {
+    type: "chain",
+    icon: GitBranch,
+    label: "Ketenaanpassing",
+    explanation:
+      uniqueDays.length > 1
+        ? `Herschikking over ${uniqueDays.length} dagen met ${uniqueEmployees.length} medewerker${uniqueEmployees.length > 1 ? "s" : ""}: ${uniqueEmployees.join(", ")}.`
+        : `Meervoudige aanpassing met ${uniqueEmployees.length} medewerker${uniqueEmployees.length > 1 ? "s" : ""}: ${uniqueEmployees.join(", ")}.`,
+  };
+}
+
+// ─── Main component ────────────────────────────────────────────
 
 export function PostSolveChat({ requestData, solverAssignments, onApplyAlternative }: PostSolveChatProps) {
   const { t } = useTranslation();
@@ -91,7 +166,7 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
         {
           id: Date.now() + 1,
           role: "assistant",
-          content: `✅ **Begrepen:** ${intent.summary}\n\n⏳ Ik zoek nu de beste alternatieven...`,
+          content: `✅ **Begrepen:** ${intent.summary}\n\n⏳ Ik zoek nu de beste alternatieven die voldoen aan alle ATW-regels, kwalificaties en contracturen...`,
         },
       ]);
 
@@ -108,7 +183,6 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
 
       // Step 3: Build payload and call alternatives endpoint
       const payload = buildAlternativesPayload(requestData, solverAssignments, constraint, 5);
-      console.log("Alternatives payload:", JSON.stringify(payload, null, 2).slice(0, 3000));
 
       const altRes = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/solve-alternatives`,
@@ -129,13 +203,18 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
 
       const altResponse: AlternativesResponse = await altRes.json();
 
-      if (!altResponse.Alternatives || altResponse.Alternatives.length === 0) {
+      // Filter: only valid solutions (no hard violations)
+      const validAlts = (altResponse.Alternatives || []).filter(
+        (a) => a.Score.HardViolations === 0
+      );
+
+      if (validAlts.length === 0) {
         setMessages((prev) => [
           ...prev,
           {
             id: Date.now() + 2,
             role: "assistant",
-            content: "❌ Helaas heb ik geen geldige alternatieven kunnen vinden die aan alle ATW-regels en kwalificatie-eisen voldoen. Probeer een andere dag of medewerker.",
+            content: "❌ Helaas heb ik geen **geldige** alternatieven kunnen vinden die aan alle ATW-regels en kwalificatie-eisen voldoen. Probeer een andere dag of medewerker.",
           },
         ]);
       } else {
@@ -144,9 +223,10 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
           {
             id: Date.now() + 2,
             role: "assistant",
-            content: `Ik heb **${altResponse.Alternatives.length} alternatieve${altResponse.Alternatives.length === 1 ? "" : "n"}** gevonden, gerankt op het minste aantal wijzigingen:`,
-            alternatives: altResponse.Alternatives,
+            content: `Ik heb **${validAlts.length} geldige oplossing${validAlts.length === 1 ? "" : "en"}** gevonden — allemaal zonder ATW-schendingen:`,
+            alternatives: validAlts,
             baseline: altResponse.Baseline,
+            constraintSummary: intent.summary,
           },
         ]);
       }
@@ -173,12 +253,10 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
       {
         id: Date.now(),
         role: "assistant",
-        content: `✅ **Alternatief ${alt.Rank} is doorgevoerd!** Het rooster is bijgewerkt met ${alt.ChangesFromBaseline} wijziging${alt.ChangesFromBaseline === 1 ? "" : "en"}.`,
+        content: `✅ **Alternatief #${alt.Rank} is doorgevoerd!** Het rooster is bijgewerkt met ${alt.ChangesFromBaseline} wijziging${alt.ChangesFromBaseline === 1 ? "" : "en"}.`,
       },
     ]);
   };
-
-  const dayNames = ["ma", "di", "wo", "do", "vr", "za", "zo"];
 
   const examplePrompts = [
     {
@@ -239,75 +317,98 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
               {msg.alternatives && msg.alternatives.length > 0 && (
                 <div className="mt-3 space-y-3 ml-11">
                   {msg.baseline && (
-                    <div className="text-xs text-muted-foreground px-3 py-1.5 bg-muted/50 rounded-lg inline-block">
-                      Huidig rooster: {msg.baseline.TotalAssignments} toewijzingen · {msg.baseline.FillRatePercentage.toFixed(1)}% bezetting
+                    <div className="text-xs text-muted-foreground px-3 py-1.5 bg-muted/50 rounded-lg inline-flex items-center gap-2">
+                      <span>📊 Huidig rooster: {msg.baseline.TotalAssignments} toewijzingen · {msg.baseline.FillRatePercentage.toFixed(1)}% bezetting</span>
                     </div>
                   )}
-                  {msg.alternatives.map((alt) => (
-                    <div
-                      key={alt.Rank}
-                      className={cn(
-                        "border rounded-xl p-4 bg-card shadow-sm transition-all hover:shadow-md",
-                        alt.Rank === 1 && "border-primary/40 ring-1 ring-primary/20"
-                      )}
-                    >
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-2">
-                          <Badge variant={alt.Rank === 1 ? "default" : "secondary"} className="text-xs">
-                            #{alt.Rank}
-                          </Badge>
-                          {alt.Rank === 1 && (
-                            <Badge variant="outline" className="text-xs text-primary border-primary/30">
-                              ✅ Aanbevolen
+                  {msg.alternatives.map((alt) => {
+                    const classified = classifyAlternative(alt, msg.constraintSummary);
+                    const TypeIcon = classified.icon;
+
+                    return (
+                      <div
+                        key={alt.Rank}
+                        className={cn(
+                          "border rounded-xl overflow-hidden bg-card shadow-sm transition-all hover:shadow-md",
+                          alt.Rank === 1 && "border-primary/40 ring-1 ring-primary/20"
+                        )}
+                      >
+                        {/* Header */}
+                        <div className="flex items-center justify-between px-4 pt-3 pb-2">
+                          <div className="flex items-center gap-2">
+                            <Badge variant={alt.Rank === 1 ? "default" : "secondary"} className="text-xs">
+                              #{alt.Rank}
                             </Badge>
-                          )}
-                          <span className="text-xs text-muted-foreground">
-                            {alt.ChangesFromBaseline} wijziging{alt.ChangesFromBaseline !== 1 && "en"}
-                          </span>
+                            <div className="flex items-center gap-1.5 text-xs font-medium text-foreground">
+                              <TypeIcon className="h-3.5 w-3.5 text-primary" />
+                              {classified.label}
+                            </div>
+                            {alt.Rank === 1 && (
+                              <Badge variant="outline" className="text-[10px] text-primary border-primary/30">
+                                Aanbevolen
+                              </Badge>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
+                              <span>{alt.ChangesFromBaseline} wijziging{alt.ChangesFromBaseline !== 1 && "en"}</span>
+                              <span>·</span>
+                              <span>{alt.Score.FillRatePercentage.toFixed(0)}% bezetting</span>
+                              <span>·</span>
+                              <span className="text-primary font-medium">0 ATW-schendingen</span>
+                            </div>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs text-muted-foreground">
-                            {alt.Score.FillRatePercentage.toFixed(0)}% bezetting
-                          </span>
+
+                        {/* Explanation */}
+                        <div className="px-4 pb-2">
+                          <p className="text-xs text-muted-foreground leading-relaxed">
+                            💡 {classified.explanation}
+                          </p>
+                        </div>
+
+                        {/* Changes detail */}
+                        <div className="px-4 pb-3 space-y-1">
+                          {alt.Changes.map((change, i) => (
+                            <div
+                              key={i}
+                              className={cn(
+                                "flex items-center gap-2 text-xs px-2.5 py-1.5 rounded-md",
+                                change.Action === "added"
+                                  ? "bg-primary/5 text-primary dark:text-primary"
+                                  : "bg-destructive/5 text-destructive dark:text-destructive"
+                              )}
+                            >
+                              <span className="font-mono text-[10px] font-bold w-3">
+                                {change.Action === "added" ? "+" : "−"}
+                              </span>
+                              <span className="font-medium">{change.EmployeeName}</span>
+                              <span className="text-muted-foreground">→</span>
+                              <span>{change.ShiftName}</span>
+                              {change.Start && (
+                                <span className="text-muted-foreground text-[10px] ml-auto">
+                                  {formatShiftDate(change.Start)} ({formatShiftTime(change.Start, change.End)})
+                                </span>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Apply button */}
+                        <div className="border-t px-4 py-2.5 bg-muted/30 flex justify-end">
                           <Button
                             size="sm"
                             variant={alt.Rank === 1 ? "default" : "outline"}
-                            className="text-xs h-7"
+                            className="text-xs h-7 gap-1.5"
                             onClick={() => handleApplyAlternative(alt)}
                           >
-                            <CheckCircle2 className="h-3 w-3 mr-1" />
+                            <CheckCircle2 className="h-3 w-3" />
                             Doorvoeren
                           </Button>
                         </div>
                       </div>
-
-                      <div className="space-y-1.5">
-                        {alt.Changes.map((change, i) => (
-                          <div
-                            key={i}
-                            className={cn(
-                              "flex items-center gap-2 text-xs px-2.5 py-1.5 rounded-md",
-                              change.Action === "added"
-                                ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
-                                : "bg-red-500/10 text-red-700 dark:text-red-400"
-                            )}
-                          >
-                            <span className="font-mono text-[10px]">
-                              {change.Action === "added" ? "+" : "−"}
-                            </span>
-                            <span className="font-medium">{change.EmployeeName}</span>
-                            <span className="text-muted-foreground">→</span>
-                            <span>{change.ShiftName}</span>
-                            {change.Start && (
-                              <span className="text-muted-foreground text-[10px]">
-                                ({change.Start.split("T")[1]?.slice(0, 5)}–{change.End?.split("T")[1]?.slice(0, 5)})
-                              </span>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>
