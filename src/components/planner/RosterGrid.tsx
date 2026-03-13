@@ -201,6 +201,7 @@ const EmployeeRow = memo(function EmployeeRow({
 
 interface RosterGridProps {
   data?: RosterData;
+  employeeConstraints?: EmployeeConstraint[];
 }
 
 export function RosterGrid({ data }: RosterGridProps) {
