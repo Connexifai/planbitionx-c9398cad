@@ -281,7 +281,10 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
 
       // Step 3: First search with "narrow" scope (fast, local solutions)
       const altResponse = await fetchAlternatives(constraint, "narrow");
-      const validAlts = (altResponse.Alternatives || []).slice(0, 5);
+      const allAlts = altResponse.Alternatives || [];
+      const filledAlts = allAlts.filter((a) => a.ConflictShiftFilled !== false).slice(0, 5);
+      const openAlt = allAlts.find((a) => a.ConflictShiftFilled === false);
+      const validAlts = openAlt ? [...filledAlts, openAlt] : filledAlts;
       const resultMsgId = Date.now() + 2;
 
       if (validAlts.length === 0) {
