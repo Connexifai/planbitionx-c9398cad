@@ -228,6 +228,7 @@ export default function Index() {
   }, [dark]);
 
   const [solveStartTime, setSolveStartTime] = useState<number>(0);
+  const [solveDurationMs, setSolveDurationMs] = useState<number>(0);
 
   const handleSolve = async () => {
     if (!requestRawJson) {
@@ -262,6 +263,7 @@ export default function Index() {
       setRosterData(roster);
       setSolverExplanations((solverResponse as any).Explanations || []);
       setSolverStatistics((solverResponse as any).Statistics || null);
+      setSolveDurationMs(Date.now() - solveStartTime);
       setSolved(true);
       setSidebarCollapsed(true);
     } catch (e) {
@@ -316,7 +318,7 @@ export default function Index() {
           <div className="flex-1 flex flex-col min-w-0 overflow-visible">
             {solved ? (
               <main className="flex-1 overflow-y-auto overflow-x-hidden p-5 space-y-5">
-                <KpiCards solved data={rosterData ?? undefined} solveTime={solveStartTime ? Date.now() - solveStartTime : 0} />
+                <KpiCards solved data={rosterData ?? undefined} solveTime={solveDurationMs} />
                 <RosterTabs value={activeTab} onChange={setActiveTab} />
                 {activeTab === "roster" && <RosterGrid data={rosterData ?? undefined} />}
                 {activeTab === "dienst" && <ServiceRosterGrid data={rosterData ?? undefined} />}
