@@ -81,16 +81,22 @@ serve(async (req) => {
     }
     console.log("Sending solve/alternatives request...");
     console.log("MaxAlternatives:", (payload.SchedulingOptions as any)?.MaxAlternatives);
+    console.log("SearchScope:", (payload.SchedulingOptions as any)?.SearchScope);
     console.log("Employee count:", employees.length);
     console.log("Shift count:", Array.isArray(payload.Shifts) ? payload.Shifts.length : 0);
 
+    // Log a sample of unique shift IDs to verify format
+    const shiftIds = Array.isArray(payload.Shifts) ? payload.Shifts.slice(0, 3).map((s: any) => s.Id) : [];
+    console.log("Sample shift IDs:", JSON.stringify(shiftIds));
+
+    const bodyStr = JSON.stringify(payload);
     const response = await fetch(SOLVER_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "X-Api-Key": SOLVER_API_KEY,
       },
-      body: JSON.stringify(payload),
+      body: bodyStr,
     });
 
     if (!response.ok) {
