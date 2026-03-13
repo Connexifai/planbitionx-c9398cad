@@ -136,17 +136,17 @@
     "clickMe": "¡Hola! 👋 ¡Haz clic en mí para compartir tus preferencias de turno en el chat!",
     "clickMePost": "¡Hola! 👋 ¡Haz clic en mí, te ayudo con el cuadrante!",
     "quotes": [
-      "Nuestra IA hace planificaciones tan ajustadas que hasta el queso suizo tiene agujeros de estrés.",
-      "Nuestra IA planifica con tanta precisión… que una regla tendría envidia.",
-      "Mi IA hace planificaciones tan ajustadas que hasta las gallinas ponen huevos a tiempo.",
-      "La IA predice disponibilidad. Yo predigo pausas para café.",
-      "Nuestra IA planifica tan bien… que hasta el futuro pide feedback.",
-      "Nuestra IA aprende de datos. Yo aprendo de errores. Así que tengo más trabajo.",
-      "La IA hace la planificación. Yo gestiono el daño emocional.",
-      "Con IA la planificación es inteligencia artificial. Sin IA es caos natural.",
-      "Nuestra IA planifica tan ajustado que hasta un reloj suizo pide consejos.",
-      "Pedí a la IA un cuadrante. La IA pidió mejores datos. Ambos tenemos expectativas sin cumplir.",
-      "Nuestra IA usa machine learning. Yo uso prueba y error. Sobre todo error."
+      "¿Necesitas ayuda con una baja o una perturbación? ¡Te ayudo a encontrar un reemplazo!",
+      "¿Alguien pide tiempo libre? Déjame buscar las mejores opciones para un cambio de turno.",
+      "¿Problemas con el horario? Analizo el impacto y doy alternativas.",
+      "¿Un empleado quiere cambiar su turno? Verifico quién está disponible.",
+      "¿Cambio de última hora necesario? Encuentro una solución adecuada dentro de las reglas.",
+      "¿Un conflicto en la planificación? Te ayudo a resolverlo con cambios inteligentes.",
+      "¿Quieres dividir o mover un turno? Lo calculo por ti.",
+      "¿Perturbación en el horario? No te preocupes, ya tengo varias opciones listas.",
+      "¿Un empleado inesperadamente no disponible? Encuentro el mejor reemplazo.",
+      "¿Solicitud de cambio recibida? Verifico las reglas ATW y las horas contratadas.",
+      "¿Necesitas ayuda con cambios de horario? ¡Haz clic aquí y empecemos!"
     ]
   },
   "grid": {
