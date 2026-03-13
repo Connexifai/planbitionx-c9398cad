@@ -126,7 +126,14 @@ function EmployeeTable({ data }: { data: JsonScheduleData }) {
                 </tr>
               </thead>
               <tbody>
-                {data.employees.map((emp, i) => (
+                {[...data.employees]
+                  .sort((a, b) => {
+                    // Extract last name (part before comma) for sorting
+                    const lastNameA = a.name.split(',')[0].trim().toLowerCase();
+                    const lastNameB = b.name.split(',')[0].trim().toLowerCase();
+                    return lastNameA.localeCompare(lastNameB);
+                  })
+                  .map((emp, i) => (
                   <tr key={i} className="border-t border-border/30 hover:bg-accent/30 transition-colors">
                     <td className="px-4 py-2 font-medium">{toTitleCase(emp.name)}</td>
                     <td className="px-4 py-2 text-muted-foreground">{emp.location || "–"}</td>
