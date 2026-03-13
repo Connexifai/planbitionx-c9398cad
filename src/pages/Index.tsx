@@ -167,6 +167,9 @@ export default function Index() {
   const [rosterData, setRosterData] = useState<RosterData | null>(null);
   const [requestData, setRequestData] = useState<any>(null);
   const [requestRawJson, setRequestRawJson] = useState<string | null>(null);
+  const [entranceVisible, setEntranceVisible] = useState(() => {
+    return sessionStorage.getItem("just_logged_in") === "true";
+  });
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
     const justLoggedIn = sessionStorage.getItem("just_logged_in");
     if (justLoggedIn) {
@@ -175,6 +178,13 @@ export default function Index() {
     }
     return true;
   });
+
+  useEffect(() => {
+    if (entranceVisible) {
+      const timer = setTimeout(() => setEntranceVisible(false), 1200);
+      return () => clearTimeout(timer);
+    }
+  }, [entranceVisible]);
   const [solverExplanations, setSolverExplanations] = useState<any[]>([]);
   const [solverStatistics, setSolverStatistics] = useState<any>(null);
   const [atw, setAtw] = useState<AtwConstraints>(defaultAtw);
@@ -264,6 +274,10 @@ export default function Index() {
   return (
     <div className="h-screen flex w-full">
       {solving && <SolvingOverlay />}
+      {/* Smooth entrance overlay after login */}
+      {entranceVisible && (
+        <div className="fixed inset-0 z-[200] bg-background pointer-events-none animate-[fade-out_1.2s_ease-out_forwards]" />
+      )}
       <PlannerSidebar 
         onSolve={handleSolve} 
         onJsonLoaded={handleJsonLoaded} 
