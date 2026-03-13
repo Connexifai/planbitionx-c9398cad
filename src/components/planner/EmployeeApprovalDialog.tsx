@@ -66,9 +66,8 @@ function IPhone17({ employee, onApprove, onReject }: {
         <div className="absolute -right-[3px] top-[190px] w-[3px] h-[52px] rounded-r-sm" style={{ background: "hsl(220 10% 30%)" }} />
 
         {/* Screen bezel area */}
-        <div className="absolute inset-[3px] rounded-[3rem] bg-black overflow-hidden">
-          {/* Actual screen */}
-          <div className="absolute inset-[1px] rounded-[2.9rem] overflow-hidden bg-background flex flex-col">
+        <div className="absolute inset-[4px] rounded-[3.3rem] bg-black overflow-hidden">
+          <div className="absolute inset-[1px] rounded-[3.2rem] overflow-hidden bg-background flex flex-col">
 
             {/* Dynamic Island */}
             <div className="relative flex justify-center pt-[10px] pb-[2px] z-20">
