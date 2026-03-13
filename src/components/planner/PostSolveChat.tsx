@@ -182,7 +182,7 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
       };
 
       // Step 3: Build payload and call alternatives endpoint
-      const payload = buildAlternativesPayload(requestData, solverAssignments, constraint, 5);
+      const payload = buildAlternativesPayload(requestData, solverAssignments, constraint, 10);
 
       const altRes = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/solve-alternatives`,
