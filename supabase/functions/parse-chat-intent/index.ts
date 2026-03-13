@@ -14,12 +14,11 @@ serve(async (req) => {
   try {
     const { message, employees, schedulePeriod } = await req.json();
 
-    // Build employee list for the prompt
     const empList = (employees || []).map((e: any) => 
       `- ${e.Name} (Id: ${e.PersonId ?? e.Id})`
     ).join("\n");
 
-    const systemPrompt = `You are a scheduling assistant that parses user requests about shift changes into structured JSON.
+    const systemPrompt = `You are a scheduling assistant that parses user requests about shift changes.
 
 Available employees:
 ${empList}
@@ -33,20 +32,7 @@ Constraint types:
 - "avoid_date": employee wants a specific date off. Use date as "YYYY-MM-DD".
 - "avoid_shift_kind": employee wants to avoid a shift type. Use shiftKind: "early", "day", "late", or "night".
 
-ALWAYS respond with valid JSON only. No markdown, no explanation. Format:
-{
-  "understood": true,
-  "employeeId": "<PersonId as string>",
-  "employeeName": "<full name>",
-  "constraintType": "avoid_day" | "avoid_date" | "avoid_shift_kind",
-  "dayOfWeek": <number 0-6 or null>,
-  "date": "<YYYY-MM-DD or null>",
-  "shiftKind": "<early|day|late|night or null>",
-  "summary": "<brief Dutch description of what was understood>"
-}
-
-If you cannot determine the employee or the request, respond:
-{"understood": false, "reason": "<explanation in Dutch>"}`;
+Use the parse_scheduling_intent function to return the structured result.`;
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
@@ -60,30 +46,78 @@ If you cannot determine the employee or the request, respond:
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "google/gemini-3-flash-preview",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: message },
         ],
         temperature: 0.1,
+        tools: [
+          {
+            type: "function",
+            function: {
+              name: "parse_scheduling_intent",
+              description: "Parse a user's scheduling request into structured data",
+              parameters: {
+                type: "object",
+                properties: {
+                  understood: { type: "boolean", description: "Whether the request was understood" },
+                  employeeId: { type: "string", description: "PersonId of the employee" },
+                  employeeName: { type: "string", description: "Full name of the employee" },
+                  constraintType: { type: "string", enum: ["avoid_day", "avoid_date", "avoid_shift_kind"] },
+                  dayOfWeek: { type: "number", description: "0=ma,1=di,2=wo,3=do,4=vr,5=za,6=zo" },
+                  date: { type: "string", description: "YYYY-MM-DD format" },
+                  shiftKind: { type: "string", enum: ["early", "day", "late", "night"] },
+                  summary: { type: "string", description: "Brief Dutch description of what was understood" },
+                  reason: { type: "string", description: "If not understood, explanation in Dutch" },
+                },
+                required: ["understood"],
+                additionalProperties: false,
+              },
+            },
+          },
+        ],
+        tool_choice: { type: "function", function: { name: "parse_scheduling_intent" } },
       }),
     });
 
     if (!response.ok) {
       const err = await response.text();
+      console.error("AI gateway error:", response.status, err);
+      if (response.status === 429) {
+        return new Response(JSON.stringify({ error: "Rate limit bereikt, probeer het later opnieuw." }), {
+          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      if (response.status === 402) {
+        return new Response(JSON.stringify({ error: "Onvoldoende credits. Voeg credits toe in je workspace instellingen." }), {
+          status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
       throw new Error(`AI API error [${response.status}]: ${err}`);
     }
 
     const aiResult = await response.json();
-    const content = aiResult.choices?.[0]?.message?.content || "";
     
-    // Extract JSON from response (handle possible markdown wrapping)
+    // Try tool call first, then fallback to content
+    const toolCall = aiResult.choices?.[0]?.message?.tool_calls?.[0];
     let parsed;
-    try {
-      const jsonMatch = content.match(/\{[\s\S]*\}/);
-      parsed = JSON.parse(jsonMatch ? jsonMatch[0] : content);
-    } catch {
-      parsed = { understood: false, reason: "Kon het antwoord niet verwerken" };
+    
+    if (toolCall?.function?.arguments) {
+      try {
+        parsed = JSON.parse(toolCall.function.arguments);
+      } catch {
+        parsed = { understood: false, reason: "Kon het antwoord niet verwerken" };
+      }
+    } else {
+      // Fallback: parse from content
+      const content = aiResult.choices?.[0]?.message?.content || "";
+      try {
+        const jsonMatch = content.match(/\{[\s\S]*\}/);
+        parsed = JSON.parse(jsonMatch ? jsonMatch[0] : content);
+      } catch {
+        parsed = { understood: false, reason: "Kon het antwoord niet verwerken" };
+      }
     }
 
     return new Response(JSON.stringify(parsed), {
