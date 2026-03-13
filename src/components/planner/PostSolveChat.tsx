@@ -177,7 +177,10 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
       ]);
 
       const altResponse = await fetchAlternatives(constraint, "full");
-      const validAlts = (altResponse.Alternatives || []).slice(0, 5);
+      const allAlts = altResponse.Alternatives || [];
+      const filledAlts = allAlts.filter((a) => a.ConflictShiftFilled !== false).slice(0, 5);
+      const openAlt = allAlts.find((a) => a.ConflictShiftFilled === false);
+      const validAlts = openAlt ? [...filledAlts, openAlt] : filledAlts;
 
       if (validAlts.length === 0) {
         setMessages((prev) => [
@@ -194,7 +197,7 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
           {
             id: Date.now() + 1,
             role: "assistant",
-            content: `🔎 Met een breder zoekbereik heb ik **${validAlts.length} extra oplossing${validAlts.length === 1 ? "" : "en"}** gevonden:`,
+            content: `🔎 Met een breder zoekbereik heb ik **${filledAlts.length} extra oplossing${filledAlts.length === 1 ? "" : "en"}** gevonden:`,
             alternatives: validAlts,
             baseline: altResponse.Baseline,
           },
@@ -281,7 +284,10 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
 
       // Step 3: First search with "narrow" scope (fast, local solutions)
       const altResponse = await fetchAlternatives(constraint, "narrow");
-      const validAlts = (altResponse.Alternatives || []).slice(0, 5);
+      const allAlts = altResponse.Alternatives || [];
+      const filledAlts = allAlts.filter((a) => a.ConflictShiftFilled !== false).slice(0, 5);
+      const openAlt = allAlts.find((a) => a.ConflictShiftFilled === false);
+      const validAlts = openAlt ? [...filledAlts, openAlt] : filledAlts;
       const resultMsgId = Date.now() + 2;
 
       if (validAlts.length === 0) {
@@ -301,7 +307,7 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
           {
             id: resultMsgId,
             role: "assistant",
-            content: `Ik heb **${validAlts.length} oplossing${validAlts.length === 1 ? "" : "en"}** gevonden in de directe omgeving:`,
+            content: `Ik heb **${filledAlts.length} oplossing${filledAlts.length === 1 ? "" : "en"}** gevonden in de directe omgeving:`,
             alternatives: validAlts,
             baseline: altResponse.Baseline,
             constraintSummary: intent.summary,
