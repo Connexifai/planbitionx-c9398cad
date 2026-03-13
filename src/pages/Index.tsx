@@ -90,7 +90,7 @@ function SolvingOverlay() {
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black animate-[fade-in_0.6s_ease-out]">
       {/* First ~3 seconds of login video, looped */}
       <video
         autoPlay
