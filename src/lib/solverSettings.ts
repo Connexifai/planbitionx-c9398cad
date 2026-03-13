@@ -88,39 +88,62 @@ export const defaultSolver: SolverSettings = {
 
 const timeLimitValues = [30, 60, 120, 300];
 const plateauStopValues = [0, 15, 30, 60];
-const levelValues = [0, 0.3, 0.6, 1.0];
 
-/** Build the API payload fields from UI settings */
+/** Map UI level index (0-3) to API integer level */
+const levelMap = [0, 1, 2, 3];
+
+/** Build the SchedulingOptions object matching the API's expected format */
 export function buildSettingsPayload(atw: AtwConstraints, soft: SoftConstraints, solver: SolverSettings) {
-  // Root-level solver settings (snake_case as expected by the API)
-  const rootSettings: Record<string, unknown> = {
-    time_limit_seconds: timeLimitValues[solver.timeLimitIndex] ?? 30,
-    seed: solver.seed,
+  const SchedulingOptions: Record<string, unknown> = {
+    // Solver settings
+    TimeLimitSeconds: timeLimitValues[solver.timeLimitIndex] ?? 30,
+    PlateauTimeoutSeconds: plateauStopValues[solver.plateauStopIndex] ?? 0,
+    Seed: solver.seed,
+    EnrichExplanationsWithAI: solver.aiExplanation,
+
+    // Hard constraints (ATW) – values
+    MaxShiftMinutes: atw.maxShiftDurationMinutes,
+    MaxNightShiftMinutes: atw.maxNightShiftMinutes,
+    MaxWeeklyMinutes: atw.maxWeekHoursMinutes,
+    MinRestMinutes: atw.minRestBetweenMinutes,
+    NightRestMinutes: atw.restAfterNightMinutes,
+    ReducedRestMinutes: atw.shortenedRestMinutes,
+    Break1ThresholdMinutes: atw.breakRulesMinutes1,
+    Break2ThresholdMinutes: atw.breakRulesMinutes2,
+    WeeklyRestMinutes: atw.rest36hMinutes,
+    AfterNightSeriesRestMinutes: atw.rest46hMinutes,
+
+    // Hard constraints – disable toggles (inverted: enabled in UI = not disabled)
+    DisableMaxShift: !atw.maxShiftDurationEnabled,
+    DisableMaxWeekly: !atw.maxWeekHoursEnabled,
+    DisableMinRest: !atw.minRestBetweenEnabled,
+    DisableNightRest: !atw.restAfterNightEnabled,
+    DisableBreaks: !atw.breakRulesEnabled,
+    DisableWeeklyRest: !atw.rest36hEnabled,
+    DisableAfterNightSeriesRest: !atw.rest46hEnabled,
+
+    // ATW extras
+    NightExceptionActive: atw.nightShiftExceptionEnabled,
+    AllowOneReducedRestPerWeek: atw.shortenedRestEnabled,
+    Prefer14HRest: soft.rest14hPreference > 0,
+
+    // Soft constraints – level integers
+    SwitchLevel: levelMap[soft.minimizeShiftChange] ?? 0,
+    RotationLevel: levelMap[soft.forwardRotation] ?? 0,
+    CrossWeekRotationLevel: levelMap[soft.crossWeekRotation] ?? 0,
+    ShiftConsistencyLevel: levelMap[soft.shiftConsistency] ?? 0,
+    ShortRestLevel: levelMap[soft.rest14hPreference] ?? 0,
+    IsolatedNightLevel: levelMap[soft.singleNightShifts] ?? 0,
+
+    // Rotation block sizes
+    ForwardRotationBlockSizeMin: soft.minRotationBlock,
+    ForwardRotationBlockSizeMax: soft.maxRotationBlock,
+    EnableForwardRotation: soft.forwardRotation > 0,
+    MinimizeShiftTypeSwitching: soft.minimizeShiftChange > 0,
+
+    // Distribution
+    BalanceDailyFillRate: soft.distributeOpen,
   };
-  if (plateauStopValues[solver.plateauStopIndex] > 0) {
-    rootSettings.plateau_stop_seconds = plateauStopValues[solver.plateauStopIndex];
-  }
 
-  const HardConstraints: Record<string, unknown> = {};
-  if (atw.maxShiftDurationEnabled) HardConstraints.MaxShiftDurationMinutes = atw.maxShiftDurationMinutes;
-  if (atw.maxNightShiftEnabled) HardConstraints.MaxNightShiftDurationMinutes = atw.maxNightShiftMinutes;
-  if (atw.maxWeekHoursEnabled) HardConstraints.MaxWeekHoursMinutes = atw.maxWeekHoursMinutes;
-  if (atw.minRestBetweenEnabled) HardConstraints.MinRestBetweenShiftsMinutes = atw.minRestBetweenMinutes;
-  if (atw.shortenedRestEnabled) HardConstraints.ShortenedRestMinutes = atw.shortenedRestMinutes;
-  if (atw.restAfterNightEnabled) HardConstraints.RestAfterNightMinutes = atw.restAfterNightMinutes;
-  if (atw.rest36hEnabled) HardConstraints.Rest36hMinutes = atw.rest36hMinutes;
-  if (atw.rest46hEnabled) HardConstraints.Rest46hMinutes = atw.rest46hMinutes;
-
-  const SoftConstraints: Record<string, unknown> = {};
-  if (soft.forwardRotation > 0) SoftConstraints.ForwardRotationWeight = levelValues[soft.forwardRotation];
-  if (soft.minimizeShiftChange > 0) SoftConstraints.MinimizeShiftChangeWeight = levelValues[soft.minimizeShiftChange];
-  if (soft.crossWeekRotation > 0) SoftConstraints.CrossWeekRotationWeight = levelValues[soft.crossWeekRotation];
-  if (soft.shiftConsistency > 0) SoftConstraints.ShiftConsistencyWeight = levelValues[soft.shiftConsistency];
-  if (soft.rest14hPreference > 0) SoftConstraints.Rest14hPreferenceWeight = levelValues[soft.rest14hPreference];
-  if (soft.singleNightShifts > 0) SoftConstraints.SingleNightShiftsWeight = levelValues[soft.singleNightShifts];
-  SoftConstraints.MinRotationBlock = soft.minRotationBlock;
-  SoftConstraints.MaxRotationBlock = soft.maxRotationBlock;
-  SoftConstraints.DistributeOpenShifts = soft.distributeOpen;
-
-  return { ...rootSettings, HardConstraints, SoftConstraints };
+  return { SchedulingOptions };
 }
