@@ -4,10 +4,10 @@ import { format, getDay, parseISO } from "date-fns";
  * Builds a /solve/alternatives request payload.
  *
  * Key rules (from API docs):
- * 1. AssignedShifts = list of original shift IDs (frozen assignments)
- * 2. Remove conflicting shift from target employee's AssignedShifts
- * 3. Add Constraint to target employee
- * 4. Shifts use original IDs (no instance suffixes)
+ * 1. AssignedShifts must include the employee's current assignments (including conflicts)
+ * 2. Add constraint to target employee (solver detects conflicts itself)
+ * 3. Shifts use original IDs (no instance suffixes)
+ * 4. AssignedShifts use unique ShiftId|Start IDs
  * 5. SearchScope: "narrow" | "full" | "auto"
  */
 
@@ -63,6 +63,24 @@ export interface AlternativesResponse {
 export type SearchScope = "narrow" | "full" | "auto";
 
 // ─── Helpers ───────────────────────────────────────────────────
+
+function getEmployeeIdCandidates(employee: any): string[] {
+  return [employee?.PersonId, employee?.Id, employee?.ContractId]
+    .filter((value) => value !== undefined && value !== null && String(value).trim().length > 0)
+    .map((value) => String(value));
+}
+
+function getAssignmentEmployeeIdCandidates(assignment: SolverAssignment | Record<string, unknown>): string[] {
+  const anyAssignment = assignment as Record<string, unknown>;
+  return [
+    anyAssignment.PersonId,
+    anyAssignment.EmployeeId,
+    anyAssignment.ContractId,
+    anyAssignment.Id,
+  ]
+    .filter((value) => value !== undefined && value !== null && String(value).trim().length > 0)
+    .map((value) => String(value));
+}
 
 function classifyShiftKind(shiftName: string, shiftStart: string): "early" | "day" | "late" | "night" {
   const lower = (shiftName || "").toLowerCase();
@@ -132,30 +150,40 @@ export function buildAlternativesPayload(
   // Shifts keep their ORIGINAL IDs — the API handles uniqueness internally.
   // Only AssignedShifts use the composite "ShiftId|Start" format.
 
-  // Build lookup: "baseShiftId|start" → composite AssignedShift ID
-  const shiftNameMap = new Map<string, string>();
-  for (const s of sourceShifts) {
-    const compositeKey = makeUniqueShiftId(String(s.Id), String(s.Start || ""));
-    shiftNameMap.set(compositeKey, s.Name || "");
+  // Group solver assignments by every known employee-id variant
+  // so we never drop a conflict shift by id mismatch.
+  const assignmentsByEmployee = new Map<string, Array<SolverAssignment & { compositeId: string }>>();
+  for (const assignment of (solverAssignments || [])) {
+    const anyAssignment = assignment as SolverAssignment & Record<string, unknown>;
+    const start = String(anyAssignment.Start ?? anyAssignment.StartTime ?? "");
+    const compositeId = makeUniqueShiftId(String(anyAssignment.ShiftId), start);
+
+    for (const employeeId of getAssignmentEmployeeIdCandidates(anyAssignment)) {
+      if (!assignmentsByEmployee.has(employeeId)) {
+        assignmentsByEmployee.set(employeeId, []);
+      }
+      assignmentsByEmployee.get(employeeId)!.push({ ...assignment, compositeId });
+    }
   }
 
-  // Group solver assignments by employee, creating composite IDs for AssignedShifts
-  const assignmentsByEmployee = new Map<string, Array<SolverAssignment & { compositeId: string }>>();
-  for (const a of (solverAssignments || [])) {
-    const empId = String(a.PersonId);
-    const compositeId = makeUniqueShiftId(String(a.ShiftId), String(a.Start));
-    if (!assignmentsByEmployee.has(empId)) assignmentsByEmployee.set(empId, []);
-    assignmentsByEmployee.get(empId)!.push({ ...a, compositeId });
-  }
+  const targetEmployeeId = String(constraint.employeeId);
 
   const employees = sourceEmployees.map((emp: any) => {
-    const empId = String(emp.PersonId ?? emp.Id);
-    const empAssignments = assignmentsByEmployee.get(empId) || [];
-    const isTarget = empId === String(constraint.employeeId);
+    const employeeIds = getEmployeeIdCandidates(emp);
+    const isTarget = employeeIds.includes(targetEmployeeId);
 
-    // All assignments stay in AssignedShifts — the API detects conflicts
-    // itself based on the constraint + present shift.
-    const assignedShifts = empAssignments.map((a) => a.compositeId);
+    const solverAssigned = employeeIds
+      .flatMap((id) => assignmentsByEmployee.get(id) || [])
+      .map((a) => a.compositeId)
+      .filter(Boolean);
+
+    // Preserve any pre-existing AssignedShifts from the request and merge with
+    // current solver assignments, without removing the conflict shift.
+    const existingAssigned = Array.isArray(emp.AssignedShifts)
+      ? emp.AssignedShifts.map((id: unknown) => String(id)).filter(Boolean)
+      : [];
+
+    const assignedShifts = Array.from(new Set([...existingAssigned, ...solverAssigned]));
 
     // Constraints
     const existingConstraints = Array.isArray(emp.Constraints) ? [...emp.Constraints] : [];
@@ -211,9 +239,9 @@ export function getRemovedAssignments(
   shifts: any[]
 ): AlternativeChange[] {
   const empId = String(constraint.employeeId);
-  const empAssignments = (solverAssignments || []).filter(
-    (a) => String(a.PersonId) === empId
-  );
+  const empAssignments = (solverAssignments || []).filter((assignment) => {
+    return getAssignmentEmployeeIdCandidates(assignment as SolverAssignment & Record<string, unknown>).includes(empId);
+  });
 
   // Build shift name lookup
   const shiftNameByIdStart = new Map<string, string>();
