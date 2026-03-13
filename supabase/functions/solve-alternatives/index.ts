@@ -60,8 +60,29 @@ serve(async (req) => {
       };
     });
 
-    console.log("Sending solve/alternatives request to external API...");
+    // Log first employee's AssignedShifts and Constraints for debugging
+    const firstEmpWithShifts = employees.find((e: any) => e.AssignedShifts?.length > 0);
+    if (firstEmpWithShifts) {
+      console.log("Sample employee AssignedShifts:", JSON.stringify({
+        name: firstEmpWithShifts.Name,
+        assignedShifts: firstEmpWithShifts.AssignedShifts,
+        constraints: firstEmpWithShifts.Constraints,
+      }));
+    }
+    // Log employee with constraints (target employee)
+    const targetEmp = employees.find((e: any) => e.Constraints?.length > 0);
+    if (targetEmp) {
+      console.log("Target employee:", JSON.stringify({
+        name: targetEmp.Name,
+        id: targetEmp.PersonId ?? targetEmp.Id,
+        assignedShifts: targetEmp.AssignedShifts,
+        constraints: targetEmp.Constraints,
+      }));
+    }
+    console.log("Sending solve/alternatives request...");
     console.log("MaxAlternatives:", (payload.SchedulingOptions as any)?.MaxAlternatives);
+    console.log("Employee count:", employees.length);
+    console.log("Shift count:", Array.isArray(payload.Shifts) ? payload.Shifts.length : 0);
 
     const response = await fetch(SOLVER_URL, {
       method: "POST",
