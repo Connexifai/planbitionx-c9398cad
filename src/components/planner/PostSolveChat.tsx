@@ -1,12 +1,12 @@
-import { useState, useRef, useEffect } from "react";
-import { SendHorizontal, Bot, User, ArrowRightLeft, Lightbulb, CheckCircle2, UserPlus, Repeat2, GitBranch } from "lucide-react";
+import { useState, useRef, useEffect, useCallback } from "react";
+import { SendHorizontal, Bot, User, ArrowRightLeft, Lightbulb, CheckCircle2, UserPlus, Repeat2, GitBranch, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 import ReactMarkdown from "react-markdown";
-import { buildAlternativesPayload, normalizeAlternativeShiftIds } from "@/lib/buildAlternativesPayload";
-import type { AlternativeConstraint, Alternative, AlternativesResponse, AlternativeChange } from "@/lib/buildAlternativesPayload";
+import { buildAlternativesPayload } from "@/lib/buildAlternativesPayload";
+import type { AlternativeConstraint, Alternative, AlternativesResponse, AlternativeChange, SearchScope } from "@/lib/buildAlternativesPayload";
 import { format, parseISO } from "date-fns";
 import { nl } from "date-fns/locale";
 
@@ -17,6 +17,10 @@ interface Message {
   alternatives?: Alternative[];
   baseline?: AlternativesResponse["Baseline"];
   constraintSummary?: string;
+  /** Show a "zoek verder" button on this message */
+  showSearchFull?: boolean;
+  /** Store the constraint+intent so we can re-search with "full" */
+  pendingConstraint?: AlternativeConstraint;
 }
 
 export interface PostSolveChatProps {
@@ -53,35 +57,34 @@ function formatShiftTime(start?: string, end?: string): string {
 }
 
 function classifyAlternative(alt: Alternative, constraintEmployee?: string): ClassifiedAlternative {
+  // If the solver provides a Summary, use it as explanation
   const changes = alt.Changes || [];
   const added = changes.filter((c) => c.Action === "added");
   const removed = changes.filter((c) => c.Action === "removed");
 
-  // Only additions, no removals → direct replacement
   if (removed.length === 0 && added.length >= 1) {
     const replacers = [...new Set(added.map((c) => c.EmployeeName))];
     return {
       type: "direct_replacement",
       icon: UserPlus,
       label: "Directe vervanging",
-      explanation:
+      explanation: alt.Summary || (
         added.length === 1
           ? `${replacers[0]} neemt de dienst over op ${formatShiftDate(added[0].Start)}. Geen andere wijzigingen nodig.`
-          : `${replacers.join(" en ")} nemen de dienst${added.length > 1 ? "en" : ""} over. Geen verdere impact op het rooster.`,
+          : `${replacers.join(" en ")} nemen de dienst${added.length > 1 ? "en" : ""} over. Geen verdere impact op het rooster.`
+      ),
     };
   }
 
-  // Exactly 1 removed + 1 added for the same shift → simple swap
   if (removed.length === 1 && added.length === 1 && removed[0].ShiftId === added[0].ShiftId) {
     return {
       type: "swap",
       icon: Repeat2,
       label: "Dienstruil",
-      explanation: `${removed[0].EmployeeName} en ${added[0].EmployeeName} wisselen van dienst op ${formatShiftDate(added[0].Start)}.`,
+      explanation: alt.Summary || `${removed[0].EmployeeName} en ${added[0].EmployeeName} wisselen van dienst op ${formatShiftDate(added[0].Start)}.`,
     };
   }
 
-  // Multiple changes → chain / multi-day reshuffle
   const uniqueEmployees = [...new Set(changes.map((c) => c.EmployeeName))];
   const uniqueDays = [...new Set(changes.filter((c) => c.Start).map((c) => formatShiftDate(c.Start)))];
 
@@ -89,10 +92,11 @@ function classifyAlternative(alt: Alternative, constraintEmployee?: string): Cla
     type: "chain",
     icon: GitBranch,
     label: "Ketenaanpassing",
-    explanation:
+    explanation: alt.Summary || (
       uniqueDays.length > 1
         ? `Herschikking over ${uniqueDays.length} dagen met ${uniqueEmployees.length} medewerker${uniqueEmployees.length > 1 ? "s" : ""}: ${uniqueEmployees.join(", ")}.`
-        : `Meervoudige aanpassing met ${uniqueEmployees.length} medewerker${uniqueEmployees.length > 1 ? "s" : ""}: ${uniqueEmployees.join(", ")}.`,
+        : `Meervoudige aanpassing met ${uniqueEmployees.length} medewerker${uniqueEmployees.length > 1 ? "s" : ""}: ${uniqueEmployees.join(", ")}.`
+    ),
   };
 }
 
@@ -116,6 +120,90 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages, isTyping]);
+
+  /** Shared function to call the alternatives endpoint */
+  const fetchAlternatives = useCallback(async (
+    constraint: AlternativeConstraint,
+    scope: SearchScope
+  ): Promise<AlternativesResponse> => {
+    const payload = buildAlternativesPayload(requestData, solverAssignments, constraint, 10, scope);
+
+    const altRes = await fetch(
+      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/solve-alternatives`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
+        body: JSON.stringify(payload),
+      }
+    );
+
+    if (!altRes.ok) {
+      const errText = await altRes.text();
+      throw new Error(`Alternatives API error: ${errText}`);
+    }
+
+    return altRes.json();
+  }, [requestData, solverAssignments]);
+
+  /** Handle "Zoek verder" — re-search with full scope */
+  const handleSearchFull = useCallback(async (constraint: AlternativeConstraint, messageId: number) => {
+    // Remove the "zoek verder" button from the message
+    setMessages((prev) =>
+      prev.map((m) => m.id === messageId ? { ...m, showSearchFull: false } : m)
+    );
+    setIsTyping(true);
+
+    try {
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: Date.now(),
+          role: "assistant",
+          content: "🔍 Breder zoeken met alle medewerkers en diensten...",
+        },
+      ]);
+
+      const altResponse = await fetchAlternatives(constraint, "full");
+      const validAlts = (altResponse.Alternatives || []).slice(0, 5);
+
+      if (validAlts.length === 0) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: Date.now() + 1,
+            role: "assistant",
+            content: "❌ Ook met een breder zoekbereik zijn er geen extra alternatieven gevonden.",
+          },
+        ]);
+      } else {
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: Date.now() + 1,
+            role: "assistant",
+            content: `🔎 Met een breder zoekbereik heb ik **${validAlts.length} extra oplossing${validAlts.length === 1 ? "" : "en"}** gevonden:`,
+            alternatives: validAlts,
+            baseline: altResponse.Baseline,
+          },
+        ]);
+      }
+    } catch (error) {
+      console.error("Full search error:", error);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: Date.now() + 1,
+          role: "assistant",
+          content: `❌ Er ging iets mis bij het uitgebreid zoeken: ${error instanceof Error ? error.message : "Onbekende fout"}`,
+        },
+      ]);
+    } finally {
+      setIsTyping(false);
+    }
+  }, [fetchAlternatives]);
 
   const handleSend = async (text?: string) => {
     const msg = text || input;
@@ -166,7 +254,7 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
         {
           id: Date.now() + 1,
           role: "assistant",
-          content: `✅ **Begrepen:** ${intent.summary}\n\n⏳ Ik zoek nu de beste alternatieven die voldoen aan alle ATW-regels, kwalificaties en contracturen...`,
+          content: `✅ **Begrepen:** ${intent.summary}\n\n⏳ Ik zoek nu snel de beste lokale alternatieven...`,
         },
       ]);
 
@@ -181,52 +269,34 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
         strength: "hard",
       };
 
-      // Step 3: Build payload and call alternatives endpoint
-      const payload = buildAlternativesPayload(requestData, solverAssignments, constraint, 10);
-
-      const altRes = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/solve-alternatives`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-          },
-          body: JSON.stringify(payload),
-        }
-      );
-
-      if (!altRes.ok) {
-        const errText = await altRes.text();
-        throw new Error(`Alternatives API error: ${errText}`);
-      }
-
-      const altResponse: AlternativesResponse = await altRes.json();
-
-      // Filter: only valid solutions (no hard violations), take top 5
-      const validAlts = (altResponse.Alternatives || [])
-        .filter((a) => a.Score.HardViolations === 0)
-        .slice(0, 5);
+      // Step 3: First search with "narrow" scope (fast, local solutions)
+      const altResponse = await fetchAlternatives(constraint, "narrow");
+      const validAlts = (altResponse.Alternatives || []).slice(0, 5);
+      const resultMsgId = Date.now() + 2;
 
       if (validAlts.length === 0) {
         setMessages((prev) => [
           ...prev,
           {
-            id: Date.now() + 2,
+            id: resultMsgId,
             role: "assistant",
-            content: "❌ Helaas heb ik geen **geldige** alternatieven kunnen vinden die aan alle ATW-regels en kwalificatie-eisen voldoen. Probeer een andere dag of medewerker.",
+            content: "⚠️ Geen directe alternatieven gevonden in de directe omgeving. Wil je breder zoeken?",
+            showSearchFull: true,
+            pendingConstraint: constraint,
           },
         ]);
       } else {
         setMessages((prev) => [
           ...prev,
           {
-            id: Date.now() + 2,
+            id: resultMsgId,
             role: "assistant",
-            content: `Ik heb **${validAlts.length} geldige oplossing${validAlts.length === 1 ? "" : "en"}** gevonden — allemaal zonder ATW-schendingen:`,
+            content: `Ik heb **${validAlts.length} oplossing${validAlts.length === 1 ? "" : "en"}** gevonden in de directe omgeving:`,
             alternatives: validAlts,
             baseline: altResponse.Baseline,
             constraintSummary: intent.summary,
+            showSearchFull: true,
+            pendingConstraint: constraint,
           },
         ]);
       }
@@ -353,8 +423,6 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
                               <span>{alt.ChangesFromBaseline} wijziging{alt.ChangesFromBaseline !== 1 && "en"}</span>
                               <span>·</span>
                               <span>{alt.Score.FillRatePercentage.toFixed(0)}% bezetting</span>
-                              <span>·</span>
-                              <span className="text-primary font-medium">0 ATW-schendingen</span>
                             </div>
                           </div>
                         </div>
@@ -391,6 +459,14 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
                               )}
                             </div>
                           ))}
+                          {/* Show Reason from solver if available */}
+                          {alt.Changes.some((c) => c.Reason) && (
+                            <div className="mt-1 px-2.5 py-1 text-[10px] text-muted-foreground italic">
+                              {alt.Changes.filter((c) => c.Reason).map((c, i) => (
+                                <div key={i}>📝 {c.Reason}</div>
+                              ))}
+                            </div>
+                          )}
                         </div>
 
                         {/* Apply button */}
@@ -408,6 +484,22 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
                       </div>
                     );
                   })}
+                </div>
+              )}
+
+              {/* "Zoek verder" button */}
+              {msg.showSearchFull && msg.pendingConstraint && (
+                <div className="mt-3 ml-11">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-2 text-xs"
+                    disabled={isTyping}
+                    onClick={() => handleSearchFull(msg.pendingConstraint!, msg.id)}
+                  >
+                    <Search className="h-3.5 w-3.5" />
+                    🔍 Zoek verder (breder zoekbereik)
+                  </Button>
                 </div>
               )}
             </div>
