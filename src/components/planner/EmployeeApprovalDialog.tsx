@@ -60,10 +60,10 @@ function IPhone17({ employee, onApprove, onReject }: {
         }}
       >
         {/* Side buttons - volume */}
-        <div className="absolute -left-[2.5px] top-[120px] w-[2.5px] h-[28px] rounded-l-sm" style={{ background: "hsl(220 10% 30%)" }} />
-        <div className="absolute -left-[2.5px] top-[160px] w-[2.5px] h-[28px] rounded-l-sm" style={{ background: "hsl(220 10% 30%)" }} />
+        <div className="absolute -left-[3px] top-[155px] w-[3px] h-[34px] rounded-l-sm" style={{ background: "hsl(220 10% 30%)" }} />
+        <div className="absolute -left-[3px] top-[205px] w-[3px] h-[34px] rounded-l-sm" style={{ background: "hsl(220 10% 30%)" }} />
         {/* Side button - power */}
-        <div className="absolute -right-[2.5px] top-[150px] w-[2.5px] h-[42px] rounded-r-sm" style={{ background: "hsl(220 10% 30%)" }} />
+        <div className="absolute -right-[3px] top-[190px] w-[3px] h-[52px] rounded-r-sm" style={{ background: "hsl(220 10% 30%)" }} />
 
         {/* Screen bezel area */}
         <div className="absolute inset-[3px] rounded-[3rem] bg-black overflow-hidden">
