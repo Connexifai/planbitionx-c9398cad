@@ -703,6 +703,14 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
           </div>
         </div>
       </div>
+
+      <EmployeeApprovalDialog
+        open={approvalDialogOpen}
+        onOpenChange={setApprovalDialogOpen}
+        alternative={approvalAlternative}
+        onAllApproved={handleAllApproved}
+        onRejected={handleRejected}
+      />
     </div>
   );
 }
