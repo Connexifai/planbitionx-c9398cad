@@ -380,8 +380,9 @@ export default function Index() {
 
       <div className="flex-1 flex flex-col min-w-0">
         <header className="flex items-center justify-between gap-4 border-b bg-card px-4 py-2.5 shadow-sm">
-          <div className="flex items-center gap-3">
+          <div className="flex flex-col">
             <h1 className="text-lg font-bold tracking-tight">{t("app.title")}</h1>
+            <span className="text-[10px] text-muted-foreground tracking-wide uppercase">Chapter One</span>
           </div>
           <div className="flex items-center gap-2">
             {solved && (
