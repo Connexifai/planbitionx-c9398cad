@@ -20,7 +20,15 @@ import { PushNotificationManager } from "@/components/PushNotificationManager";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Download, Moon, Sun, MessageCircle, PanelRightClose } from "lucide-react";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Download, Moon, Sun, MessageCircle, PanelRightClose, LogOut, User } from "lucide-react";
 import { useEffect, useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -28,6 +36,7 @@ import { cn } from "@/lib/utils";
 import robotImg from "@/assets/robot-assistant.png";
 import { useRosterAnimation } from "@/hooks/useRosterAnimation";
 import { normalizeAlternativeShiftIds, type AlternativeChange } from "@/lib/buildAlternativesPayload";
+import { useAuth } from "@/contexts/AuthContext";
 
 function useTypingText(text: string, speed = 40) {
   const [displayed, setDisplayed] = useState("");
@@ -160,6 +169,7 @@ function SolvingOverlay() {
 
 export default function Index() {
   const { t } = useTranslation();
+  const { signOut, user } = useAuth();
   const [dark, setDark] = useState(() => document.documentElement.classList.contains("dark"));
   const [solved, setSolved] = useState(false);
   const [solving, setSolving] = useState(false);
@@ -387,6 +397,25 @@ export default function Index() {
               <Switch checked={dark} onCheckedChange={setDark} className="scale-75" />
               <Moon className="h-3.5 w-3.5 text-muted-foreground" />
             </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Avatar className="h-8 w-8 cursor-pointer ml-2">
+                  <AvatarFallback className="bg-primary text-primary-foreground text-xs font-semibold">
+                    {user?.email?.charAt(0).toUpperCase() || "U"}
+                  </AvatarFallback>
+                </Avatar>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <div className="px-3 py-2 text-sm text-muted-foreground truncate">
+                  {user?.email}
+                </div>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={signOut} className="cursor-pointer text-destructive focus:text-destructive">
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Uitloggen
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </header>
 
