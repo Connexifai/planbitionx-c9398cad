@@ -537,12 +537,12 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
               >
                 <div
                   className={cn(
-                    "flex items-center justify-center w-8 h-8 rounded-lg shrink-0 mt-0.5",
+                    "flex items-center justify-center w-8 h-8 rounded-lg shrink-0 mt-0.5 overflow-hidden",
                     msg.role === "assistant" ? "bg-primary/10" : "bg-accent"
                   )}
                 >
                   {msg.role === "assistant" ? (
-                    <img src={robotImg} alt="AI" className="h-6 w-6 object-contain" />
+                    <img src={robotImg} alt="AI" className="h-10 w-6 object-cover object-top scale-[1.3]" />
                   ) : (
                     <User className="h-4 w-4 text-muted-foreground" />
                   )}
@@ -752,8 +752,8 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
 
           {isTyping && (
             <div className="flex gap-3 max-w-[85%]">
-              <div className="flex items-center justify-center w-8 h-8 rounded-lg shrink-0 mt-0.5 bg-primary/10">
-                <img src={robotImg} alt="AI" className="h-6 w-6 object-contain" />
+              <div className="flex items-center justify-center w-8 h-8 rounded-lg shrink-0 mt-0.5 bg-primary/10 overflow-hidden">
+                <img src={robotImg} alt="AI" className="h-10 w-6 object-cover object-top scale-[1.3]" />
               </div>
               <div className="rounded-xl px-4 py-3 text-sm bg-card border shadow-sm">
                 <div className="flex gap-1.5 items-center text-muted-foreground">
