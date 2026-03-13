@@ -2,8 +2,10 @@ import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useTranslation } from "react-i18next";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { useRef, memo } from "react";
+import { useRef, memo, useMemo } from "react";
+import { Ban, ShieldAlert } from "lucide-react";
 import type { RosterData, ShiftData, DayColumn, RosterEmployee, DemandMap } from "@/lib/parseSolverResponse";
+import type { EmployeeConstraint } from "@/components/planner/AiBriefingChat";
 
 type ShiftType = "vroeg" | "dag" | "laat" | "nacht" | null;
 
