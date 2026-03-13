@@ -6,6 +6,7 @@ import { useRef, memo, useMemo } from "react";
 import { Ban, ShieldAlert } from "lucide-react";
 import type { RosterData, ShiftData, DayColumn, RosterEmployee, DemandMap } from "@/lib/parseSolverResponse";
 import type { EmployeeConstraint } from "@/components/planner/AiBriefingChat";
+import type { RosterAnimationState } from "@/hooks/useRosterAnimation";
 
 type ShiftType = "vroeg" | "dag" | "laat" | "nacht" | null;
 
