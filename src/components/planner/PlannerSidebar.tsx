@@ -162,10 +162,16 @@ function JsonSection({ onJsonLoaded }: { onJsonLoaded?: (rawJson?: string) => vo
         <Button variant={loaded ? "default" : "outline"} size="sm" className="flex-1 text-xs" onClick={handleLoadFromTextarea}>
           {loaded ? t("sidebar.loaded") : t("sidebar.validateLoad")}
         </Button>
-        <Button variant="outline" size="sm" className="flex-1 text-xs" onClick={() => {
-          try { setJsonText(JSON.stringify(JSON.parse(jsonText), null, 2)); } catch {}
+        <Button variant="outline" size="sm" className="flex-1 text-xs" onClick={async () => {
+          try {
+            const res = await fetch("/data/schedule-request.json");
+            const text = await res.text();
+            setJsonText(text);
+            onJsonLoaded?.(text);
+            setLoaded(true);
+          } catch {}
         }}>
-          {t("sidebar.format")}
+          {t("sidebar.example", "Voorbeeld")}
         </Button>
       </div>
     </div>
