@@ -236,7 +236,7 @@ export default function Index() {
       return;
     }
     setSolving(true);
-    setSolveStartTime(Date.now());
+    const startTime = Date.now();
     try {
       // Merge sidebar settings into the request payload
       const basePayload = JSON.parse(requestRawJson);
@@ -263,7 +263,7 @@ export default function Index() {
       setRosterData(roster);
       setSolverExplanations((solverResponse as any).Explanations || []);
       setSolverStatistics((solverResponse as any).Statistics || null);
-      setSolveDurationMs(Date.now() - solveStartTime);
+      setSolveDurationMs(Date.now() - startTime);
       setSolved(true);
       setSidebarCollapsed(true);
     } catch (e) {
