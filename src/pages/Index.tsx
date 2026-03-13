@@ -200,7 +200,7 @@ export default function Index() {
 
   const handleApplyAlternative = useCallback((alt: any) => {
     const normalizedAlt = normalizeAlternativeShiftIds(alt);
-    const changes: Array<{ Action: string; EmployeeId: string; ShiftId: string; Start?: string; End?: string }> = normalizedAlt.Changes || [];
+    const changes = (normalizedAlt.Changes || []) as Array<{ Action: string; EmployeeId: string; EmployeeName: string; ShiftId: string; ShiftName: string; Start?: string; End?: string; Reason?: string }>;
 
     // Apply changes to current assignments instead of replacing with (empty) alt.Assignments
     const applyChangesToAssignments = () => {
