@@ -8,6 +8,7 @@ import { RosterTabs } from "@/components/planner/RosterTabs";
 import { PostSolveChat } from "@/components/planner/PostSolveChat";
 import { AiBriefingChat } from "@/components/planner/AiBriefingChat";
 import { JsonDataViewer } from "@/components/planner/JsonDataViewer";
+import { RosterChangeOverlay } from "@/components/planner/RosterChangeOverlay";
 import type { JsonScheduleData } from "@/components/planner/JsonDataViewer";
 import { parseRawScheduleJson } from "@/lib/parseScheduleJson";
 import { parseSolverResponse } from "@/lib/parseSolverResponse";
