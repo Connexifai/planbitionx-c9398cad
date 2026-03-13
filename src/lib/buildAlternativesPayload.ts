@@ -128,28 +128,23 @@ export function buildAlternativesPayload(
   const sourceShifts = Array.isArray(originalRequest?.Shifts) ? originalRequest.Shifts : [];
   const sourceEmployees = Array.isArray(originalRequest?.Employees) ? originalRequest.Employees : [];
 
-  // Create shifts with unique IDs (baseId_date)
-  const uniqueShifts = sourceShifts.map((s: any) => ({
-    ...s,
-    Id: makeUniqueShiftId(String(s.Id), String(s.Start || "")),
-  }));
+  // Shifts keep their ORIGINAL IDs — the API handles uniqueness internally.
+  // Only AssignedShifts use the composite "ShiftId|Start" format.
 
-  // Build lookup: "baseShiftId|start" → uniqueShiftId
-  const shiftIdMap = new Map<string, string>();
+  // Build lookup: "baseShiftId|start" → composite AssignedShift ID
   const shiftNameMap = new Map<string, string>();
-  for (const s of uniqueShifts) {
-    const origId = toOriginalShiftId(s.Id);
-    shiftIdMap.set(`${origId}|${s.Start}`, s.Id);
-    shiftNameMap.set(s.Id, s.Name || "");
+  for (const s of sourceShifts) {
+    const compositeKey = makeUniqueShiftId(String(s.Id), String(s.Start || ""));
+    shiftNameMap.set(compositeKey, s.Name || "");
   }
 
-  // Group solver assignments by employee, mapping to unique shift IDs
-  const assignmentsByEmployee = new Map<string, Array<SolverAssignment & { uniqueShiftId: string }>>();
+  // Group solver assignments by employee, creating composite IDs for AssignedShifts
+  const assignmentsByEmployee = new Map<string, Array<SolverAssignment & { compositeId: string }>>();
   for (const a of (solverAssignments || [])) {
     const empId = String(a.PersonId);
-    const uniqueId = shiftIdMap.get(`${a.ShiftId}|${a.Start}`) || makeUniqueShiftId(String(a.ShiftId), String(a.Start));
+    const compositeId = makeUniqueShiftId(String(a.ShiftId), String(a.Start));
     if (!assignmentsByEmployee.has(empId)) assignmentsByEmployee.set(empId, []);
-    assignmentsByEmployee.get(empId)!.push({ ...a, uniqueShiftId: uniqueId });
+    assignmentsByEmployee.get(empId)!.push({ ...a, compositeId });
   }
 
   const employees = sourceEmployees.map((emp: any) => {
@@ -160,13 +155,13 @@ export function buildAlternativesPayload(
     // For the target employee, filter out conflicting assignments
     const keptAssignments = isTarget
       ? empAssignments.filter((a) => {
-          const name = shiftNameMap.get(a.uniqueShiftId) || "";
+          const name = shiftNameMap.get(a.compositeId) || "";
           return !assignmentMatchesConstraint(a, name, constraint);
         })
       : empAssignments;
 
-    // AssignedShifts = list of unique shift IDs
-    const assignedShifts = keptAssignments.map((a) => a.uniqueShiftId);
+    // AssignedShifts = list of composite "ShiftId|Start" IDs
+    const assignedShifts = keptAssignments.map((a) => a.compositeId);
 
     // Constraints
     const existingConstraints = Array.isArray(emp.Constraints) ? [...emp.Constraints] : [];
@@ -198,7 +193,7 @@ export function buildAlternativesPayload(
 
   return {
     ...originalRequest,
-    Shifts: uniqueShifts,
+    Shifts: sourceShifts,  // Original shift IDs — NOT composite
     Employees: employees,
     SchedulingOptions: {
       ...(originalRequest?.SchedulingOptions || {}),
