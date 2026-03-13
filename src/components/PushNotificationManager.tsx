@@ -128,7 +128,7 @@ export function PushNotificationManager() {
         await subscription.unsubscribe();
 
         // Remove from database
-        await supabase.from("push_subscriptions").delete().eq("endpoint", endpoint);
+        await supabase.from("push_subscriptions" as any).delete().eq("endpoint", endpoint);
       }
 
       setIsSubscribed(false);
