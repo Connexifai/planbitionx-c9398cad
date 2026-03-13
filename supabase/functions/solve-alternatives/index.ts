@@ -89,8 +89,26 @@ serve(async (req) => {
     const shiftIds = Array.isArray(payload.Shifts) ? payload.Shifts.slice(0, 3).map((s: any) => s.Id) : [];
     console.log("Sample shift IDs:", JSON.stringify(shiftIds));
 
+    // Build query params from top-level constraint fields (v6.89w+)
+    const qp = new URLSearchParams();
+    if (payload.TargetEmployeeId) qp.set("targetEmployeeId", String(payload.TargetEmployeeId));
+    if (payload.ConstraintType) qp.set("constraintType", String(payload.ConstraintType));
+    if (payload.DayOfWeek !== undefined) qp.set("dayOfWeek", String(payload.DayOfWeek));
+    if (payload.Date) qp.set("date", String(payload.Date));
+    if (payload.ShiftKind) qp.set("shiftKind", String(payload.ShiftKind));
+
+    // Remove top-level constraint fields from body (API reads them from query)
+    delete payload.TargetEmployeeId;
+    delete payload.ConstraintType;
+    delete payload.DayOfWeek;
+    delete payload.Date;
+    delete payload.ShiftKind;
+
+    const solverUrl = qp.toString() ? `${SOLVER_URL}?${qp.toString()}` : SOLVER_URL;
+    console.log("Solver URL:", solverUrl);
+
     const bodyStr = JSON.stringify(payload);
-    const response = await fetch(SOLVER_URL, {
+    const response = await fetch(solverUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
