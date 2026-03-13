@@ -1,11 +1,11 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { SendHorizontal, Bot, User, ArrowRightLeft, Lightbulb, CheckCircle2, UserPlus, Repeat2, GitBranch, Search } from "lucide-react";
+import { SendHorizontal, Bot, User, ArrowRightLeft, Lightbulb, CheckCircle2, UserPlus, Repeat2, GitBranch, Search, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 import ReactMarkdown from "react-markdown";
-import { buildAlternativesPayload, getRemovedAssignments, enrichAlternative } from "@/lib/buildAlternativesPayload";
+import { buildAlternativesPayload } from "@/lib/buildAlternativesPayload";
 import type { AlternativeConstraint, Alternative, AlternativesResponse, AlternativeChange, SearchScope } from "@/lib/buildAlternativesPayload";
 import { format, parseISO } from "date-fns";
 import { nl } from "date-fns/locale";
@@ -57,12 +57,21 @@ function formatShiftTime(start?: string, end?: string): string {
 }
 
 function classifyAlternative(alt: Alternative, constraintEmployee?: string): ClassifiedAlternative {
-  // If the solver provides a Summary, use it as explanation
+  // "Dienst open laten" option
+  if (alt.ConflictShiftFilled === false) {
+    return {
+      type: "direct_replacement",
+      icon: AlertCircle,
+      label: "Dienst open laten",
+      explanation: alt.Summary || "De dienst wordt niet opgevuld en blijft open.",
+    };
+  }
+
   const changes = alt.Changes || [];
   const added = changes.filter((c) => c.Action === "added");
   const removed = changes.filter((c) => c.Action === "removed");
 
-  if (removed.length === 0 && added.length >= 1) {
+  if (removed.length <= 1 && added.length >= 1 && added.length <= 2) {
     const replacers = [...new Set(added.map((c) => c.EmployeeName))];
     return {
       type: "direct_replacement",
@@ -146,21 +155,7 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
     }
 
     const response: AlternativesResponse = await altRes.json();
-
-    // Compute the synthetic "removed" changes for the target employee
-    const removedChanges = getRemovedAssignments(
-      solverAssignments,
-      constraint,
-      requestData?.Shifts || []
-    );
-
-    // Enrich each alternative with the removed changes + normalize IDs
-    return {
-      ...response,
-      Alternatives: (response.Alternatives || []).map((alt) =>
-        enrichAlternative(alt, removedChanges)
-      ),
-    };
+    return response;
   }, [requestData, solverAssignments]);
 
   /** Handle "Zoek verder" — re-search with full scope */
@@ -408,36 +403,50 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
                   {msg.alternatives.map((alt) => {
                     const classified = classifyAlternative(alt, msg.constraintSummary);
                     const TypeIcon = classified.icon;
+                    const isOpenShift = alt.ConflictShiftFilled === false;
 
                     return (
                       <div
                         key={alt.Rank}
                         className={cn(
                           "border rounded-xl overflow-hidden bg-card shadow-sm transition-all hover:shadow-md",
-                          alt.Rank === 1 && "border-primary/40 ring-1 ring-primary/20"
+                          alt.Rank === 1 && !isOpenShift && "border-primary/40 ring-1 ring-primary/20",
+                          isOpenShift && "border-dashed border-muted-foreground/30 opacity-80"
                         )}
                       >
                         {/* Header */}
                         <div className="flex items-center justify-between px-4 pt-3 pb-2">
                           <div className="flex items-center gap-2">
-                            <Badge variant={alt.Rank === 1 ? "default" : "secondary"} className="text-xs">
+                            <Badge variant={alt.Rank === 1 && !isOpenShift ? "default" : "secondary"} className="text-xs">
                               #{alt.Rank}
                             </Badge>
-                            <div className="flex items-center gap-1.5 text-xs font-medium text-foreground">
-                              <TypeIcon className="h-3.5 w-3.5 text-primary" />
+                            <div className={cn(
+                              "flex items-center gap-1.5 text-xs font-medium",
+                              isOpenShift ? "text-muted-foreground" : "text-foreground"
+                            )}>
+                              <TypeIcon className={cn("h-3.5 w-3.5", isOpenShift ? "text-muted-foreground" : "text-primary")} />
                               {classified.label}
                             </div>
-                            {alt.Rank === 1 && (
+                            {alt.Rank === 1 && !isOpenShift && (
                               <Badge variant="outline" className="text-[10px] text-primary border-primary/30">
                                 Aanbevolen
+                              </Badge>
+                            )}
+                            {isOpenShift && (
+                              <Badge variant="outline" className="text-[10px] text-muted-foreground border-muted-foreground/30">
+                                Geen vervanging
                               </Badge>
                             )}
                           </div>
                           <div className="flex items-center gap-2">
                             <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
                               <span>{alt.ChangesFromBaseline} wijziging{alt.ChangesFromBaseline !== 1 && "en"}</span>
-                              <span>·</span>
-                              <span>{alt.Score.FillRatePercentage.toFixed(0)}% bezetting</span>
+                              {alt.Score && (
+                                <>
+                                  <span>·</span>
+                                  <span>{alt.Score.FillRatePercentage.toFixed(0)}% bezetting</span>
+                                </>
+                              )}
                             </div>
                           </div>
                         </div>
@@ -445,55 +454,57 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
                         {/* Explanation */}
                         <div className="px-4 pb-2">
                           <p className="text-xs text-muted-foreground leading-relaxed">
-                            💡 {classified.explanation}
+                            {isOpenShift ? "⚠️" : "💡"} {classified.explanation}
                           </p>
                         </div>
 
                         {/* Changes detail */}
-                        <div className="px-4 pb-3 space-y-1">
-                          {alt.Changes.map((change, i) => (
-                            <div
-                              key={i}
-                              className={cn(
-                                "flex items-center gap-2 text-xs px-2.5 py-1.5 rounded-md",
-                                change.Action === "added"
-                                  ? "bg-primary/5 text-primary dark:text-primary"
-                                  : "bg-destructive/5 text-destructive dark:text-destructive"
-                              )}
-                            >
-                              <span className="font-mono text-[10px] font-bold w-3">
-                                {change.Action === "added" ? "+" : "−"}
-                              </span>
-                              <span className="font-medium">{change.EmployeeName}</span>
-                              <span className="text-muted-foreground">→</span>
-                              <span>{change.ShiftName}</span>
-                              {change.Start && (
-                                <span className="text-muted-foreground text-[10px] ml-auto">
-                                  {formatShiftDate(change.Start)} ({formatShiftTime(change.Start, change.End)})
+                        {alt.Changes && alt.Changes.length > 0 && (
+                          <div className="px-4 pb-3 space-y-1">
+                            {alt.Changes.map((change, i) => (
+                              <div
+                                key={i}
+                                className={cn(
+                                  "flex items-center gap-2 text-xs px-2.5 py-1.5 rounded-md",
+                                  change.Action === "added"
+                                    ? "bg-primary/5 text-primary dark:text-primary"
+                                    : "bg-destructive/5 text-destructive dark:text-destructive"
+                                )}
+                              >
+                                <span className="font-mono text-[10px] font-bold w-3">
+                                  {change.Action === "added" ? "+" : "−"}
                                 </span>
-                              )}
-                            </div>
-                          ))}
-                          {/* Show Reason from solver if available */}
-                          {alt.Changes.some((c) => c.Reason) && (
-                            <div className="mt-1 px-2.5 py-1 text-[10px] text-muted-foreground italic">
-                              {alt.Changes.filter((c) => c.Reason).map((c, i) => (
-                                <div key={i}>📝 {c.Reason}</div>
-                              ))}
-                            </div>
-                          )}
-                        </div>
+                                {change.EmployeeName && <span className="font-medium">{change.EmployeeName}</span>}
+                                {change.EmployeeName && change.ShiftName && <span className="text-muted-foreground">→</span>}
+                                {change.ShiftName && <span>{change.ShiftName}</span>}
+                                {change.Start && (
+                                  <span className="text-muted-foreground text-[10px] ml-auto">
+                                    {formatShiftDate(change.Start)} ({formatShiftTime(change.Start, change.End)})
+                                  </span>
+                                )}
+                              </div>
+                            ))}
+                            {/* Show Reason from solver if available */}
+                            {alt.Changes.some((c) => c.Reason) && (
+                              <div className="mt-1 px-2.5 py-1 text-[10px] text-muted-foreground italic">
+                                {alt.Changes.filter((c) => c.Reason).map((c, i) => (
+                                  <div key={i}>📝 {c.Reason}</div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        )}
 
                         {/* Apply button */}
                         <div className="border-t px-4 py-2.5 bg-muted/30 flex justify-end">
                           <Button
                             size="sm"
-                            variant={alt.Rank === 1 ? "default" : "outline"}
+                            variant={isOpenShift ? "outline" : alt.Rank === 1 ? "default" : "outline"}
                             className="text-xs h-7 gap-1.5"
                             onClick={() => handleApplyAlternative(alt)}
                           >
                             <CheckCircle2 className="h-3 w-3" />
-                            Doorvoeren
+                            {isOpenShift ? "Dienst open laten" : "Doorvoeren"}
                           </Button>
                         </div>
                       </div>
