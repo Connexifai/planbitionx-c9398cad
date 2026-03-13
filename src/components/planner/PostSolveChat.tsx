@@ -197,7 +197,7 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
           {
             id: Date.now() + 1,
             role: "assistant",
-            content: `🔎 Met een breder zoekbereik heb ik **${validAlts.length} extra oplossing${validAlts.length === 1 ? "" : "en"}** gevonden:`,
+            content: `🔎 Met een breder zoekbereik heb ik **${filledAlts.length} extra oplossing${filledAlts.length === 1 ? "" : "en"}** gevonden:`,
             alternatives: validAlts,
             baseline: altResponse.Baseline,
           },
