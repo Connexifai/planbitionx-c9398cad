@@ -465,14 +465,8 @@ export default function Index() {
                         <PostSolveChat
                           requestData={requestData}
                           solverAssignments={solverAssignments}
-                          onApplyAlternative={(alt) => {
-                            // Re-parse the alternative's assignments into roster data
-                            const newRoster = parseSolverResponse(requestData, { Assignments: alt.Assignments });
-                            setRosterData(newRoster);
-                            setSolverAssignments(alt.Assignments);
-                            toast.success(`Alternatief #${alt.Rank} doorgevoerd`, {
-                              description: `${alt.ChangesFromBaseline} wijziging${alt.ChangesFromBaseline !== 1 ? "en" : ""} toegepast`,
-                            });
+                          onApplyAlternative={handleApplyAlternative}
+                        />
                           }}
                         />
                       ) : (
