@@ -442,18 +442,8 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
     }
   };
 
-  const examplePrompts = [
-    {
-      icon: ArrowRightLeft,
-      label: t("chat.shiftSwap"),
-      prompt: t("chat.shiftSwapPrompt"),
-    },
-    {
-      icon: Lightbulb,
-      label: t("chat.findAlternative"),
-      prompt: t("chat.findAlternativePrompt"),
-    },
-  ];
+
+
 
   return (
     <div className="flex h-full">
@@ -663,21 +653,8 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
             </div>
           )}
 
-          {/* Example prompts */}
-          {messages.length === 1 && (
-            <div className="flex flex-wrap gap-2 pt-2">
-              {examplePrompts.map((ep) => (
-                <button
-                  key={ep.label}
-                  onClick={() => handleSend(ep.prompt)}
-                  className="flex items-center gap-2 rounded-lg border bg-card px-3 py-2.5 text-sm hover:bg-accent hover:border-primary/30 transition-all shadow-sm"
-                >
-                  <ep.icon className="h-4 w-4 text-primary" />
-                  <span className="font-medium">{ep.label}</span>
-                </button>
-              ))}
-            </div>
-          )}
+
+
         </div>
 
         {/* Input */}
