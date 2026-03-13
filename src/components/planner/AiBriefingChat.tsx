@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
-import { SendHorizontal, Bot, User, Loader2, AlertTriangle, CheckCircle2, X } from "lucide-react";
+import { SendHorizontal, User, Loader2, AlertTriangle, CheckCircle2, X } from "lucide-react";
+import robotImg from "@/assets/robot-assistant.png";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -175,7 +176,7 @@ export function AiBriefingChat({ employees, schedulePeriod, constraints, onConst
           {messages.map((msg) => (
             <div key={msg.id} className={cn("flex gap-3 max-w-[85%]", msg.role === "user" ? "ml-auto flex-row-reverse" : "")}>
               <div className={cn("flex items-center justify-center w-8 h-8 rounded-lg shrink-0 mt-0.5", msg.role === "assistant" ? "bg-primary/10" : "bg-accent")}>
-                {msg.role === "assistant" ? <Bot className="h-4 w-4 text-primary" /> : <User className="h-4 w-4 text-muted-foreground" />}
+                {msg.role === "assistant" ? <img src={robotImg} alt="AI" className="h-6 w-6 object-contain" /> : <User className="h-4 w-4 text-muted-foreground" />}
               </div>
               <div className={cn("rounded-xl px-4 py-3 text-sm leading-relaxed", msg.role === "assistant" ? "bg-card border shadow-sm" : "bg-primary text-primary-foreground")}>
                 {msg.role === "assistant" ? (
@@ -191,7 +192,7 @@ export function AiBriefingChat({ employees, schedulePeriod, constraints, onConst
           {loading && (
             <div className="flex gap-3 max-w-[85%]">
               <div className="flex items-center justify-center w-8 h-8 rounded-lg shrink-0 mt-0.5 bg-primary/10">
-                <Bot className="h-4 w-4 text-primary" />
+                <img src={robotImg} alt="AI" className="h-6 w-6 object-contain" />
               </div>
               <div className="rounded-xl px-4 py-3 text-sm bg-card border shadow-sm">
                 <Loader2 className="h-4 w-4 animate-spin text-primary" />
@@ -202,7 +203,7 @@ export function AiBriefingChat({ employees, schedulePeriod, constraints, onConst
 
         <div className="bg-background pt-4 pb-3 px-4 border-t border-border">
           <div className="flex items-center gap-1 mb-2">
-            <Bot className="h-3.5 w-3.5 text-primary" />
+            <img src={robotImg} alt="AI" className="h-3.5 w-3.5 object-contain" />
             <span className="text-xs font-medium text-muted-foreground">{t("chat.sendMessage")}</span>
           </div>
           <div className="flex items-center gap-2 rounded-xl border-2 border-primary/20 bg-card px-4 py-3 shadow-md focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/10 transition-all">

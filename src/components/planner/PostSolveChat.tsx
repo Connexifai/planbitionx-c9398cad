@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { SendHorizontal, Bot, User, CheckCircle2, UserPlus, Repeat2, GitBranch, Search, AlertCircle, Smartphone } from "lucide-react";
+import { SendHorizontal, User, CheckCircle2, UserPlus, Repeat2, GitBranch, Search, AlertCircle, Smartphone } from "lucide-react";
+import robotImg from "@/assets/robot-assistant.png";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -541,7 +542,7 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
                   )}
                 >
                   {msg.role === "assistant" ? (
-                    <Bot className="h-4 w-4 text-primary" />
+                    <img src={robotImg} alt="AI" className="h-6 w-6 object-contain" />
                   ) : (
                     <User className="h-4 w-4 text-muted-foreground" />
                   )}
@@ -752,7 +753,7 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
           {isTyping && (
             <div className="flex gap-3 max-w-[85%]">
               <div className="flex items-center justify-center w-8 h-8 rounded-lg shrink-0 mt-0.5 bg-primary/10">
-                <Bot className="h-4 w-4 text-primary" />
+                <img src={robotImg} alt="AI" className="h-6 w-6 object-contain" />
               </div>
               <div className="rounded-xl px-4 py-3 text-sm bg-card border shadow-sm">
                 <div className="flex gap-1.5 items-center text-muted-foreground">
