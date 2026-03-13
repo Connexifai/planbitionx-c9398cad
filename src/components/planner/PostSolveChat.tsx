@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 import ReactMarkdown from "react-markdown";
 import robotImg from "@/assets/robot-assistant.png";
-import { buildAlternativesPayload } from "@/lib/buildAlternativesPayload";
+import { buildAlternativesPayload, normalizeAlternativeShiftIds } from "@/lib/buildAlternativesPayload";
 import type { AlternativeConstraint, Alternative, AlternativesResponse } from "@/lib/buildAlternativesPayload";
 
 interface Message {
@@ -166,7 +166,8 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
   };
 
   const handleApplyAlternative = (alt: Alternative) => {
-    onApplyAlternative?.(alt);
+    const normalizedAlt = normalizeAlternativeShiftIds(alt);
+    onApplyAlternative?.(normalizedAlt);
     setMessages((prev) => [
       ...prev,
       {
