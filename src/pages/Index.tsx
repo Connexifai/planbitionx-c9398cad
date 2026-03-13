@@ -355,11 +355,11 @@ export default function Index() {
 
                       {robotLanded && jsonLoaded && (
                         <div
-                          className="relative bg-primary text-primary-foreground shadow-xl rounded-2xl px-4 py-3 max-w-[230px] mb-2 animate-fade-in cursor-pointer pointer-events-auto"
+                          className="relative bg-card/95 backdrop-blur-md border border-border shadow-2xl rounded-3xl px-5 py-3 max-w-[240px] mb-2 animate-fade-in cursor-pointer pointer-events-auto"
                           onClick={() => setChatOpen(true)}
                         >
-                          <p className="text-sm font-semibold leading-snug">{t("robot.clickMe")}</p>
-                          <div className="absolute -bottom-2 right-6 w-4 h-4 bg-primary rotate-45 rounded-sm" />
+                          <p className="text-sm font-semibold leading-snug text-foreground tracking-wide">{t("robot.clickMe")}</p>
+                          <div className="absolute -bottom-2.5 right-6 w-5 h-5 bg-card/95 backdrop-blur-md border-b border-r border-border rotate-45 rounded-sm" />
                         </div>
                       )}
 
