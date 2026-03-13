@@ -20,11 +20,13 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Download, Moon, Sun, MessageCircle, PanelRightClose } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import robotImg from "@/assets/robot-assistant.png";
+import { useRosterAnimation } from "@/hooks/useRosterAnimation";
+import { normalizeAlternativeShiftIds } from "@/lib/buildAlternativesPayload";
 
 function useTypingText(text: string, speed = 40) {
   const [displayed, setDisplayed] = useState("");
@@ -193,6 +195,24 @@ export default function Index() {
   const [atw, setAtw] = useState<AtwConstraints>(defaultAtw);
   const [soft, setSoft] = useState<SoftConstraints>(defaultSoft);
   const [solver, setSolver] = useState<SolverSettings>(defaultSolver);
+  const { animationState, startAnimation } = useRosterAnimation();
+
+  const handleApplyAlternative = useCallback((alt: any) => {
+    const normalizedAlt = normalizeAlternativeShiftIds(alt);
+    const changes = normalizedAlt.Changes || [];
+
+    // Apply roster immediately so cells show new state during animation
+    const newRoster = parseSolverResponse(requestData, { Assignments: normalizedAlt.Assignments });
+    setRosterData(newRoster);
+    setSolverAssignments(normalizedAlt.Assignments);
+
+    // Start step-by-step animation, show toast when done
+    startAnimation(changes, () => {
+      toast.success(`Alternatief #${alt.Rank} doorgevoerd`, {
+        description: `${alt.ChangesFromBaseline} wijziging${alt.ChangesFromBaseline !== 1 ? "en" : ""} toegepast`,
+      });
+    });
+  }, [requestData, startAnimation]);
 
   const handleJsonLoaded = (rawJson?: string) => {
     setSolved(false);
@@ -347,7 +367,7 @@ export default function Index() {
               <main className="flex-1 overflow-y-auto overflow-x-hidden p-5 space-y-5">
                 <KpiCards solved data={rosterData ?? undefined} solveTime={solveDurationMs} />
                 <RosterTabs value={activeTab} onChange={setActiveTab} />
-                {activeTab === "roster" && <RosterGrid data={rosterData ?? undefined} employeeConstraints={employeeConstraints} />}
+                {activeTab === "roster" && <RosterGrid data={rosterData ?? undefined} employeeConstraints={employeeConstraints} animationState={animationState} />}
                 {activeTab === "dienst" && <ServiceRosterGrid data={rosterData ?? undefined} />}
                 {activeTab === "stats" && <StatsDashboard data={rosterData ?? undefined} />}
                 {activeTab === "uitleg" && <ExplanationView data={rosterData ?? undefined} solverExplanations={solverExplanations} solverStatistics={solverStatistics} />}
@@ -463,15 +483,7 @@ export default function Index() {
                         <PostSolveChat
                           requestData={requestData}
                           solverAssignments={solverAssignments}
-                          onApplyAlternative={(alt) => {
-                            // Re-parse the alternative's assignments into roster data
-                            const newRoster = parseSolverResponse(requestData, { Assignments: alt.Assignments });
-                            setRosterData(newRoster);
-                            setSolverAssignments(alt.Assignments);
-                            toast.success(`Alternatief #${alt.Rank} doorgevoerd`, {
-                              description: `${alt.ChangesFromBaseline} wijziging${alt.ChangesFromBaseline !== 1 ? "en" : ""} toegepast`,
-                            });
-                          }}
+                          onApplyAlternative={handleApplyAlternative}
                         />
                       ) : (
                         <AiBriefingChat

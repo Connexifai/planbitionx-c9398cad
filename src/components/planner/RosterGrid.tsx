@@ -1,11 +1,13 @@
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useTranslation } from "react-i18next";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { useRef, memo, useMemo } from "react";
-import { Ban, ShieldAlert } from "lucide-react";
+import { useRef, memo, useMemo, useEffect } from "react";
+import { Ban, ShieldAlert, CheckCircle2 } from "lucide-react";
 import type { RosterData, ShiftData, DayColumn, RosterEmployee, DemandMap } from "@/lib/parseSolverResponse";
 import type { EmployeeConstraint } from "@/components/planner/AiBriefingChat";
+import type { RosterAnimationState } from "@/hooks/useRosterAnimation";
 
 type ShiftType = "vroeg" | "dag" | "laat" | "nacht" | null;
 
@@ -120,12 +122,18 @@ const EmployeeRow = memo(function EmployeeRow({
   days,
   t,
   constraints,
+  highlightDayDate,
+  highlightAction,
+  isAnimatingRow,
 }: {
   emp: RosterEmployee;
   numDays: number;
   days: DayColumn[];
   t: (key: string) => string;
   constraints: EmployeeConstraint[];
+  highlightDayDate?: string;
+  highlightAction?: "added" | "removed";
+  isAnimatingRow?: boolean;
 }) {
   // Check which day cells have constraint violations
   const dayConstraintFlags = useMemo(() => {
@@ -152,7 +160,10 @@ const EmployeeRow = memo(function EmployeeRow({
 
   return (
     <div
-      className="grid border-b border-border/60 transition-colors hover:bg-accent/30"
+      className={cn(
+        "grid border-b border-border/60 transition-colors hover:bg-accent/30",
+        isAnimatingRow && "bg-primary/5"
+      )}
       style={{
         gridTemplateColumns: `230px repeat(${numDays}, minmax(85px, 1fr))`,
       }}
@@ -194,10 +205,18 @@ const EmployeeRow = memo(function EmployeeRow({
         const hasShiftAssigned = shift.type !== null;
         const showViolationRing = hasConstraintOnCell && hasShiftAssigned;
 
+        const isHighlighted = highlightDayDate && dayDate === highlightDayDate;
+
         return (
           <div
             key={i}
-            className={`flex items-center justify-center px-0.5 py-0.5 border-r last:border-r-0 relative ${days[i]?.weekend ? "bg-weekend" : ""} ${showViolationRing ? (cellStrength === "hard" ? "ring-2 ring-inset ring-destructive/50 bg-destructive/10" : "ring-2 ring-inset ring-kpi-unfilled/40 bg-kpi-unfilled/10") : ""}`}
+            className={cn(
+              "flex items-center justify-center px-0.5 py-0.5 border-r last:border-r-0 relative transition-all duration-500",
+              days[i]?.weekend && "bg-weekend",
+              showViolationRing && (cellStrength === "hard" ? "ring-2 ring-inset ring-destructive/50 bg-destructive/10" : "ring-2 ring-inset ring-kpi-unfilled/40 bg-kpi-unfilled/10"),
+              isHighlighted && highlightAction === "added" && "roster-cell-highlight-added",
+              isHighlighted && highlightAction === "removed" && "roster-cell-highlight-removed",
+            )}
           >
             {hasConstraintOnCell && (
               <Tooltip>
@@ -230,9 +249,10 @@ const EmployeeRow = memo(function EmployeeRow({
 interface RosterGridProps {
   data?: RosterData;
   employeeConstraints?: EmployeeConstraint[];
+  animationState?: RosterAnimationState;
 }
 
-export function RosterGrid({ data, employeeConstraints = [] }: RosterGridProps) {
+export function RosterGrid({ data, employeeConstraints = [], animationState }: RosterGridProps) {
   const { t } = useTranslation();
   const parentRef = useRef<HTMLDivElement>(null);
 
@@ -247,6 +267,22 @@ export function RosterGrid({ data, employeeConstraints = [] }: RosterGridProps) 
     overscan: 5,
     measureElement: (el) => el.getBoundingClientRect().height,
   });
+
+  // Auto-scroll to the current animation step's employee row
+  const prevAnimStepRef = useRef<string | null>(null);
+  const currentAnimStep = animationState?.currentStep;
+  
+  useEffect(() => {
+    if (!currentAnimStep || !parentRef.current) return;
+    const stepKey = `${currentAnimStep.employeeId}-${currentAnimStep.dayDate}-${currentAnimStep.stepIndex}`;
+    if (prevAnimStepRef.current === stepKey) return;
+    prevAnimStepRef.current = stepKey;
+
+    const empIdx = employees.findIndex((e) => String(e.id) === currentAnimStep.employeeId);
+    if (empIdx >= 0) {
+      rowVirtualizer.scrollToIndex(empIdx, { align: "center", behavior: "smooth" });
+    }
+  }, [currentAnimStep, employees, rowVirtualizer]);
 
   if (!data) {
     return (
@@ -272,10 +308,49 @@ export function RosterGrid({ data, employeeConstraints = [] }: RosterGridProps) 
   });
 
   return (
-    <div
-      ref={parentRef}
-      className="roster-scroll w-full max-w-full rounded-xl border border-border/50 bg-card shadow-sm overflow-x-auto overflow-y-auto max-h-[calc(100vh-280px)]"
-    >
+    <div className="relative">
+      {/* Animation progress banner */}
+      {animationState?.active && (
+        <div className="sticky top-0 z-10 flex items-center gap-3 px-4 py-2.5 bg-primary/10 border-b border-primary/30 backdrop-blur-sm animate-fade-in">
+          {animationState.done ? (
+            <>
+              <div className="flex items-center justify-center w-6 h-6 rounded-full bg-primary text-primary-foreground">
+                <CheckCircle2 className="h-3.5 w-3.5" />
+              </div>
+              <span className="text-sm font-semibold text-primary">
+                Alle {animationState.completedSteps.length} wijzigingen doorgevoerd ✓
+              </span>
+            </>
+          ) : animationState.currentStep ? (
+            <>
+              <div className="flex items-center justify-center w-6 h-6 rounded-full bg-primary/20 text-primary animate-pulse">
+                <span className="text-xs font-bold">{animationState.currentStep.stepIndex + 1}</span>
+              </div>
+              <span className="text-sm font-medium text-foreground">
+                <span className={animationState.currentStep.action === "added" ? "text-primary" : "text-destructive"}>
+                  {animationState.currentStep.action === "added" ? "+" : "−"}
+                </span>{" "}
+                <span className="font-semibold">{animationState.currentStep.employeeName}</span>
+                {" → "}
+                <span>{animationState.currentStep.shiftName}</span>
+              </span>
+              <span className="ml-auto text-xs text-muted-foreground">
+                Stap {animationState.currentStep.stepIndex + 1} van {animationState.currentStep.totalSteps}
+              </span>
+              <div className="w-20 h-1.5 rounded-full bg-muted overflow-hidden">
+                <div
+                  className="h-full rounded-full bg-primary transition-all duration-500"
+                  style={{ width: `${((animationState.currentStep.stepIndex + 1) / animationState.currentStep.totalSteps) * 100}%` }}
+                />
+              </div>
+            </>
+          ) : null}
+        </div>
+      )}
+      <div
+        ref={parentRef}
+        className="roster-scroll w-full max-w-full rounded-xl border border-border/50 bg-card shadow-sm overflow-x-auto overflow-y-auto max-h-[calc(100vh-280px)]"
+      >
       <div style={{ minWidth: `${220 + numDays * 90}px` }}>
         {/* Header */}
         <div
@@ -322,11 +397,23 @@ export function RosterGrid({ data, employeeConstraints = [] }: RosterGridProps) 
                   days={days}
                   t={t}
                   constraints={employeeConstraints.filter(c => c.personId === emp.id)}
+                  highlightDayDate={
+                    animationState?.currentStep?.employeeId === String(emp.id)
+                      ? animationState.currentStep.dayDate
+                      : undefined
+                  }
+                  highlightAction={
+                    animationState?.currentStep?.employeeId === String(emp.id)
+                      ? animationState.currentStep.action
+                      : undefined
+                  }
+                  isAnimatingRow={animationState?.currentStep?.employeeId === String(emp.id)}
                 />
               </div>
             );
           })}
         </div>
+      </div>
       </div>
     </div>
   );

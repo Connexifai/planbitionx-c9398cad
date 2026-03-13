@@ -246,14 +246,13 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
   };
 
   const handleApplyAlternative = (alt: Alternative) => {
-    const normalizedAlt = normalizeAlternativeShiftIds(alt);
-    onApplyAlternative?.(normalizedAlt);
+    onApplyAlternative?.(alt);
     setMessages((prev) => [
       ...prev,
       {
         id: Date.now(),
         role: "assistant",
-        content: `✅ **Alternatief #${alt.Rank} is doorgevoerd!** Het rooster is bijgewerkt met ${alt.ChangesFromBaseline} wijziging${alt.ChangesFromBaseline === 1 ? "" : "en"}.`,
+        content: `✅ **Alternatief #${alt.Rank} wordt doorgevoerd!** Bekijk het rooster voor de stapsgewijze animatie van ${alt.ChangesFromBaseline} wijziging${alt.ChangesFromBaseline === 1 ? "" : "en"}.`,
       },
     ]);
   };
