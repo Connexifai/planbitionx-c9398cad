@@ -467,8 +467,6 @@ export default function Index() {
                           solverAssignments={solverAssignments}
                           onApplyAlternative={handleApplyAlternative}
                         />
-                          }}
-                        />
                       ) : (
                         <AiBriefingChat
                           employees={requestData?.Employees || []}
