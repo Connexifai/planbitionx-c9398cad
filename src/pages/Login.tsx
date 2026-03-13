@@ -59,7 +59,8 @@ export default function Login() {
           <div className="flex flex-col items-center">
             <img src={robotImg} alt="Planbition X" className="w-28 h-28 object-contain drop-shadow-2xl robot-float hover:scale-110 transition-transform duration-500 cursor-pointer mb-4" />
             <h1 className="text-3xl font-black tracking-tight text-foreground">{t("app.title")}</h1>
-            <p className="text-muted-foreground text-sm mt-1">{t("app.subtitle")}</p>
+            <span className="text-[10px] text-muted-foreground/70 tracking-[0.2em] uppercase mt-1">Chapter One</span>
+            <p className="text-muted-foreground text-sm mt-2">{t("app.subtitle")}</p>
           </div>
 
           <div className="grid grid-cols-3 gap-4 text-center py-3 border-y border-border/50">
