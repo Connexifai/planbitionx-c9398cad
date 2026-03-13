@@ -166,7 +166,8 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
   };
 
   const handleApplyAlternative = (alt: Alternative) => {
-    onApplyAlternative?.(alt);
+    const normalizedAlt = normalizeAlternativeShiftIds(alt);
+    onApplyAlternative?.(normalizedAlt);
     setMessages((prev) => [
       ...prev,
       {
