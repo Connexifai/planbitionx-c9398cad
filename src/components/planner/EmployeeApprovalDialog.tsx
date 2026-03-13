@@ -112,28 +112,28 @@ function IPhone17({ employee, onApprove, onReject }: {
                   </div>
 
                   {/* Message content */}
-                  <div className="px-4 py-3 space-y-3">
-                    <p className="text-[13px] font-medium text-foreground leading-snug">
+                  <div className="px-5 py-4 space-y-4">
+                    <p className="text-[15px] font-medium text-foreground leading-snug">
                       Hoi {employee.name.split(" ")[0]} 👋
                     </p>
-                    <p className="text-[12px] text-muted-foreground leading-relaxed">
+                    <p className="text-[14px] text-muted-foreground leading-relaxed">
                       Er is een roosterwijziging waar jouw akkoord voor nodig is:
                     </p>
 
                     {/* Changes */}
-                    <div className="space-y-1.5">
+                    <div className="space-y-2">
                       {employee.changes.map((change, i) => (
                         <div
                           key={i}
                           className={cn(
-                            "flex items-center gap-2 px-3 py-2 rounded-xl text-[11px]",
+                            "flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-[13px]",
                             change.Action === "added"
                               ? "bg-primary/8 border border-primary/15"
                               : "bg-destructive/8 border border-destructive/15"
                           )}
                         >
                           <span className={cn(
-                            "text-[13px] font-bold w-4 text-center",
+                            "text-[15px] font-bold w-4 text-center",
                             change.Action === "added" ? "text-primary" : "text-destructive"
                           )}>
                             {change.Action === "added" ? "+" : "−"}
@@ -141,7 +141,7 @@ function IPhone17({ employee, onApprove, onReject }: {
                           <div className="flex-1 min-w-0">
                             <span className="font-semibold text-foreground">{change.ShiftName}</span>
                             {change.Start && (
-                              <div className="text-[10px] text-muted-foreground mt-0.5">
+                              <div className="text-[12px] text-muted-foreground mt-0.5">
                                 {formatDate(change.Start)} · {formatTime(change.Start, change.End)}
                               </div>
                             )}
@@ -150,7 +150,7 @@ function IPhone17({ employee, onApprove, onReject }: {
                       ))}
                     </div>
 
-                    <p className="text-[12px] text-muted-foreground text-center pt-1">
+                    <p className="text-[14px] text-muted-foreground text-center pt-1">
                       Ga je akkoord met deze wijziging?
                     </p>
                   </div>
