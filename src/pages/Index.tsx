@@ -228,6 +228,7 @@ export default function Index() {
   }, [dark]);
 
   const [solveStartTime, setSolveStartTime] = useState<number>(0);
+  const [solveDurationMs, setSolveDurationMs] = useState<number>(0);
 
   const handleSolve = async () => {
     if (!requestRawJson) {
