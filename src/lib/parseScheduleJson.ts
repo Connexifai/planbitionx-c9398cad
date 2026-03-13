@@ -34,7 +34,7 @@ interface RawSchedule {
 }
 
 function classifyShiftType(name: string, startHour: number): string {
-  const lower = name.toLowerCase();
+  const lower = (name || "").toLowerCase();
   if (lower.includes("night") || lower.includes("nacht")) return "nacht";
   if (lower.includes("late") || lower.includes("laat")) return "laat";
   if (lower.includes("early") || lower.includes("vroeg")) return "vroeg";
