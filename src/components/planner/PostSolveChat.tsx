@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { SendHorizontal, Bot, User, ArrowRightLeft, Lightbulb, CheckCircle2, UserPlus, Repeat2, GitBranch, Search, AlertCircle } from "lucide-react";
+import { SendHorizontal, Bot, User, ArrowRightLeft, Lightbulb, CheckCircle2, UserPlus, Repeat2, GitBranch, Search, AlertCircle, Smartphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -9,6 +9,7 @@ import { buildAlternativesPayload } from "@/lib/buildAlternativesPayload";
 import type { AlternativeConstraint, Alternative, AlternativesResponse, AlternativeChange, SearchScope } from "@/lib/buildAlternativesPayload";
 import { format, parseISO } from "date-fns";
 import { nl } from "date-fns/locale";
+import { EmployeeApprovalDialog } from "./EmployeeApprovalDialog";
 
 interface Message {
   id: number;
