@@ -9,36 +9,16 @@ const corsHeaders = {
 const SOLVER_URL = "https://planbition-ai-solver-production.up.railway.app/solve/alternatives";
 const SOLVER_API_KEY = "test-2024";
 
-// This edge function fetches the test JSON from the project's public URL and forwards it to the solver
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
 
   try {
-    // Fetch the test payload from the project's public files
-    const testDataUrl = "https://isubyupzumsfvvegknfr.supabase.co/storage/v1/object/public/test/request.json";
-    
-    // Actually, let's just read from the request body which will contain the URL to fetch from
-    const { sourceUrl } = await req.json();
-    
-    if (!sourceUrl) {
-      return new Response(JSON.stringify({ error: "sourceUrl required" }), {
-        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" }
-      });
-    }
-
-    console.log("Fetching test data from:", sourceUrl);
-    const dataResp = await fetch(sourceUrl);
-    if (!dataResp.ok) {
-      return new Response(JSON.stringify({ error: `Failed to fetch: ${dataResp.status}` }), {
-        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" }
-      });
-    }
-
-    const payload = await dataResp.text();
+    // Forward the raw body directly to the solver
+    const payload = await req.text();
     console.log("Payload size:", payload.length, "chars");
-    console.log("Sending to solver...");
+    console.log("Sending to solver alternatives...");
 
     const response = await fetch(SOLVER_URL, {
       method: "POST",
@@ -51,13 +31,14 @@ serve(async (req) => {
 
     const responseText = await response.text();
     console.log("Solver status:", response.status);
-    console.log("Solver response (first 5000 chars):", responseText.slice(0, 5000));
+    console.log("Response size:", responseText.length, "chars");
+    console.log("Response preview:", responseText.slice(0, 5000));
 
     return new Response(JSON.stringify({
-      status: response.status,
-      statusText: response.statusText,
-      bodyLength: responseText.length,
-      bodyPreview: responseText.slice(0, 10000),
+      solverStatus: response.status,
+      solverStatusText: response.statusText,
+      responseLength: responseText.length,
+      response: responseText.slice(0, 10000),
     }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
