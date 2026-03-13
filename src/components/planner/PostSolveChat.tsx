@@ -11,6 +11,11 @@ import { format, parseISO } from "date-fns";
 import { nl } from "date-fns/locale";
 import { EmployeeApprovalDialog } from "./EmployeeApprovalDialog";
 
+interface CandidateEmployee {
+  id: string;
+  name: string;
+}
+
 interface Message {
   id: number;
   role: "user" | "assistant";
@@ -18,10 +23,12 @@ interface Message {
   alternatives?: Alternative[];
   baseline?: AlternativesResponse["Baseline"];
   constraintSummary?: string;
-  /** Show a "zoek verder" button on this message */
   showSearchFull?: boolean;
-  /** Store the constraint+intent so we can re-search with "full" */
   pendingConstraint?: AlternativeConstraint;
+  /** Disambiguation candidates */
+  candidates?: CandidateEmployee[];
+  /** Original user message to retry after disambiguation */
+  originalMessage?: string;
 }
 
 export interface PostSolveChatProps {
