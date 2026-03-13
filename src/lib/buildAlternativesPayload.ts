@@ -150,30 +150,40 @@ export function buildAlternativesPayload(
   // Shifts keep their ORIGINAL IDs — the API handles uniqueness internally.
   // Only AssignedShifts use the composite "ShiftId|Start" format.
 
-  // Build lookup: "baseShiftId|start" → composite AssignedShift ID
-  const shiftNameMap = new Map<string, string>();
-  for (const s of sourceShifts) {
-    const compositeKey = makeUniqueShiftId(String(s.Id), String(s.Start || ""));
-    shiftNameMap.set(compositeKey, s.Name || "");
+  // Group solver assignments by every known employee-id variant
+  // so we never drop a conflict shift by id mismatch.
+  const assignmentsByEmployee = new Map<string, Array<SolverAssignment & { compositeId: string }>>();
+  for (const assignment of (solverAssignments || [])) {
+    const anyAssignment = assignment as SolverAssignment & Record<string, unknown>;
+    const start = String(anyAssignment.Start ?? anyAssignment.StartTime ?? "");
+    const compositeId = makeUniqueShiftId(String(anyAssignment.ShiftId), start);
+
+    for (const employeeId of getAssignmentEmployeeIdCandidates(anyAssignment)) {
+      if (!assignmentsByEmployee.has(employeeId)) {
+        assignmentsByEmployee.set(employeeId, []);
+      }
+      assignmentsByEmployee.get(employeeId)!.push({ ...assignment, compositeId });
+    }
   }
 
-  // Group solver assignments by employee, creating composite IDs for AssignedShifts
-  const assignmentsByEmployee = new Map<string, Array<SolverAssignment & { compositeId: string }>>();
-  for (const a of (solverAssignments || [])) {
-    const empId = String(a.PersonId);
-    const compositeId = makeUniqueShiftId(String(a.ShiftId), String(a.Start));
-    if (!assignmentsByEmployee.has(empId)) assignmentsByEmployee.set(empId, []);
-    assignmentsByEmployee.get(empId)!.push({ ...a, compositeId });
-  }
+  const targetEmployeeId = String(constraint.employeeId);
 
   const employees = sourceEmployees.map((emp: any) => {
-    const empId = String(emp.PersonId ?? emp.Id);
-    const empAssignments = assignmentsByEmployee.get(empId) || [];
-    const isTarget = empId === String(constraint.employeeId);
+    const employeeIds = getEmployeeIdCandidates(emp);
+    const isTarget = employeeIds.includes(targetEmployeeId);
 
-    // All assignments stay in AssignedShifts — the API detects conflicts
-    // itself based on the constraint + present shift.
-    const assignedShifts = empAssignments.map((a) => a.compositeId);
+    const solverAssigned = employeeIds
+      .flatMap((id) => assignmentsByEmployee.get(id) || [])
+      .map((a) => a.compositeId)
+      .filter(Boolean);
+
+    // Preserve any pre-existing AssignedShifts from the request and merge with
+    // current solver assignments, without removing the conflict shift.
+    const existingAssigned = Array.isArray(emp.AssignedShifts)
+      ? emp.AssignedShifts.map((id: unknown) => String(id)).filter(Boolean)
+      : [];
+
+    const assignedShifts = Array.from(new Set([...existingAssigned, ...solverAssigned]));
 
     // Constraints
     const existingConstraints = Array.isArray(emp.Constraints) ? [...emp.Constraints] : [];
