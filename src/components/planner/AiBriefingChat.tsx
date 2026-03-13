@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
-import { SendHorizontal, Bot, User, Loader2, AlertTriangle, CheckCircle2, X } from "lucide-react";
+import { SendHorizontal, User, Loader2, AlertTriangle, CheckCircle2, X } from "lucide-react";
+import robotImg from "@/assets/robot-assistant.png";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
