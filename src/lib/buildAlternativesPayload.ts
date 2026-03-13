@@ -87,9 +87,10 @@ function assignmentMatchesConstraint(
   }
 
   if (constraint.type === "avoid_day") {
-    // Both use JS getDay convention: 0=Sunday, 1=Monday, ..., 6=Saturday
+    // Convert JS getDay (0=Sun,1=Mon,...,6=Sat) to solver/ISO convention (0=Mon,...,6=Sun)
     const jsDay = getDay(parseISO(assignment.Start));
-    return jsDay === constraint.dayOfWeek;
+    const solverDay = jsDay === 0 ? 6 : jsDay - 1;
+    return solverDay === constraint.dayOfWeek;
   }
 
   if (constraint.type === "avoid_shift_kind") {
