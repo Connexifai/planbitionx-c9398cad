@@ -231,9 +231,10 @@ const EmployeeRow = memo(function EmployeeRow({
 interface RosterGridProps {
   data?: RosterData;
   employeeConstraints?: EmployeeConstraint[];
+  animationState?: RosterAnimationState;
 }
 
-export function RosterGrid({ data, employeeConstraints = [] }: RosterGridProps) {
+export function RosterGrid({ data, employeeConstraints = [], animationState }: RosterGridProps) {
   const { t } = useTranslation();
   const parentRef = useRef<HTMLDivElement>(null);
 
