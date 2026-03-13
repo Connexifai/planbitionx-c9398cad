@@ -83,7 +83,7 @@ Use the parse_scheduling_intent function to return the structured result.`;
                   employeeId: { type: "string", description: "PersonId of the employee (only when unambiguous)" },
                   employeeName: { type: "string", description: "Full name of the employee" },
                   constraintType: { type: "string", enum: ["avoid_day", "avoid_date", "avoid_shift_kind"] },
-                  dayOfWeek: { type: "number", description: "0=ma,1=di,2=wo,3=do,4=vr,5=za,6=zo" },
+                  dayOfWeek: { type: "number", description: "0=zondag,1=maandag,2=dinsdag,3=woensdag,4=donderdag,5=vrijdag,6=zaterdag (JS getDay convention)" },
                   date: { type: "string", description: "YYYY-MM-DD format" },
                   shiftKind: { type: "string", enum: ["early", "day", "late", "night"] },
                   summary: { type: "string", description: "Brief Dutch description of what was understood" },
