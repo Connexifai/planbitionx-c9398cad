@@ -250,6 +250,22 @@ export function RosterGrid({ data, employeeConstraints = [], animationState }: R
     measureElement: (el) => el.getBoundingClientRect().height,
   });
 
+  // Auto-scroll to the current animation step's employee row
+  const prevAnimStepRef = useRef<string | null>(null);
+  const currentAnimStep = animationState?.currentStep;
+  
+  useEffect(() => {
+    if (!currentAnimStep || !parentRef.current) return;
+    const stepKey = `${currentAnimStep.employeeId}-${currentAnimStep.dayDate}-${currentAnimStep.stepIndex}`;
+    if (prevAnimStepRef.current === stepKey) return;
+    prevAnimStepRef.current = stepKey;
+
+    const empIdx = employees.findIndex((e) => String(e.id) === currentAnimStep.employeeId);
+    if (empIdx >= 0) {
+      rowVirtualizer.scrollToIndex(empIdx, { align: "center", behavior: "smooth" });
+    }
+  }, [currentAnimStep, employees, rowVirtualizer]);
+
   if (!data) {
     return (
       <div className="rounded-xl border border-border/50 bg-card p-8 text-center text-muted-foreground">
