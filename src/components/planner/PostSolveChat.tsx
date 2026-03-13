@@ -169,7 +169,9 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
     constraint: AlternativeConstraint,
     scope: SearchScope
   ): Promise<AlternativesResponse> => {
+    console.log("[PostSolveChat] solverAssignments count:", solverAssignments?.length, "sample:", JSON.stringify(solverAssignments?.slice(0, 2)));
     const payload = buildAlternativesPayload(requestData, solverAssignments, constraint, 10, scope);
+    console.log("[PostSolveChat] payload employee sample AssignedShifts:", payload?.Employees?.slice(0, 3)?.map((e: any) => ({ name: e.Name, assigned: e.AssignedShifts?.length })));
 
     const altRes = await fetch(
       `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/solve-alternatives`,
