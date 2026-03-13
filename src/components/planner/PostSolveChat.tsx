@@ -56,6 +56,29 @@ function formatShiftTime(start?: string, end?: string): string {
   return e ? `${s}–${e}` : s;
 }
 
+interface PreparedAlternatives {
+  filledAlts: Alternative[];
+  openAlt?: Alternative;
+  visibleAlts: Alternative[];
+}
+
+function prepareAlternatives(alternatives: Alternative[]): PreparedAlternatives {
+  const filledAlts = alternatives.filter((a) => a.ConflictShiftFilled !== false).slice(0, 5);
+  const openAlt = alternatives.find((a) => a.ConflictShiftFilled === false);
+  return {
+    filledAlts,
+    openAlt,
+    visibleAlts: openAlt ? [...filledAlts, openAlt] : filledAlts,
+  };
+}
+
+function formatAlternativeCount(prepared: PreparedAlternatives): string {
+  if (prepared.filledAlts.length > 0) {
+    return `${prepared.filledAlts.length} oplossing${prepared.filledAlts.length === 1 ? "" : "en"}`;
+  }
+  return prepared.openAlt ? "1 optie" : "0 oplossingen";
+}
+
 function classifyAlternative(alt: Alternative, constraintEmployee?: string): ClassifiedAlternative {
   // "Dienst open laten" option
   if (alt.ConflictShiftFilled === false) {
