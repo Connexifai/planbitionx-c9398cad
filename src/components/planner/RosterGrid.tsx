@@ -208,12 +208,7 @@ const EmployeeRow = memo(function EmployeeRow({
                 </TooltipTrigger>
                 <TooltipContent side="top" className="max-w-[220px]">
                   <p className="text-xs font-semibold mb-1">Constraints:</p>
-                  {constraints.filter(c => {
-                    if (c.constraint.type === "avoid_day" && hasDayConstraint) return true;
-                    if (c.constraint.type === "avoid_date" && hasDayConstraint) return true;
-                    if (c.constraint.type === "avoid_shift_kind" && hasShiftViolation) return true;
-                    return false;
-                  }).map((c, ci) => {
+                  {cellConstraints.map((c, ci) => {
                     const str = c.constraint.strength === "hard" ? "🚫" : "⚠️";
                     let label = str;
                     if (c.constraint.type === "avoid_day") label = `${str} ${dayNames[c.constraint.dayOfWeek ?? 0]}`;
