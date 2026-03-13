@@ -353,6 +353,17 @@ export function RosterGrid({ data, employeeConstraints = [], animationState }: R
                   days={days}
                   t={t}
                   constraints={employeeConstraints.filter(c => c.personId === emp.id)}
+                  highlightDayDate={
+                    animationState?.currentStep?.employeeId === String(emp.id)
+                      ? animationState.currentStep.dayDate
+                      : undefined
+                  }
+                  highlightAction={
+                    animationState?.currentStep?.employeeId === String(emp.id)
+                      ? animationState.currentStep.action
+                      : undefined
+                  }
+                  isAnimatingRow={animationState?.currentStep?.employeeId === String(emp.id)}
                 />
               </div>
             );
