@@ -442,18 +442,8 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
     }
   };
 
-  const examplePrompts = [
-    {
-      icon: ArrowRightLeft,
-      label: t("chat.shiftSwap"),
-      prompt: t("chat.shiftSwapPrompt"),
-    },
-    {
-      icon: Lightbulb,
-      label: t("chat.findAlternative"),
-      prompt: t("chat.findAlternativePrompt"),
-    },
-  ];
+
+
 
   return (
     <div className="flex h-full">
