@@ -307,7 +307,7 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
           {
             id: resultMsgId,
             role: "assistant",
-            content: `Ik heb **${validAlts.length} oplossing${validAlts.length === 1 ? "" : "en"}** gevonden in de directe omgeving:`,
+            content: `Ik heb **${filledAlts.length} oplossing${filledAlts.length === 1 ? "" : "en"}** gevonden in de directe omgeving:`,
             alternatives: validAlts,
             baseline: altResponse.Baseline,
             constraintSummary: intent.summary,
