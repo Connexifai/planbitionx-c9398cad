@@ -101,6 +101,24 @@ function assignmentMatchesConstraint(
 
 // ─── Payload builder ───────────────────────────────────────────
 
+/**
+ * Creates a unique shift ID by combining the base ID with the start date.
+ * Format: "421_2026-04-06" — clean enough for the solver to handle.
+ */
+function makeUniqueShiftId(baseId: string, start: string): string {
+  const dateStr = start?.split("T")[0] || "";
+  return dateStr ? `${baseId}_${dateStr}` : baseId;
+}
+
+/**
+ * Strips the date suffix to recover the original shift ID.
+ */
+function toOriginalShiftId(uniqueId: string): string {
+  // Match pattern: "digits_YYYY-MM-DD"
+  const match = uniqueId.match(/^(.+)_\d{4}-\d{2}-\d{2}$/);
+  return match ? match[1] : uniqueId;
+}
+
 export function buildAlternativesPayload(
   originalRequest: any,
   solverAssignments: SolverAssignment[],
@@ -111,18 +129,28 @@ export function buildAlternativesPayload(
   const sourceShifts = Array.isArray(originalRequest?.Shifts) ? originalRequest.Shifts : [];
   const sourceEmployees = Array.isArray(originalRequest?.Employees) ? originalRequest.Employees : [];
 
-  // Build a shift lookup by ID+Start for name resolution
-  const shiftLookup = new Map<string, string>();
-  for (const s of sourceShifts) {
-    shiftLookup.set(`${s.Id}|${s.Start}`, s.Name || "");
+  // Create shifts with unique IDs (baseId_date)
+  const uniqueShifts = sourceShifts.map((s: any) => ({
+    ...s,
+    Id: makeUniqueShiftId(String(s.Id), String(s.Start || "")),
+  }));
+
+  // Build lookup: "baseShiftId|start" → uniqueShiftId
+  const shiftIdMap = new Map<string, string>();
+  const shiftNameMap = new Map<string, string>();
+  for (const s of uniqueShifts) {
+    const origId = toOriginalShiftId(s.Id);
+    shiftIdMap.set(`${origId}|${s.Start}`, s.Id);
+    shiftNameMap.set(s.Id, s.Name || "");
   }
 
-  // Group solver assignments by employee
-  const assignmentsByEmployee = new Map<string, SolverAssignment[]>();
+  // Group solver assignments by employee, mapping to unique shift IDs
+  const assignmentsByEmployee = new Map<string, Array<SolverAssignment & { uniqueShiftId: string }>>();
   for (const a of (solverAssignments || [])) {
     const empId = String(a.PersonId);
+    const uniqueId = shiftIdMap.get(`${a.ShiftId}|${a.Start}`) || makeUniqueShiftId(String(a.ShiftId), String(a.Start));
     if (!assignmentsByEmployee.has(empId)) assignmentsByEmployee.set(empId, []);
-    assignmentsByEmployee.get(empId)!.push(a);
+    assignmentsByEmployee.get(empId)!.push({ ...a, uniqueShiftId: uniqueId });
   }
 
   const employees = sourceEmployees.map((emp: any) => {
@@ -133,13 +161,13 @@ export function buildAlternativesPayload(
     // For the target employee, filter out conflicting assignments
     const keptAssignments = isTarget
       ? empAssignments.filter((a) => {
-          const name = shiftLookup.get(`${a.ShiftId}|${a.Start}`) || "";
+          const name = shiftNameMap.get(a.uniqueShiftId) || "";
           return !assignmentMatchesConstraint(a, name, constraint);
         })
       : empAssignments;
 
-    // AssignedShifts = list of original shift IDs (just the ID strings)
-    const assignedShifts = keptAssignments.map((a) => String(a.ShiftId));
+    // AssignedShifts = list of unique shift IDs
+    const assignedShifts = keptAssignments.map((a) => a.uniqueShiftId);
 
     // Constraints
     const existingConstraints = Array.isArray(emp.Constraints) ? [...emp.Constraints] : [];
@@ -171,7 +199,7 @@ export function buildAlternativesPayload(
 
   return {
     ...originalRequest,
-    Shifts: sourceShifts, // Original shifts, no instance IDs
+    Shifts: uniqueShifts,
     Employees: employees,
     SchedulingOptions: {
       ...(originalRequest?.SchedulingOptions || {}),
@@ -181,9 +209,20 @@ export function buildAlternativesPayload(
   };
 }
 
+
 /**
- * Legacy normalizer — now a no-op since we no longer use instance IDs.
+ * Strips date-based unique IDs back to original shift IDs for roster display.
  */
 export function normalizeAlternativeShiftIds(alternative: Alternative): Alternative {
-  return alternative;
+  return {
+    ...alternative,
+    Assignments: (alternative.Assignments || []).map((a) => ({
+      ...a,
+      ShiftId: toOriginalShiftId(String(a.ShiftId)),
+    })),
+    Changes: (alternative.Changes || []).map((c) => ({
+      ...c,
+      ShiftId: toOriginalShiftId(String(c.ShiftId)),
+    })),
+  };
 }
