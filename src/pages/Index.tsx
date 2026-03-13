@@ -20,7 +20,15 @@ import { PushNotificationManager } from "@/components/PushNotificationManager";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Download, Moon, Sun, MessageCircle, PanelRightClose } from "lucide-react";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Download, Moon, Sun, MessageCircle, PanelRightClose, LogOut, User } from "lucide-react";
 import { useEffect, useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -28,6 +36,7 @@ import { cn } from "@/lib/utils";
 import robotImg from "@/assets/robot-assistant.png";
 import { useRosterAnimation } from "@/hooks/useRosterAnimation";
 import { normalizeAlternativeShiftIds, type AlternativeChange } from "@/lib/buildAlternativesPayload";
+import { useAuth } from "@/contexts/AuthContext";
 
 function useTypingText(text: string, speed = 40) {
   const [displayed, setDisplayed] = useState("");
