@@ -330,12 +330,32 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
       };
       setLastConstraint(constraint);
 
+      // Debug: log target employee's assignments from solver output
+      const targetEmpAssignments = (solverAssignments || []).filter(
+        (a: any) => String(a.PersonId) === String(constraint.employeeId)
+      );
+      console.log("[PostSolveChat] Target employee debug:", {
+        employeeId: constraint.employeeId,
+        employeeName: constraint.employeeName,
+        constraintType: constraint.type,
+        dayOfWeek: constraint.dayOfWeek,
+        totalSolverAssignments: solverAssignments?.length,
+        targetAssignmentCount: targetEmpAssignments.length,
+        targetAssignments: targetEmpAssignments.map((a: any) => ({
+          ShiftId: a.ShiftId,
+          PersonId: a.PersonId,
+          Start: a.Start,
+          End: a.End,
+        })),
+      });
+
       // Pre-check: does the employee actually have conflicting shifts?
       const removedShifts = getRemovedAssignments(
         solverAssignments,
         constraint,
         requestData?.Shifts || []
       );
+      console.log("[PostSolveChat] Removed shifts:", removedShifts);
 
       if (removedShifts.length === 0) {
         const dayNames = ["maandag", "dinsdag", "woensdag", "donderdag", "vrijdag", "zaterdag", "zondag"];
