@@ -600,8 +600,19 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
                           </div>
                         )}
 
-                        {/* Apply button */}
-                        <div className="border-t px-4 py-2.5 bg-muted/30 flex justify-end">
+                        {/* Action buttons */}
+                        <div className="border-t px-4 py-2.5 bg-muted/30 flex justify-end gap-2">
+                          {!isOpenShift && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="text-xs h-7 gap-1.5"
+                              onClick={() => handleSolveForMe(alt)}
+                            >
+                              <Smartphone className="h-3 w-3" />
+                              Los het op voor mij
+                            </Button>
+                          )}
                           <Button
                             size="sm"
                             variant={isOpenShift ? "outline" : alt.Rank === 1 ? "default" : "outline"}
