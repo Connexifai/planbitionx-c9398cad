@@ -327,6 +327,7 @@ export default function Index() {
   return (
     <div className="h-screen flex w-full">
       {solving && <SolvingOverlay />}
+      <RosterChangeOverlay state={animationState} />
       {/* Smooth entrance overlay after login */}
       {entranceVisible && (
         <div className="fixed inset-0 z-[200] bg-background pointer-events-none animate-[fade-out_1.2s_ease-out_forwards]" />
