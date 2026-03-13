@@ -213,8 +213,24 @@ export function buildAlternativesPayload(
     };
   });
 
+  // Top-level constraint fields for v6.89w+ API
+  const topLevelConstraint: Record<string, unknown> = {
+    TargetEmployeeId: targetEmployeeId,
+    ConstraintType: constraint.type,
+  };
+  if (constraint.type === "avoid_day" && constraint.dayOfWeek !== undefined) {
+    topLevelConstraint.DayOfWeek = constraint.dayOfWeek;
+  }
+  if (constraint.type === "avoid_date" && constraint.date) {
+    topLevelConstraint.Date = constraint.date;
+  }
+  if (constraint.type === "avoid_shift_kind" && constraint.shiftKind) {
+    topLevelConstraint.ShiftKind = constraint.shiftKind;
+  }
+
   return {
     ...originalRequest,
+    ...topLevelConstraint,
     Shifts: sourceShifts,  // Original shift IDs — NOT composite
     Employees: employees,
     SchedulingOptions: {
