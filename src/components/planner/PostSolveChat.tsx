@@ -563,10 +563,11 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
 
               {/* Alternatives cards */}
               {msg.alternatives && msg.alternatives.length > 0 && (
-                <div className="mt-3 space-y-3 ml-11">
+                <div className="mt-4 space-y-4 ml-11">
                   {msg.baseline && (
-                    <div className="text-xs text-muted-foreground px-3 py-1.5 bg-muted/50 rounded-lg inline-flex items-center gap-2">
-                      <span>📊 Huidig rooster: {msg.baseline.TotalAssignments} toewijzingen · {msg.baseline.FillRatePercentage.toFixed(1)}% bezetting</span>
+                    <div className="text-xs text-muted-foreground px-3 py-2 bg-muted/50 rounded-lg inline-flex items-center gap-2 border border-border/50">
+                      <span className="text-sm">📊</span>
+                      <span>Huidig rooster: <strong>{msg.baseline.TotalAssignments}</strong> toewijzingen · <strong>{msg.baseline.FillRatePercentage.toFixed(1)}%</strong> bezetting</span>
                     </div>
                   )}
                   {msg.alternatives.map((alt) => {
@@ -578,27 +579,56 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
                       <div
                         key={alt.Rank}
                         className={cn(
-                          "border rounded-xl overflow-hidden bg-card shadow-sm transition-all hover:shadow-md",
-                          alt.Rank === 1 && !isOpenShift && "border-primary/40 ring-1 ring-primary/20",
-                          isOpenShift && "border-dashed border-muted-foreground/30 opacity-80"
+                          "border-2 rounded-xl overflow-hidden bg-card shadow-sm transition-all hover:shadow-lg",
+                          alt.Rank === 1 && !isOpenShift && "border-primary/50 ring-2 ring-primary/15 shadow-primary/5",
+                          alt.Rank !== 1 && !isOpenShift && "border-border hover:border-primary/30",
+                          isOpenShift && "border-dashed border-muted-foreground/30 opacity-75"
                         )}
                       >
+                        {/* Colored top accent bar */}
+                        {!isOpenShift && (
+                          <div className={cn(
+                            "h-1",
+                            alt.Rank === 1 ? "bg-primary" : "bg-muted-foreground/20"
+                          )} />
+                        )}
+
                         {/* Header */}
-                        <div className="flex items-center justify-between px-4 pt-3 pb-2">
-                          <div className="flex items-center gap-2">
-                            <Badge variant={alt.Rank === 1 && !isOpenShift ? "default" : "secondary"} className="text-xs">
-                              #{alt.Rank}
-                            </Badge>
+                        <div className="flex items-center justify-between px-4 pt-3 pb-1">
+                          <div className="flex items-center gap-2.5">
                             <div className={cn(
-                              "flex items-center gap-1.5 text-xs font-medium",
-                              isOpenShift ? "text-muted-foreground" : "text-foreground"
+                              "flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold",
+                              alt.Rank === 1 && !isOpenShift
+                                ? "bg-primary text-primary-foreground"
+                                : isOpenShift
+                                  ? "bg-muted text-muted-foreground"
+                                  : "bg-secondary text-secondary-foreground"
                             )}>
-                              <TypeIcon className={cn("h-3.5 w-3.5", isOpenShift ? "text-muted-foreground" : "text-primary")} />
-                              {classified.label}
+                              {alt.Rank}
                             </div>
+                            <div className="flex flex-col">
+                              <div className={cn(
+                                "flex items-center gap-1.5 text-sm font-semibold",
+                                isOpenShift ? "text-muted-foreground" : "text-foreground"
+                              )}>
+                                <TypeIcon className={cn("h-4 w-4", isOpenShift ? "text-muted-foreground" : "text-primary")} />
+                                {classified.label}
+                              </div>
+                              <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground mt-0.5">
+                                <span>{alt.ChangesFromBaseline} wijziging{alt.ChangesFromBaseline !== 1 && "en"}</span>
+                                {alt.Score && (
+                                  <>
+                                    <span>·</span>
+                                    <span>{alt.Score.FillRatePercentage.toFixed(0)}% bezetting</span>
+                                  </>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1.5">
                             {alt.Rank === 1 && !isOpenShift && (
-                              <Badge variant="outline" className="text-[10px] text-primary border-primary/30">
-                                Aanbevolen
+                              <Badge className="text-[10px] bg-primary/10 text-primary border-primary/30 font-semibold">
+                                ⭐ Aanbevolen
                               </Badge>
                             )}
                             {isOpenShift && (
@@ -607,21 +637,10 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
                               </Badge>
                             )}
                           </div>
-                          <div className="flex items-center gap-2">
-                            <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
-                              <span>{alt.ChangesFromBaseline} wijziging{alt.ChangesFromBaseline !== 1 && "en"}</span>
-                              {alt.Score && (
-                                <>
-                                  <span>·</span>
-                                  <span>{alt.Score.FillRatePercentage.toFixed(0)}% bezetting</span>
-                                </>
-                              )}
-                            </div>
-                          </div>
                         </div>
 
                         {/* Explanation */}
-                        <div className="px-4 pb-2">
+                        <div className="px-4 py-2 mx-3 mb-2 mt-1 bg-muted/40 rounded-lg border border-border/50">
                           <p className="text-xs text-muted-foreground leading-relaxed">
                             {isOpenShift ? "⚠️" : "💡"} {classified.explanation}
                           </p>
@@ -629,35 +648,45 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
 
                         {/* Changes detail */}
                         {alt.Changes && alt.Changes.length > 0 && (
-                          <div className="px-4 pb-3 space-y-1">
+                          <div className="px-4 pb-3 space-y-1.5">
                             {alt.Changes.map((change, i) => (
                               <div
                                 key={i}
                                 className={cn(
-                                  "flex items-center gap-2 text-xs px-2.5 py-1.5 rounded-md",
+                                  "flex items-center gap-2 text-xs px-3 py-2 rounded-lg border",
                                   change.Action === "added"
-                                    ? "bg-primary/5 text-primary dark:text-primary"
-                                    : "bg-destructive/5 text-destructive dark:text-destructive"
+                                    ? "bg-primary/5 text-primary border-primary/15 dark:text-primary"
+                                    : "bg-destructive/5 text-destructive border-destructive/15 dark:text-destructive"
                                 )}
                               >
-                                <span className="font-mono text-[10px] font-bold w-3">
+                                <span className={cn(
+                                  "flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold shrink-0",
+                                  change.Action === "added"
+                                    ? "bg-primary/15 text-primary"
+                                    : "bg-destructive/15 text-destructive"
+                                )}>
                                   {change.Action === "added" ? "+" : "−"}
                                 </span>
-                                {change.EmployeeName && <span className="font-medium">{change.EmployeeName}</span>}
-                                {change.EmployeeName && change.ShiftName && <span className="text-muted-foreground">→</span>}
-                                {change.ShiftName && <span>{change.ShiftName}</span>}
+                                <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                                  {change.EmployeeName && <span className="font-semibold truncate">{change.EmployeeName}</span>}
+                                  {change.EmployeeName && change.ShiftName && <span className="text-muted-foreground shrink-0">→</span>}
+                                  {change.ShiftName && <span className="truncate">{change.ShiftName}</span>}
+                                </div>
                                 {change.Start && (
-                                  <span className="text-muted-foreground text-[10px] ml-auto">
-                                    {formatShiftDate(change.Start)} ({formatShiftTime(change.Start, change.End)})
+                                  <span className="text-muted-foreground text-[10px] shrink-0 ml-auto whitespace-nowrap">
+                                    {formatShiftDate(change.Start)} · {formatShiftTime(change.Start, change.End)}
                                   </span>
                                 )}
                               </div>
                             ))}
                             {/* Show Reason from solver if available */}
                             {alt.Changes.some((c) => c.Reason) && (
-                              <div className="mt-1 px-2.5 py-1 text-[10px] text-muted-foreground italic">
+                              <div className="mt-1.5 px-3 py-1.5 text-[11px] text-muted-foreground bg-muted/30 rounded-lg">
                                 {alt.Changes.filter((c) => c.Reason).map((c, i) => (
-                                  <div key={i}>📝 {c.Reason}</div>
+                                  <div key={i} className="flex items-start gap-1.5">
+                                    <span className="shrink-0">📝</span>
+                                    <span className="italic">{c.Reason}</span>
+                                  </div>
                                 ))}
                               </div>
                             )}
@@ -665,25 +694,28 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
                         )}
 
                         {/* Action buttons */}
-                        <div className="border-t px-4 py-2.5 bg-muted/30 flex justify-end gap-2">
+                        <div className="border-t px-4 py-3 bg-muted/20 flex justify-end gap-2">
                           {!isOpenShift && (
                             <Button
                               size="sm"
                               variant="outline"
-                              className="text-xs h-7 gap-1.5"
+                              className="text-xs h-8 gap-1.5 px-3"
                               onClick={() => handleSolveForMe(alt)}
                             >
-                              <Smartphone className="h-3 w-3" />
+                              <Smartphone className="h-3.5 w-3.5" />
                               Los het op voor mij
                             </Button>
                           )}
                           <Button
                             size="sm"
                             variant={isOpenShift ? "outline" : alt.Rank === 1 ? "default" : "outline"}
-                            className="text-xs h-7 gap-1.5"
+                            className={cn(
+                              "text-xs h-8 gap-1.5 px-3",
+                              alt.Rank === 1 && !isOpenShift && "shadow-sm"
+                            )}
                             onClick={() => handleApplyAlternative(alt)}
                           >
-                            <CheckCircle2 className="h-3 w-3" />
+                            <CheckCircle2 className="h-3.5 w-3.5" />
                             {isOpenShift ? "Dienst open laten" : "Doorvoeren"}
                           </Button>
                         </div>
