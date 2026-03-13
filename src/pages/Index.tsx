@@ -328,6 +328,7 @@ export default function Index() {
                 {t("app.downloadJson")}
               </Button>
             )}
+            <PushNotificationManager />
             <LanguageSwitcher />
             <div className="flex items-center gap-1.5 ml-1">
               <Sun className="h-3.5 w-3.5 text-muted-foreground" />
