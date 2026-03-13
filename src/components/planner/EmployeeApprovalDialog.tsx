@@ -95,7 +95,7 @@ function IPhone17({ employee, onApprove, onReject }: {
             {/* App content */}
             <div className="flex-1 flex flex-col overflow-hidden">
               {/* iOS notification banner style */}
-              <div className="mx-3 mt-1 mb-2">
+              <div className="mx-4 mt-2 mb-3">
                 <div className="rounded-2xl bg-card border border-border/60 shadow-lg overflow-hidden" style={{
                   boxShadow: "0 4px 20px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04)",
                 }}>
