@@ -27,11 +27,28 @@ serve(async (req) => {
       );
     }
 
+    // Ensure all Shifts have a Name field (required by solver)
+    const shifts = Array.isArray(payload.Shifts) ? payload.Shifts : [];
+    payload.Shifts = shifts.map((shift: any) => {
+      if (!shift || typeof shift !== "object") return shift;
+      if (!shift.Name) {
+        return { ...shift, Name: `Shift ${shift.Id ?? "unknown"}` };
+      }
+      return shift;
+    });
+
+    // Ensure all Employees have a Name field (required by solver)
     const employees = Array.isArray(payload.Employees) ? payload.Employees : [];
     payload.Employees = employees.map((employee) => {
       if (!employee || typeof employee !== "object") return employee;
 
       const typedEmployee = employee as Record<string, unknown>;
+      
+      // Add Name fallback if missing
+      if (!typedEmployee.Name) {
+        typedEmployee.Name = `Employee ${typedEmployee.PersonId ?? typedEmployee.Id ?? "unknown"}`;
+      }
+
       const historical = Array.isArray(typedEmployee.HistoricalShifts)
         ? typedEmployee.HistoricalShifts
         : [];

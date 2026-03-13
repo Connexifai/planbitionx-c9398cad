@@ -34,7 +34,7 @@ interface RawSchedule {
 }
 
 function classifyShiftType(name: string, startHour: number): string {
-  const lower = name.toLowerCase();
+  const lower = (name || "").toLowerCase();
   if (lower.includes("night") || lower.includes("nacht")) return "nacht";
   if (lower.includes("late") || lower.includes("laat")) return "laat";
   if (lower.includes("early") || lower.includes("vroeg")) return "vroeg";
@@ -58,19 +58,20 @@ export function parseRawScheduleJson(raw: RawSchedule): JsonScheduleData {
   // Deduplicate shifts by Id+Name, aggregate demand
   const shiftMap = new Map<string, { name: string; type: string; startTime: string; endTime: string; totalDemand: number; count: number }>();
   for (const s of raw.Shifts) {
-    const key = `${s.Id}_${s.Name}`;
+    const shiftName = s.Name || `Shift ${s.Id}`;
+    const key = `${s.Id}_${shiftName}`;
     const sStart = parseISO(s.Start);
     const sEnd = parseISO(s.End);
     const startTime = format(sStart, "HH:mm");
     const endTime = format(sEnd, "HH:mm");
-    const type = classifyShiftType(s.Name, sStart.getHours());
+    const type = classifyShiftType(shiftName, sStart.getHours());
 
     if (shiftMap.has(key)) {
       const existing = shiftMap.get(key)!;
       existing.totalDemand += s.Demand;
       existing.count += 1;
     } else {
-      shiftMap.set(key, { name: s.Name, type, startTime, endTime, totalDemand: s.Demand, count: 1 });
+      shiftMap.set(key, { name: shiftName, type, startTime, endTime, totalDemand: s.Demand, count: 1 });
     }
   }
 
