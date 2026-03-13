@@ -200,12 +200,9 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
       ]);
 
       const altResponse = await fetchAlternatives(constraint, "full");
-      const allAlts = altResponse.Alternatives || [];
-      const filledAlts = allAlts.filter((a) => a.ConflictShiftFilled !== false).slice(0, 5);
-      const openAlt = allAlts.find((a) => a.ConflictShiftFilled === false);
-      const validAlts = openAlt ? [...filledAlts, openAlt] : filledAlts;
+      const prepared = prepareAlternatives(altResponse.Alternatives || []);
 
-      if (validAlts.length === 0) {
+      if (prepared.visibleAlts.length === 0) {
         setMessages((prev) => [
           ...prev,
           {
@@ -220,8 +217,8 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
           {
             id: Date.now() + 1,
             role: "assistant",
-            content: `🔎 Met een breder zoekbereik heb ik **${filledAlts.length} extra oplossing${filledAlts.length === 1 ? "" : "en"}** gevonden:`,
-            alternatives: validAlts,
+            content: `🔎 Met een breder zoekbereik heb ik **${formatAlternativeCount(prepared)}** gevonden:`,
+            alternatives: prepared.visibleAlts,
             baseline: altResponse.Baseline,
           },
         ]);
