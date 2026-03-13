@@ -75,17 +75,81 @@ function FillRateIndicator({ filled, target, pct }: { filled: number; target: nu
   );
 }
 
+const dayNames = ["ma", "di", "wo", "do", "vr", "za", "zo"];
+const shiftKindLabels: Record<string, string> = { early: "Vroeg", day: "Dag", late: "Laat", night: "Nacht" };
+
+function ConstraintIcons({ constraints }: { constraints: EmployeeConstraint[] }) {
+  if (constraints.length === 0) return null;
+
+  const hardCount = constraints.filter(c => c.constraint.strength === "hard").length;
+  const softCount = constraints.length - hardCount;
+
+  const lines = constraints.map(c => {
+    const str = c.constraint.strength === "hard" ? "🚫" : "⚠️";
+    if (c.constraint.type === "avoid_day") return `${str} ${dayNames[c.constraint.dayOfWeek ?? 0]}`;
+    if (c.constraint.type === "avoid_shift_kind") return `${str} ${shiftKindLabels[c.constraint.shiftKind ?? ""] || c.constraint.shiftKind}`;
+    if (c.constraint.type === "avoid_date") return `${str} ${c.constraint.date}`;
+    return str;
+  });
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <div className="flex items-center gap-0.5 ml-1">
+          {hardCount > 0 && (
+            <Ban className="h-3 w-3 text-destructive shrink-0" />
+          )}
+          {softCount > 0 && (
+            <ShieldAlert className="h-3 w-3 text-kpi-unfilled shrink-0" />
+          )}
+        </div>
+      </TooltipTrigger>
+      <TooltipContent side="right" className="max-w-[220px]">
+        <p className="text-xs font-semibold mb-1">Constraints:</p>
+        {lines.map((line, i) => (
+          <p key={i} className="text-xs">{line}</p>
+        ))}
+      </TooltipContent>
+    </Tooltip>
+  );
+}
+
 const EmployeeRow = memo(function EmployeeRow({
   emp,
   numDays,
   days,
   t,
+  constraints,
 }: {
   emp: RosterEmployee;
   numDays: number;
   days: DayColumn[];
   t: (key: string) => string;
+  constraints: EmployeeConstraint[];
 }) {
+  // Check which day cells have constraint violations
+  const dayConstraintFlags = useMemo(() => {
+    return days.map((day) => {
+      const dayDate = day.fullDate; // YYYY-MM-DD
+      const jsDate = new Date(dayDate);
+      const dayOfWeek = (jsDate.getDay() + 6) % 7; // Convert JS Sunday=0 to Monday=0
+
+      return constraints.some(c => {
+        if (c.constraint.type === "avoid_day" && c.constraint.dayOfWeek === dayOfWeek) return true;
+        if (c.constraint.type === "avoid_date" && c.constraint.date === dayDate) return true;
+        return false;
+      });
+    });
+  }, [days, constraints]);
+
+  // Check if there's a shift-kind violation for a given cell
+  const shiftKindViolation = (shift: ShiftData) => {
+    if (!shift.type) return false;
+    const typeMap: Record<string, string> = { vroeg: "early", dag: "day", laat: "late", nacht: "night" };
+    const kind = typeMap[shift.type];
+    return constraints.some(c => c.constraint.type === "avoid_shift_kind" && c.constraint.shiftKind === kind);
+  };
+
   return (
     <div
       className="grid border-b border-border/60 transition-colors hover:bg-accent/30"
@@ -94,9 +158,12 @@ const EmployeeRow = memo(function EmployeeRow({
       }}
     >
       <div className="flex flex-col justify-center gap-0.5 px-3 py-1.5 border-r">
-        <p className="text-[13px] font-bold leading-snug truncate text-foreground">
-          {emp.lastName}, <span className="font-medium">{emp.firstName}</span>
-        </p>
+        <div className="flex items-center">
+          <p className="text-[13px] font-bold leading-snug truncate text-foreground">
+            {emp.lastName}, <span className="font-medium">{emp.firstName}</span>
+          </p>
+          <ConstraintIcons constraints={constraints} />
+        </div>
         {emp.tags.length > 0 && (
           <div className="flex flex-wrap gap-1">
             {emp.tags.map(tag => (
@@ -108,14 +175,26 @@ const EmployeeRow = memo(function EmployeeRow({
         )}
       </div>
 
-      {emp.shifts.map((shift, i) => (
-        <div
-          key={i}
-          className={`flex items-center justify-center px-0.5 py-0.5 border-r last:border-r-0 ${days[i]?.weekend ? "bg-weekend" : ""}`}
-        >
-          <ShiftCell shift={shift} t={t} />
-        </div>
-      ))}
+      {emp.shifts.map((shift, i) => {
+        const hasDayViolation = dayConstraintFlags[i] && shift.type !== null;
+        const hasShiftViolation = shiftKindViolation(shift);
+        const hasViolation = hasDayViolation || hasShiftViolation;
+        const violationStrength = constraints.find(c => {
+          if (c.constraint.type === "avoid_day" && dayConstraintFlags[i]) return true;
+          if (c.constraint.type === "avoid_date" && dayConstraintFlags[i]) return true;
+          if (c.constraint.type === "avoid_shift_kind" && hasShiftViolation) return true;
+          return false;
+        })?.constraint.strength;
+
+        return (
+          <div
+            key={i}
+            className={`flex items-center justify-center px-0.5 py-0.5 border-r last:border-r-0 relative ${days[i]?.weekend ? "bg-weekend" : ""} ${hasViolation ? (violationStrength === "hard" ? "ring-2 ring-inset ring-destructive/50 bg-destructive/10" : "ring-2 ring-inset ring-kpi-unfilled/40 bg-kpi-unfilled/10") : ""}`}
+          >
+            <ShiftCell shift={shift} t={t} />
+          </div>
+        );
+      })}
     </div>
   );
 });
