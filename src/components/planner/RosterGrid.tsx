@@ -3,8 +3,8 @@ import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useTranslation } from "react-i18next";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { useRef, memo, useMemo, useEffect } from "react";
-import { Ban, ShieldAlert, CheckCircle2 } from "lucide-react";
+import { useRef, memo, useMemo, useEffect, useCallback } from "react";
+import { Ban, ShieldAlert } from "lucide-react";
 import type { RosterData, ShiftData, DayColumn, RosterEmployee, DemandMap } from "@/lib/parseSolverResponse";
 import type { EmployeeConstraint } from "@/components/planner/AiBriefingChat";
 import type { RosterAnimationState } from "@/hooks/useRosterAnimation";
@@ -94,17 +94,6 @@ const ShiftCell = memo(function ShiftCell({ shift, t, violationStrength, constra
   );
 });
 
-function HoursBar({ percent }: { percent: number }) {
-  const color = percent > 100 ? "bg-destructive" : percent > 90 ? "bg-kpi-assignments" : "bg-primary";
-  return (
-    <div className="flex items-center gap-2">
-      <div className="h-1.5 w-16 rounded-full bg-muted overflow-hidden">
-        <div className={`h-full rounded-full ${color} transition-all`} style={{ width: `${Math.min(percent, 100)}%` }} />
-      </div>
-    </div>
-  );
-}
-
 function FillRateIndicator({ filled, target, pct }: { filled: number; target: number; pct: number }) {
   const color = pct >= 95 ? "text-kpi-assignments" : pct >= 85 ? "text-kpi-unfilled" : "text-destructive";
   const bgColor = pct >= 95 ? "bg-kpi-assignments/20" : pct >= 85 ? "bg-kpi-unfilled/20" : "bg-destructive/20";
@@ -122,26 +111,26 @@ const EmployeeRow = memo(function EmployeeRow({
   days,
   t,
   constraints,
-  highlightDayDate,
-  highlightAction,
-  isAnimatingRow,
+  isPickupRow,
+  pickupDayDate,
+  isLandingRow,
+  landingDayDate,
 }: {
   emp: RosterEmployee;
   numDays: number;
   days: DayColumn[];
   t: (key: string) => string;
   constraints: EmployeeConstraint[];
-  highlightDayDate?: string;
-  highlightAction?: "added" | "removed";
-  isAnimatingRow?: boolean;
+  isPickupRow?: boolean;
+  pickupDayDate?: string;
+  isLandingRow?: boolean;
+  landingDayDate?: string;
 }) {
-  // Check which day cells have constraint violations
   const dayConstraintFlags = useMemo(() => {
     return days.map((day) => {
-      const dayDate = day.fullDate; // YYYY-MM-DD
+      const dayDate = day.fullDate;
       const jsDate = new Date(dayDate);
-      const dayOfWeek = (jsDate.getDay() + 6) % 7; // Convert JS Sunday=0 to Monday=0
-
+      const dayOfWeek = (jsDate.getDay() + 6) % 7;
       return constraints.some(c => {
         if (c.constraint.type === "avoid_day" && c.constraint.dayOfWeek === dayOfWeek) return true;
         if (c.constraint.type === "avoid_date" && c.constraint.date === dayDate) return true;
@@ -150,19 +139,12 @@ const EmployeeRow = memo(function EmployeeRow({
     });
   }, [days, constraints]);
 
-  // Check if there's a shift-kind violation for a given cell
-  const shiftKindViolation = (shift: ShiftData) => {
-    if (!shift.type) return false;
-    const typeMap: Record<string, string> = { vroeg: "early", dag: "day", laat: "late", nacht: "night" };
-    const kind = typeMap[shift.type];
-    return constraints.some(c => c.constraint.type === "avoid_shift_kind" && c.constraint.shiftKind === kind);
-  };
-
   return (
     <div
       className={cn(
         "grid border-b border-border/60 transition-colors hover:bg-accent/30",
-        isAnimatingRow && "bg-primary/5"
+        isPickupRow && "bg-destructive/5",
+        isLandingRow && "bg-primary/5",
       )}
       style={{
         gridTemplateColumns: `230px repeat(${numDays}, minmax(85px, 1fr))`,
@@ -199,23 +181,24 @@ const EmployeeRow = memo(function EmployeeRow({
           return false;
         });
         const hasConstraintOnCell = cellConstraints.length > 0;
-        // Pick the strongest constraint for the icon
         const cellStrength = cellConstraints.some(c => c.constraint.strength === "hard") ? "hard" as const
           : cellConstraints.length > 0 ? "soft" as const : undefined;
         const hasShiftAssigned = shift.type !== null;
         const showViolationRing = hasConstraintOnCell && hasShiftAssigned;
 
-        const isHighlighted = highlightDayDate && dayDate === highlightDayDate;
+        const isBeingPickedUp = isPickupRow && pickupDayDate === dayDate;
+        const isLandingTarget = isLandingRow && landingDayDate === dayDate;
 
         return (
           <div
             key={i}
+            data-cell-id={`${emp.id}-${dayDate}`}
             className={cn(
               "flex items-center justify-center px-0.5 py-0.5 border-r last:border-r-0 relative transition-all duration-500",
               days[i]?.weekend && "bg-weekend",
               showViolationRing && (cellStrength === "hard" ? "ring-2 ring-inset ring-destructive/50 bg-destructive/10" : "ring-2 ring-inset ring-kpi-unfilled/40 bg-kpi-unfilled/10"),
-              isHighlighted && highlightAction === "added" && "roster-cell-highlight-added",
-              isHighlighted && highlightAction === "removed" && "roster-cell-highlight-removed",
+              isBeingPickedUp && "roster-cell-pickup",
+              isLandingTarget && "roster-cell-landing",
             )}
           >
             {hasConstraintOnCell && (
@@ -250,9 +233,14 @@ interface RosterGridProps {
   data?: RosterData;
   employeeConstraints?: EmployeeConstraint[];
   animationState?: RosterAnimationState;
+  onRegisterGridFns?: (fns: {
+    scrollToEmployee: (empId: string) => Promise<void>;
+    getCellRect: (empId: string, dayDate: string) => DOMRect | null;
+    getCellHtml: (empId: string, dayDate: string) => string;
+  }) => void;
 }
 
-export function RosterGrid({ data, employeeConstraints = [], animationState }: RosterGridProps) {
+export function RosterGrid({ data, employeeConstraints = [], animationState, onRegisterGridFns }: RosterGridProps) {
   const { t } = useTranslation();
   const parentRef = useRef<HTMLDivElement>(null);
 
@@ -268,21 +256,42 @@ export function RosterGrid({ data, employeeConstraints = [], animationState }: R
     measureElement: (el) => el.getBoundingClientRect().height,
   });
 
-  // Auto-scroll to the current animation step's employee row
-  const prevAnimStepRef = useRef<string | null>(null);
-  const currentAnimStep = animationState?.currentStep;
-  
-  useEffect(() => {
-    if (!currentAnimStep || !parentRef.current) return;
-    const stepKey = `${currentAnimStep.employeeId}-${currentAnimStep.dayDate}-${currentAnimStep.stepIndex}`;
-    if (prevAnimStepRef.current === stepKey) return;
-    prevAnimStepRef.current = stepKey;
+  // Register helper functions for the animation system
+  const scrollToEmployee = useCallback(
+    (empId: string): Promise<void> => {
+      return new Promise((resolve) => {
+        const empIdx = employees.findIndex((e) => String(e.id) === empId);
+        if (empIdx >= 0) {
+          rowVirtualizer.scrollToIndex(empIdx, { align: "center", behavior: "smooth" });
+        }
+        // Wait for scroll + virtualization to settle
+        setTimeout(resolve, 350);
+      });
+    },
+    [employees, rowVirtualizer]
+  );
 
-    const empIdx = employees.findIndex((e) => String(e.id) === currentAnimStep.employeeId);
-    if (empIdx >= 0) {
-      rowVirtualizer.scrollToIndex(empIdx, { align: "center", behavior: "smooth" });
-    }
-  }, [currentAnimStep, employees, rowVirtualizer]);
+  const getCellRect = useCallback(
+    (empId: string, dayDate: string): DOMRect | null => {
+      if (!parentRef.current) return null;
+      const el = parentRef.current.querySelector(`[data-cell-id="${empId}-${dayDate}"]`);
+      return el ? el.getBoundingClientRect() : null;
+    },
+    []
+  );
+
+  const getCellHtml = useCallback(
+    (empId: string, dayDate: string): string => {
+      if (!parentRef.current) return "";
+      const el = parentRef.current.querySelector(`[data-cell-id="${empId}-${dayDate}"]`);
+      return el ? el.innerHTML : "";
+    },
+    []
+  );
+
+  useEffect(() => {
+    onRegisterGridFns?.({ scrollToEmployee, getCellRect, getCellHtml });
+  }, [onRegisterGridFns, scrollToEmployee, getCellRect, getCellHtml]);
 
   if (!data) {
     return (
@@ -307,50 +316,17 @@ export function RosterGrid({ data, employeeConstraints = [], animationState }: R
     return { filled, target, pct: target > 0 ? Math.round((filled / target) * 100) : 0 };
   });
 
+  // Determine which cells are being animated
+  const currentMove = animationState?.currentMove;
+  const phase = animationState?.phase;
+  const isPickupPhase = phase === "pickup" || phase === "flying";
+  const isLandingPhase = phase === "landing";
+
   return (
-    <div className="relative">
-      {/* Animation progress banner */}
-      {animationState?.active && (
-        <div className="sticky top-0 z-10 flex items-center gap-3 px-4 py-2.5 bg-primary/10 border-b border-primary/30 backdrop-blur-sm animate-fade-in">
-          {animationState.done ? (
-            <>
-              <div className="flex items-center justify-center w-6 h-6 rounded-full bg-primary text-primary-foreground">
-                <CheckCircle2 className="h-3.5 w-3.5" />
-              </div>
-              <span className="text-sm font-semibold text-primary">
-                Alle {animationState.completedSteps.length} wijzigingen doorgevoerd ✓
-              </span>
-            </>
-          ) : animationState.currentStep ? (
-            <>
-              <div className="flex items-center justify-center w-6 h-6 rounded-full bg-primary/20 text-primary animate-pulse">
-                <span className="text-xs font-bold">{animationState.currentStep.stepIndex + 1}</span>
-              </div>
-              <span className="text-sm font-medium text-foreground">
-                <span className={animationState.currentStep.action === "added" ? "text-primary" : "text-destructive"}>
-                  {animationState.currentStep.action === "added" ? "+" : "−"}
-                </span>{" "}
-                <span className="font-semibold">{animationState.currentStep.employeeName}</span>
-                {" → "}
-                <span>{animationState.currentStep.shiftName}</span>
-              </span>
-              <span className="ml-auto text-xs text-muted-foreground">
-                Stap {animationState.currentStep.stepIndex + 1} van {animationState.currentStep.totalSteps}
-              </span>
-              <div className="w-20 h-1.5 rounded-full bg-muted overflow-hidden">
-                <div
-                  className="h-full rounded-full bg-primary transition-all duration-500"
-                  style={{ width: `${((animationState.currentStep.stepIndex + 1) / animationState.currentStep.totalSteps) * 100}%` }}
-                />
-              </div>
-            </>
-          ) : null}
-        </div>
-      )}
-      <div
-        ref={parentRef}
-        className="roster-scroll w-full max-w-full rounded-xl border border-border/50 bg-card shadow-sm overflow-x-auto overflow-y-auto max-h-[calc(100vh-280px)]"
-      >
+    <div
+      ref={parentRef}
+      className="roster-scroll w-full max-w-full rounded-xl border border-border/50 bg-card shadow-sm overflow-x-auto overflow-y-auto max-h-[calc(100vh-280px)]"
+    >
       <div style={{ minWidth: `${220 + numDays * 90}px` }}>
         {/* Header */}
         <div
@@ -378,6 +354,8 @@ export function RosterGrid({ data, employeeConstraints = [], animationState }: R
         <div style={{ height: `${rowVirtualizer.getTotalSize()}px`, position: "relative" }}>
           {rowVirtualizer.getVirtualItems().map((virtualRow) => {
             const emp = employees[virtualRow.index];
+            const empIdStr = String(emp.id);
+
             return (
               <div
                 key={emp.id}
@@ -397,23 +375,15 @@ export function RosterGrid({ data, employeeConstraints = [], animationState }: R
                   days={days}
                   t={t}
                   constraints={employeeConstraints.filter(c => c.personId === emp.id)}
-                  highlightDayDate={
-                    animationState?.currentStep?.employeeId === String(emp.id)
-                      ? animationState.currentStep.dayDate
-                      : undefined
-                  }
-                  highlightAction={
-                    animationState?.currentStep?.employeeId === String(emp.id)
-                      ? animationState.currentStep.action
-                      : undefined
-                  }
-                  isAnimatingRow={animationState?.currentStep?.employeeId === String(emp.id)}
+                  isPickupRow={isPickupPhase && currentMove?.source.employeeId === empIdStr}
+                  pickupDayDate={isPickupPhase && currentMove?.source.employeeId === empIdStr ? currentMove.source.dayDate : undefined}
+                  isLandingRow={isLandingPhase && currentMove?.target.employeeId === empIdStr}
+                  landingDayDate={isLandingPhase && currentMove?.target.employeeId === empIdStr ? currentMove.target.dayDate : undefined}
                 />
               </div>
             );
           })}
         </div>
-      </div>
       </div>
     </div>
   );

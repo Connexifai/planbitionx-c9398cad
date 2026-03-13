@@ -195,23 +195,27 @@ export default function Index() {
   const [atw, setAtw] = useState<AtwConstraints>(defaultAtw);
   const [soft, setSoft] = useState<SoftConstraints>(defaultSoft);
   const [solver, setSolver] = useState<SolverSettings>(defaultSolver);
-  const { animationState, startAnimation } = useRosterAnimation();
+  const { animationState, startAnimation, registerGridFns } = useRosterAnimation();
 
   const handleApplyAlternative = useCallback((alt: any) => {
     const normalizedAlt = normalizeAlternativeShiftIds(alt);
     const changes = normalizedAlt.Changes || [];
 
-    // Apply roster immediately so cells show new state during animation
-    const newRoster = parseSolverResponse(requestData, { Assignments: normalizedAlt.Assignments });
-    setRosterData(newRoster);
-    setSolverAssignments(normalizedAlt.Assignments);
-
-    // Start step-by-step animation, show toast when done
-    startAnimation(changes, () => {
-      toast.success(`Alternatief #${alt.Rank} doorgevoerd`, {
-        description: `${alt.ChangesFromBaseline} wijziging${alt.ChangesFromBaseline !== 1 ? "en" : ""} toegepast`,
-      });
-    });
+    // Start animation: apply roster data just before final "done" so cells are visible during flight
+    startAnimation(
+      changes,
+      () => {
+        // Called right before final step — apply new roster
+        const newRoster = parseSolverResponse(requestData, { Assignments: normalizedAlt.Assignments });
+        setRosterData(newRoster);
+        setSolverAssignments(normalizedAlt.Assignments);
+      },
+      () => {
+        toast.success(`Alternatief #${alt.Rank} doorgevoerd`, {
+          description: `${alt.ChangesFromBaseline} wijziging${alt.ChangesFromBaseline !== 1 ? "en" : ""} toegepast`,
+        });
+      }
+    );
   }, [requestData, startAnimation]);
 
   const handleJsonLoaded = (rawJson?: string) => {
