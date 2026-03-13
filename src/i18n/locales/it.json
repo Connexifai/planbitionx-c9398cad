@@ -134,7 +134,7 @@
   "robot": {
     "uploadJson": "Carica un file JSON per iniziare",
     "clickMe": "Ehi! 👋 Clicca su di me per condividere le tue preferenze di turno nella chat!",
-    "clickMePost": "Ehi! 👋 Clicca su di me, ti aiuto con il piano turni!",
+    "clickMePost": "Ehi! 👋 Clicca su di me, ti aiuto con le perturbazioni o le richieste di modifica del piano turni!",
     "quotes": [
       "La nostra IA fa pianificazioni così strette che persino il formaggio svizzero ha buchi di stress.",
       "La nostra IA pianifica così precisamente… che un righello ne sarebbe geloso.",
