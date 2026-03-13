@@ -8,6 +8,7 @@ import { RosterTabs } from "@/components/planner/RosterTabs";
 import { PostSolveChat } from "@/components/planner/PostSolveChat";
 import { AiBriefingChat } from "@/components/planner/AiBriefingChat";
 import { JsonDataViewer } from "@/components/planner/JsonDataViewer";
+import { RosterChangeOverlay } from "@/components/planner/RosterChangeOverlay";
 import type { JsonScheduleData } from "@/components/planner/JsonDataViewer";
 import { parseRawScheduleJson } from "@/lib/parseScheduleJson";
 import { parseSolverResponse } from "@/lib/parseSolverResponse";
@@ -195,23 +196,27 @@ export default function Index() {
   const [atw, setAtw] = useState<AtwConstraints>(defaultAtw);
   const [soft, setSoft] = useState<SoftConstraints>(defaultSoft);
   const [solver, setSolver] = useState<SolverSettings>(defaultSolver);
-  const { animationState, startAnimation } = useRosterAnimation();
+  const { animationState, startAnimation, registerGridFns } = useRosterAnimation();
 
   const handleApplyAlternative = useCallback((alt: any) => {
     const normalizedAlt = normalizeAlternativeShiftIds(alt);
     const changes = normalizedAlt.Changes || [];
 
-    // Apply roster immediately so cells show new state during animation
-    const newRoster = parseSolverResponse(requestData, { Assignments: normalizedAlt.Assignments });
-    setRosterData(newRoster);
-    setSolverAssignments(normalizedAlt.Assignments);
-
-    // Start step-by-step animation, show toast when done
-    startAnimation(changes, () => {
-      toast.success(`Alternatief #${alt.Rank} doorgevoerd`, {
-        description: `${alt.ChangesFromBaseline} wijziging${alt.ChangesFromBaseline !== 1 ? "en" : ""} toegepast`,
-      });
-    });
+    // Start animation: apply roster data just before final "done" so cells are visible during flight
+    startAnimation(
+      changes,
+      () => {
+        // Called right before final step — apply new roster
+        const newRoster = parseSolverResponse(requestData, { Assignments: normalizedAlt.Assignments });
+        setRosterData(newRoster);
+        setSolverAssignments(normalizedAlt.Assignments);
+      },
+      () => {
+        toast.success(`Alternatief #${alt.Rank} doorgevoerd`, {
+          description: `${alt.ChangesFromBaseline} wijziging${alt.ChangesFromBaseline !== 1 ? "en" : ""} toegepast`,
+        });
+      }
+    );
   }, [requestData, startAnimation]);
 
   const handleJsonLoaded = (rawJson?: string) => {
@@ -322,6 +327,7 @@ export default function Index() {
   return (
     <div className="h-screen flex w-full">
       {solving && <SolvingOverlay />}
+      <RosterChangeOverlay state={animationState} />
       {/* Smooth entrance overlay after login */}
       {entranceVisible && (
         <div className="fixed inset-0 z-[200] bg-background pointer-events-none animate-[fade-out_1.2s_ease-out_forwards]" />
@@ -367,7 +373,7 @@ export default function Index() {
               <main className="flex-1 overflow-y-auto overflow-x-hidden p-5 space-y-5">
                 <KpiCards solved data={rosterData ?? undefined} solveTime={solveDurationMs} />
                 <RosterTabs value={activeTab} onChange={setActiveTab} />
-                {activeTab === "roster" && <RosterGrid data={rosterData ?? undefined} employeeConstraints={employeeConstraints} animationState={animationState} />}
+                {activeTab === "roster" && <RosterGrid data={rosterData ?? undefined} employeeConstraints={employeeConstraints} animationState={animationState} onRegisterGridFns={registerGridFns} />}
                 {activeTab === "dienst" && <ServiceRosterGrid data={rosterData ?? undefined} />}
                 {activeTab === "stats" && <StatsDashboard data={rosterData ?? undefined} />}
                 {activeTab === "uitleg" && <ExplanationView data={rosterData ?? undefined} solverExplanations={solverExplanations} solverStatistics={solverStatistics} />}
