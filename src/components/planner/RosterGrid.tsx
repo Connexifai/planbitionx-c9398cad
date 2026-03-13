@@ -175,16 +175,22 @@ const EmployeeRow = memo(function EmployeeRow({
       </div>
 
       {emp.shifts.map((shift, i) => {
-        const hasDayConstraint = dayConstraintFlags[i];
-        const hasShiftViolation = shiftKindViolation(shift);
-        const hasConstraintOnCell = hasDayConstraint || hasShiftViolation;
-        const cellConstraint = constraints.find(c => {
-          if (c.constraint.type === "avoid_day" && hasDayConstraint) return true;
-          if (c.constraint.type === "avoid_date" && hasDayConstraint) return true;
-          if (c.constraint.type === "avoid_shift_kind" && hasShiftViolation) return true;
+        const dayDate = days[i]?.fullDate;
+        const jsDate = dayDate ? new Date(dayDate) : null;
+        const dayOfWeek = jsDate ? (jsDate.getDay() + 6) % 7 : -1;
+        const typeMap: Record<string, string> = { vroeg: "early", dag: "day", laat: "late", nacht: "night" };
+        const shiftKind = shift.type ? typeMap[shift.type] : null;
+
+        const cellConstraints = constraints.filter(c => {
+          if (c.constraint.type === "avoid_day" && c.constraint.dayOfWeek === dayOfWeek) return true;
+          if (c.constraint.type === "avoid_date" && c.constraint.date === dayDate) return true;
+          if (c.constraint.type === "avoid_shift_kind" && shiftKind && c.constraint.shiftKind === shiftKind) return true;
           return false;
         });
-        const cellStrength = cellConstraint?.constraint.strength as "hard" | "soft" | undefined;
+        const hasConstraintOnCell = cellConstraints.length > 0;
+        // Pick the strongest constraint for the icon
+        const cellStrength = cellConstraints.some(c => c.constraint.strength === "hard") ? "hard" as const
+          : cellConstraints.length > 0 ? "soft" as const : undefined;
         const hasShiftAssigned = shift.type !== null;
         const showViolationRing = hasConstraintOnCell && hasShiftAssigned;
 
