@@ -564,12 +564,21 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
               {/* Alternatives cards */}
               {msg.alternatives && msg.alternatives.length > 0 && (
                 <div className="mt-4 space-y-4 ml-11">
-                  {msg.baseline && (
-                    <div className="text-xs text-muted-foreground px-3 py-2 bg-muted/50 rounded-lg inline-flex items-center gap-2 border border-border/50">
-                      <span className="text-sm">📊</span>
-                      <span>Huidig rooster: <strong>{msg.baseline.TotalAssignments}</strong> toewijzingen · <strong>{msg.baseline.FillRatePercentage.toFixed(1)}%</strong> bezetting</span>
-                    </div>
-                  )}
+                  {/* Section header */}
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                      🔄 Alternatieven
+                      <Badge variant="secondary" className="text-[10px] font-normal">
+                        {msg.alternatives.length} optie{msg.alternatives.length !== 1 && "s"}
+                      </Badge>
+                    </h4>
+                    {msg.baseline && (
+                      <div className="text-[11px] text-muted-foreground flex items-center gap-1.5">
+                        <span>📊</span>
+                        <span>{msg.baseline.TotalAssignments} toewijzingen · {msg.baseline.FillRatePercentage.toFixed(1)}% bezetting</span>
+                      </div>
+                    )}
+                  </div>
                   {msg.alternatives.map((alt) => {
                     const classified = classifyAlternative(alt, msg.constraintSummary);
                     const TypeIcon = classified.icon;
