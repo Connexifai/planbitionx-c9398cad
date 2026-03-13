@@ -263,6 +263,7 @@ export default function Index() {
       setRosterData(roster);
       setSolverExplanations((solverResponse as any).Explanations || []);
       setSolverStatistics((solverResponse as any).Statistics || null);
+      setSolveDurationMs(Date.now() - solveStartTime);
       setSolved(true);
       setSidebarCollapsed(true);
     } catch (e) {
