@@ -15,7 +15,7 @@ export interface AlternativeConstraint {
   employeeId: string;
   employeeName: string;
   type: "avoid_day" | "avoid_date" | "avoid_shift_kind";
-  dayOfWeek?: number; // 0=zo, 1=ma, ..., 6=za (JS getDay convention)
+  dayOfWeek?: number; // 0=ma, 1=di, 2=wo, 3=do, 4=vr, 5=za, 6=zo (ISO convention)
   date?: string; // YYYY-MM-DD
   shiftKind?: string; // "early","day","late","night"
   strength: "hard" | "soft";
