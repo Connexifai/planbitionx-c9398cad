@@ -103,21 +103,19 @@ function assignmentMatchesConstraint(
 // ─── Payload builder ───────────────────────────────────────────
 
 /**
- * Creates a unique shift ID by combining the base ID with the start date.
- * Format: "421_2026-04-06" — clean enough for the solver to handle.
+ * Creates a composite shift ID: "ShiftId|Start" (e.g. "22264|2026-03-30T22:00:00").
+ * This is the format expected by the solver alternatives endpoint (v6.89+).
  */
 function makeUniqueShiftId(baseId: string, start: string): string {
-  const dateStr = start?.split("T")[0] || "";
-  return dateStr ? `${baseId}_${dateStr}` : baseId;
+  return start ? `${baseId}|${start}` : baseId;
 }
 
 /**
- * Strips the date suffix to recover the original shift ID.
+ * Strips the pipe+timestamp suffix to recover the original shift ID.
  */
 function toOriginalShiftId(uniqueId: string): string {
-  // Match pattern: "digits_YYYY-MM-DD"
-  const match = uniqueId.match(/^(.+)_\d{4}-\d{2}-\d{2}$/);
-  return match ? match[1] : uniqueId;
+  const pipeIdx = uniqueId.indexOf("|");
+  return pipeIdx > 0 ? uniqueId.substring(0, pipeIdx) : uniqueId;
 }
 
 export function buildAlternativesPayload(
