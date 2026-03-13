@@ -15,6 +15,7 @@ import type { RosterData, SolverResponse } from "@/lib/parseSolverResponse";
 import { defaultAtw, defaultSoft, defaultSolver, buildSettingsPayload } from "@/lib/solverSettings";
 import type { AtwConstraints, SoftConstraints, SolverSettings } from "@/lib/solverSettings";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { PushNotificationManager } from "@/components/PushNotificationManager";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
