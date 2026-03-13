@@ -175,22 +175,50 @@ const EmployeeRow = memo(function EmployeeRow({
       </div>
 
       {emp.shifts.map((shift, i) => {
-        const hasDayViolation = dayConstraintFlags[i] && shift.type !== null;
+        const hasDayConstraint = dayConstraintFlags[i];
         const hasShiftViolation = shiftKindViolation(shift);
-        const hasViolation = hasDayViolation || hasShiftViolation;
-        const violationStrength = constraints.find(c => {
-          if (c.constraint.type === "avoid_day" && dayConstraintFlags[i]) return true;
-          if (c.constraint.type === "avoid_date" && dayConstraintFlags[i]) return true;
+        const hasConstraintOnCell = hasDayConstraint || hasShiftViolation;
+        const cellConstraint = constraints.find(c => {
+          if (c.constraint.type === "avoid_day" && hasDayConstraint) return true;
+          if (c.constraint.type === "avoid_date" && hasDayConstraint) return true;
           if (c.constraint.type === "avoid_shift_kind" && hasShiftViolation) return true;
           return false;
-        })?.constraint.strength as "hard" | "soft" | undefined;
+        });
+        const cellStrength = cellConstraint?.constraint.strength as "hard" | "soft" | undefined;
+        const hasShiftAssigned = shift.type !== null;
+        const showViolationRing = hasConstraintOnCell && hasShiftAssigned;
 
         return (
           <div
             key={i}
-            className={`flex items-center justify-center px-0.5 py-0.5 border-r last:border-r-0 relative ${days[i]?.weekend ? "bg-weekend" : ""} ${hasViolation ? (violationStrength === "hard" ? "ring-2 ring-inset ring-destructive/50 bg-destructive/10" : "ring-2 ring-inset ring-kpi-unfilled/40 bg-kpi-unfilled/10") : ""}`}
+            className={`flex items-center justify-center px-0.5 py-0.5 border-r last:border-r-0 relative ${days[i]?.weekend ? "bg-weekend" : ""} ${showViolationRing ? (cellStrength === "hard" ? "ring-2 ring-inset ring-destructive/50 bg-destructive/10" : "ring-2 ring-inset ring-kpi-unfilled/40 bg-kpi-unfilled/10") : ""}`}
           >
-            <ShiftCell shift={shift} t={t} violationStrength={violationStrength} constraints={constraints} />
+            {hasConstraintOnCell && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="absolute top-0.5 right-0.5 z-10">
+                    <ViolationIcon strength={cellStrength || "soft"} />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent side="top" className="max-w-[220px]">
+                  <p className="text-xs font-semibold mb-1">Constraints:</p>
+                  {constraints.filter(c => {
+                    if (c.constraint.type === "avoid_day" && hasDayConstraint) return true;
+                    if (c.constraint.type === "avoid_date" && hasDayConstraint) return true;
+                    if (c.constraint.type === "avoid_shift_kind" && hasShiftViolation) return true;
+                    return false;
+                  }).map((c, ci) => {
+                    const str = c.constraint.strength === "hard" ? "🚫" : "⚠️";
+                    let label = str;
+                    if (c.constraint.type === "avoid_day") label = `${str} ${dayNames[c.constraint.dayOfWeek ?? 0]}`;
+                    if (c.constraint.type === "avoid_shift_kind") label = `${str} ${shiftKindLabels[c.constraint.shiftKind ?? ""] || c.constraint.shiftKind}`;
+                    if (c.constraint.type === "avoid_date") label = `${str} ${c.constraint.date}`;
+                    return <p key={ci} className="text-xs">{label}</p>;
+                  })}
+                </TooltipContent>
+              </Tooltip>
+            )}
+            <ShiftCell shift={shift} t={t} violationStrength={undefined} constraints={[]} />
           </div>
         );
       })}
