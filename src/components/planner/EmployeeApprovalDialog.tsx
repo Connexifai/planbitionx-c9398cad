@@ -50,12 +50,14 @@ function IPhone17({ employee, onApprove, onReject }: {
       <div
         className="absolute inset-0 rounded-[3.6rem]"
         style={{
-          background: "linear-gradient(145deg, hsl(220 10% 25%), hsl(220 8% 35%), hsl(220 10% 28%))",
+          background: "linear-gradient(145deg, hsl(220 8% 45%), hsl(220 6% 55%), hsl(220 8% 48%))",
           boxShadow: `
-            0 0 0 1px hsl(220 10% 20%),
-            0 25px 60px -10px rgba(0,0,0,0.5),
-            0 10px 30px -5px rgba(0,0,0,0.3),
-            inset 0 1px 0 hsl(220 10% 40%)
+            0 0 0 1.5px hsl(220 10% 60%),
+            0 0 0 3px hsl(220 8% 40%),
+            0 30px 80px -10px rgba(0,0,0,0.6),
+            0 15px 40px -5px rgba(0,0,0,0.4),
+            inset 0 1px 0 hsl(220 10% 65%),
+            inset 0 -1px 0 hsl(220 10% 35%)
           `,
         }}
       >
