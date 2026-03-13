@@ -287,6 +287,8 @@ export default function Index() {
       setRosterData(roster);
       setSolverExplanations((solverResponse as any).Explanations || []);
       setSolverStatistics((solverResponse as any).Statistics || null);
+      setSolverAssignments((solverResponse as any).Assignments || []);
+      setSolverStatistics((solverResponse as any).Statistics || null);
       setSolveDurationMs(Date.now() - startTime);
       setSolved(true);
       setSidebarCollapsed(true);
