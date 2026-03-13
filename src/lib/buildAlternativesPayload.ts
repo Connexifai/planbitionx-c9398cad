@@ -239,9 +239,9 @@ export function getRemovedAssignments(
   shifts: any[]
 ): AlternativeChange[] {
   const empId = String(constraint.employeeId);
-  const empAssignments = (solverAssignments || []).filter(
-    (a) => String(a.PersonId) === empId
-  );
+  const empAssignments = (solverAssignments || []).filter((assignment) => {
+    return getAssignmentEmployeeIdCandidates(assignment as SolverAssignment & Record<string, unknown>).includes(empId);
+  });
 
   // Build shift name lookup
   const shiftNameByIdStart = new Map<string, string>();
