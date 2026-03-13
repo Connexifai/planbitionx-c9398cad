@@ -64,6 +64,24 @@ export type SearchScope = "narrow" | "full" | "auto";
 
 // ─── Helpers ───────────────────────────────────────────────────
 
+function getEmployeeIdCandidates(employee: any): string[] {
+  return [employee?.PersonId, employee?.Id, employee?.ContractId]
+    .filter((value) => value !== undefined && value !== null && String(value).trim().length > 0)
+    .map((value) => String(value));
+}
+
+function getAssignmentEmployeeIdCandidates(assignment: SolverAssignment | Record<string, unknown>): string[] {
+  const anyAssignment = assignment as Record<string, unknown>;
+  return [
+    anyAssignment.PersonId,
+    anyAssignment.EmployeeId,
+    anyAssignment.ContractId,
+    anyAssignment.Id,
+  ]
+    .filter((value) => value !== undefined && value !== null && String(value).trim().length > 0)
+    .map((value) => String(value));
+}
+
 function classifyShiftKind(shiftName: string, shiftStart: string): "early" | "day" | "late" | "night" {
   const lower = (shiftName || "").toLowerCase();
   const hour = parseISO(shiftStart).getHours();
