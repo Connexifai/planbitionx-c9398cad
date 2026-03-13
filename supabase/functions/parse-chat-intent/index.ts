@@ -32,6 +32,12 @@ Constraint types:
 - "avoid_date": employee wants a specific date off. Use date as "YYYY-MM-DD".
 - "avoid_shift_kind": employee wants to avoid a shift type. Use shiftKind: "early", "day", "late", or "night".
 
+IMPORTANT - Ambiguity check:
+- Before returning a result, check if the employee name mentioned by the user matches MULTIPLE employees in the list (e.g. multiple people named "Sarah" or "Jan").
+- Compare using first names, last names, or partial matches.
+- If there are multiple matches, set understood=false, set ambiguous=true, and return the list of matching candidates in the "candidates" array with their full names and IDs.
+- Only return understood=true when exactly ONE employee matches.
+
 Use the parse_scheduling_intent function to return the structured result.`;
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
@@ -61,15 +67,27 @@ Use the parse_scheduling_intent function to return the structured result.`;
               parameters: {
                 type: "object",
                 properties: {
-                  understood: { type: "boolean", description: "Whether the request was understood" },
-                  employeeId: { type: "string", description: "PersonId of the employee" },
+                  understood: { type: "boolean", description: "Whether the request was understood AND unambiguous" },
+                  ambiguous: { type: "boolean", description: "True if multiple employees match the given name" },
+                  candidates: { 
+                    type: "array", 
+                    description: "List of matching employees when ambiguous",
+                    items: {
+                      type: "object",
+                      properties: {
+                        id: { type: "string", description: "PersonId" },
+                        name: { type: "string", description: "Full name" },
+                      },
+                    },
+                  },
+                  employeeId: { type: "string", description: "PersonId of the employee (only when unambiguous)" },
                   employeeName: { type: "string", description: "Full name of the employee" },
                   constraintType: { type: "string", enum: ["avoid_day", "avoid_date", "avoid_shift_kind"] },
                   dayOfWeek: { type: "number", description: "0=ma,1=di,2=wo,3=do,4=vr,5=za,6=zo" },
                   date: { type: "string", description: "YYYY-MM-DD format" },
                   shiftKind: { type: "string", enum: ["early", "day", "late", "night"] },
                   summary: { type: "string", description: "Brief Dutch description of what was understood" },
-                  reason: { type: "string", description: "If not understood, explanation in Dutch" },
+                  reason: { type: "string", description: "If not understood or ambiguous, explanation in Dutch" },
                 },
                 required: ["understood"],
                 additionalProperties: false,

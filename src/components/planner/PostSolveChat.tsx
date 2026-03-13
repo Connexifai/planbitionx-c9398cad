@@ -11,6 +11,11 @@ import { format, parseISO } from "date-fns";
 import { nl } from "date-fns/locale";
 import { EmployeeApprovalDialog } from "./EmployeeApprovalDialog";
 
+interface CandidateEmployee {
+  id: string;
+  name: string;
+}
+
 interface Message {
   id: number;
   role: "user" | "assistant";
@@ -18,10 +23,12 @@ interface Message {
   alternatives?: Alternative[];
   baseline?: AlternativesResponse["Baseline"];
   constraintSummary?: string;
-  /** Show a "zoek verder" button on this message */
   showSearchFull?: boolean;
-  /** Store the constraint+intent so we can re-search with "full" */
   pendingConstraint?: AlternativeConstraint;
+  /** Disambiguation candidates */
+  candidates?: CandidateEmployee[];
+  /** Original user message to retry after disambiguation */
+  originalMessage?: string;
 }
 
 export interface PostSolveChatProps {
@@ -273,14 +280,28 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
       const intent = await parseRes.json();
 
       if (!intent.understood) {
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: Date.now() + 1,
-            role: "assistant",
-            content: `⚠️ ${intent.reason || "Ik kon je verzoek niet begrijpen. Kun je het anders formuleren?"}`,
-          },
-        ]);
+        if (intent.ambiguous && intent.candidates?.length > 0) {
+          // Ambiguous — ask user to pick
+          setMessages((prev) => [
+            ...prev,
+            {
+              id: Date.now() + 1,
+              role: "assistant",
+              content: `🤔 Er zijn meerdere medewerkers met die naam. Wie bedoel je?`,
+              candidates: intent.candidates,
+              originalMessage: msg,
+            },
+          ]);
+        } else {
+          setMessages((prev) => [
+            ...prev,
+            {
+              id: Date.now() + 1,
+              role: "assistant",
+              content: `⚠️ ${intent.reason || "Ik kon je verzoek niet begrijpen. Kun je het anders formuleren?"}`,
+            },
+          ]);
+        }
         setIsTyping(false);
         return;
       }
@@ -616,6 +637,45 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
                       </div>
                     );
                   })}
+                </div>
+              )}
+
+              {/* Disambiguation candidates */}
+              {msg.candidates && msg.candidates.length > 0 && (
+                <div className="mt-3 ml-11 flex flex-wrap gap-2">
+                  {msg.candidates.map((c) => (
+                    <Button
+                      key={c.id}
+                      variant="outline"
+                      size="sm"
+                      className="gap-2 text-xs"
+                      disabled={isTyping}
+                      onClick={() => {
+                        // Replace the original message with the full name and re-send
+                        const original = msg.originalMessage || "";
+                        // Build a clarified message using the full name
+                        const clarified = original.replace(
+                          /\b\w+\b/i,
+                          (match) => {
+                            // Replace the first word that partially matches the candidate name
+                            if (c.name.toLowerCase().includes(match.toLowerCase())) return c.name;
+                            return match;
+                          }
+                        );
+                        // If no replacement happened, just prepend the full name
+                        const finalMsg = clarified === original
+                          ? `${c.name}: ${original}`
+                          : clarified;
+                        // Remove candidates from this message
+                        setMessages((prev) =>
+                          prev.map((m) => m.id === msg.id ? { ...m, candidates: undefined } : m)
+                        );
+                        handleSend(finalMsg);
+                      }}
+                    >
+                      👤 {c.name}
+                    </Button>
+                  ))}
                 </div>
               )}
 
