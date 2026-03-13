@@ -414,6 +414,7 @@ export function RosterGrid({ data, employeeConstraints = [], animationState }: R
           })}
         </div>
       </div>
+      </div>
     </div>
   );
 }
