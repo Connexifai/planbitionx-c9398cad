@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { SendHorizontal, Bot, User, ArrowRightLeft, Lightbulb, CheckCircle2, UserPlus, Repeat2, GitBranch, Search } from "lucide-react";
+import { SendHorizontal, Bot, User, ArrowRightLeft, Lightbulb, CheckCircle2, UserPlus, Repeat2, GitBranch, Search, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
