@@ -185,9 +185,8 @@ export function buildAlternativesPayload(
       constraints.push(newConstraint);
     }
 
-    const { Id: _id, ...empWithoutId } = emp;
     return {
-      ...empWithoutId,
+      ...emp,
       AssignedShifts: assignedShifts,
       Constraints: constraints,
     };
