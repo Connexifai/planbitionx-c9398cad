@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { SendHorizontal, Bot, User, ArrowRightLeft, Lightbulb, CheckCircle2, UserPlus, Repeat2, GitBranch, Search, AlertCircle } from "lucide-react";
+import { SendHorizontal, Bot, User, ArrowRightLeft, Lightbulb, CheckCircle2, UserPlus, Repeat2, GitBranch, Search, AlertCircle, Smartphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -9,6 +9,7 @@ import { buildAlternativesPayload } from "@/lib/buildAlternativesPayload";
 import type { AlternativeConstraint, Alternative, AlternativesResponse, AlternativeChange, SearchScope } from "@/lib/buildAlternativesPayload";
 import { format, parseISO } from "date-fns";
 import { nl } from "date-fns/locale";
+import { EmployeeApprovalDialog } from "./EmployeeApprovalDialog";
 
 interface Message {
   id: number;
@@ -145,6 +146,9 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
   ]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [approvalDialogOpen, setApprovalDialogOpen] = useState(false);
+  const [approvalAlternative, setApprovalAlternative] = useState<Alternative | null>(null);
+  const [lastConstraint, setLastConstraint] = useState<AlternativeConstraint | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -301,6 +305,7 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
         shiftKind: intent.shiftKind ?? undefined,
         strength: "hard",
       };
+      setLastConstraint(constraint);
 
       // Step 3: First search with "narrow" scope (fast, local solutions)
       const altResponse = await fetchAlternatives(constraint, "narrow");
@@ -358,6 +363,83 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
         content: `✅ **Alternatief #${alt.Rank} wordt doorgevoerd!** Bekijk het rooster voor de stapsgewijze animatie van ${alt.ChangesFromBaseline} wijziging${alt.ChangesFromBaseline === 1 ? "" : "en"}.`,
       },
     ]);
+  };
+
+  const handleSolveForMe = (alt: Alternative) => {
+    setApprovalAlternative(alt);
+    setApprovalDialogOpen(true);
+  };
+
+  const handleAllApproved = (alt: Alternative) => {
+    onApplyAlternative?.(alt);
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: Date.now(),
+        role: "assistant",
+        content: `✅ **Alle medewerkers akkoord!** Alternatief #${alt.Rank} wordt doorgevoerd met ${alt.ChangesFromBaseline} wijziging${alt.ChangesFromBaseline === 1 ? "" : "en"}. Bekijk het rooster voor de animatie.`,
+      },
+    ]);
+  };
+
+  const handleRejected = async (rejectedByName: string, _rejectedById: string) => {
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: Date.now(),
+        role: "assistant",
+        content: `❌ **${rejectedByName}** heeft de wijziging afgewezen. Ik zoek automatisch een nieuw alternatief zonder ${rejectedByName}...`,
+      },
+    ]);
+    setIsTyping(true);
+
+    try {
+      if (!lastConstraint) throw new Error("Geen constraint beschikbaar voor opnieuw zoeken.");
+
+      // Search with full scope to find more options
+      const altResponse = await fetchAlternatives(lastConstraint, "full");
+      const allAlts = altResponse.Alternatives || [];
+      // Filter out alternatives that involve the rejecting employee
+      const filteredAlts = allAlts.filter((a) => {
+        const changes = a.Changes || [];
+        return !changes.some((c) => c.EmployeeName === rejectedByName);
+      });
+      const prepared = prepareAlternatives(filteredAlts);
+
+      if (prepared.visibleAlts.length === 0) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: Date.now() + 1,
+            role: "assistant",
+            content: `⚠️ Geen alternatieven gevonden zonder ${rejectedByName}. Probeer een andere aanpassing of laat de dienst open.`,
+          },
+        ]);
+      } else {
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: Date.now() + 1,
+            role: "assistant",
+            content: `🔎 **${formatAlternativeCount(prepared)}** gevonden zonder ${rejectedByName}:`,
+            alternatives: prepared.visibleAlts,
+            baseline: altResponse.Baseline,
+          },
+        ]);
+      }
+    } catch (error) {
+      console.error("Re-search after rejection error:", error);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: Date.now() + 1,
+          role: "assistant",
+          content: `❌ Er ging iets mis bij het opnieuw zoeken: ${error instanceof Error ? error.message : "Onbekende fout"}`,
+        },
+      ]);
+    } finally {
+      setIsTyping(false);
+    }
   };
 
   const examplePrompts = [
@@ -518,8 +600,19 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
                           </div>
                         )}
 
-                        {/* Apply button */}
-                        <div className="border-t px-4 py-2.5 bg-muted/30 flex justify-end">
+                        {/* Action buttons */}
+                        <div className="border-t px-4 py-2.5 bg-muted/30 flex justify-end gap-2">
+                          {!isOpenShift && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="text-xs h-7 gap-1.5"
+                              onClick={() => handleSolveForMe(alt)}
+                            >
+                              <Smartphone className="h-3 w-3" />
+                              Los het op voor mij
+                            </Button>
+                          )}
                           <Button
                             size="sm"
                             variant={isOpenShift ? "outline" : alt.Rank === 1 ? "default" : "outline"}
@@ -610,6 +703,14 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
           </div>
         </div>
       </div>
+
+      <EmployeeApprovalDialog
+        open={approvalDialogOpen}
+        onOpenChange={setApprovalDialogOpen}
+        alternative={approvalAlternative}
+        onAllApproved={handleAllApproved}
+        onRejected={handleRejected}
+      />
     </div>
   );
 }
