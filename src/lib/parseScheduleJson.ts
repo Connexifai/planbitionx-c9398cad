@@ -58,12 +58,13 @@ export function parseRawScheduleJson(raw: RawSchedule): JsonScheduleData {
   // Deduplicate shifts by Id+Name, aggregate demand
   const shiftMap = new Map<string, { name: string; type: string; startTime: string; endTime: string; totalDemand: number; count: number }>();
   for (const s of raw.Shifts) {
-    const key = `${s.Id}_${s.Name}`;
+    const shiftName = s.Name || `Shift ${s.Id}`;
+    const key = `${s.Id}_${shiftName}`;
     const sStart = parseISO(s.Start);
     const sEnd = parseISO(s.End);
     const startTime = format(sStart, "HH:mm");
     const endTime = format(sEnd, "HH:mm");
-    const type = classifyShiftType(s.Name, sStart.getHours());
+    const type = classifyShiftType(shiftName, sStart.getHours());
 
     if (shiftMap.has(key)) {
       const existing = shiftMap.get(key)!;
