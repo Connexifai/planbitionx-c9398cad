@@ -436,7 +436,14 @@ export default function Index() {
                       </Tooltip>
                     </div>
                     <div className="flex-1 min-h-0">
-                      {solved ? <PostSolveChat /> : <AiBriefingChat />}
+                      {solved ? <PostSolveChat /> : (
+                        <AiBriefingChat
+                          employees={requestData?.Employees || []}
+                          schedulePeriod={requestData ? `${requestData.Start} - ${requestData.End}` : ""}
+                          constraints={employeeConstraints}
+                          onConstraintsChange={setEmployeeConstraints}
+                        />
+                      )}
                     </div>
                   </>
                 )}
