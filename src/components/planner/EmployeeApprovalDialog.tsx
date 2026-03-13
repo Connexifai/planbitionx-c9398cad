@@ -45,7 +45,7 @@ function IPhone17({ employee, onApprove, onReject }: {
   const timeStr = `${now.getHours()}:${String(now.getMinutes()).padStart(2, "0")}`;
 
   return (
-    <div className="relative mx-auto animate-fade-in" style={{ width: 310, height: 640 }}>
+    <div className="relative mx-auto animate-fade-in" style={{ width: 407, height: 833 }}>
       {/* Outer titanium frame */}
       <div
         className="absolute inset-0 rounded-[3.2rem]"
