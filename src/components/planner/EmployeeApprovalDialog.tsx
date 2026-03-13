@@ -100,15 +100,15 @@ function IPhone17({ employee, onApprove, onReject }: {
                   boxShadow: "0 4px 20px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04)",
                 }}>
                   {/* App header bar */}
-                  <div className="flex items-center gap-2.5 px-4 py-2.5 bg-primary/5 border-b border-border/40">
-                    <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center">
-                      <span className="text-[10px] font-black text-primary-foreground">PX</span>
+                  <div className="flex items-center gap-3 px-5 py-3 bg-primary/5 border-b border-border/40">
+                    <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center">
+                      <span className="text-[12px] font-black text-primary-foreground">PX</span>
                     </div>
                     <div>
-                      <div className="text-[12px] font-semibold text-foreground leading-tight">Planbition X</div>
-                      <div className="text-[10px] text-muted-foreground leading-tight">Roosterwijziging</div>
+                      <div className="text-[14px] font-semibold text-foreground leading-tight">Planbition X</div>
+                      <div className="text-[12px] text-muted-foreground leading-tight">Roosterwijziging</div>
                     </div>
-                    <div className="ml-auto text-[10px] text-muted-foreground">nu</div>
+                    <div className="ml-auto text-[12px] text-muted-foreground">nu</div>
                   </div>
 
                   {/* Message content */}
