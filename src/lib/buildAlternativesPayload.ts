@@ -211,8 +211,18 @@ export function buildAlternativesPayload(
 
 
 /**
- * Legacy normalizer — now a no-op since we no longer use instance IDs.
+ * Strips date-based unique IDs back to original shift IDs for roster display.
  */
 export function normalizeAlternativeShiftIds(alternative: Alternative): Alternative {
-  return alternative;
+  return {
+    ...alternative,
+    Assignments: (alternative.Assignments || []).map((a) => ({
+      ...a,
+      ShiftId: toOriginalShiftId(String(a.ShiftId)),
+    })),
+    Changes: (alternative.Changes || []).map((c) => ({
+      ...c,
+      ShiftId: toOriginalShiftId(String(c.ShiftId)),
+    })),
+  };
 }
