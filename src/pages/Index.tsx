@@ -189,6 +189,7 @@ export default function Index() {
   }, [entranceVisible]);
   const [solverExplanations, setSolverExplanations] = useState<any[]>([]);
   const [solverStatistics, setSolverStatistics] = useState<any>(null);
+  const [solverAssignments, setSolverAssignments] = useState<any[]>([]);
   const [atw, setAtw] = useState<AtwConstraints>(defaultAtw);
   const [soft, setSoft] = useState<SoftConstraints>(defaultSoft);
   const [solver, setSolver] = useState<SolverSettings>(defaultSolver);
@@ -285,6 +286,8 @@ export default function Index() {
       const roster = parseSolverResponse(requestData, solverResponse);
       setRosterData(roster);
       setSolverExplanations((solverResponse as any).Explanations || []);
+      setSolverStatistics((solverResponse as any).Statistics || null);
+      setSolverAssignments((solverResponse as any).Assignments || []);
       setSolverStatistics((solverResponse as any).Statistics || null);
       setSolveDurationMs(Date.now() - startTime);
       setSolved(true);
@@ -456,7 +459,21 @@ export default function Index() {
                       </Tooltip>
                     </div>
                     <div className="flex-1 min-h-0">
-                      {solved ? <PostSolveChat /> : (
+                      {solved ? (
+                        <PostSolveChat
+                          requestData={requestData}
+                          solverAssignments={solverAssignments}
+                          onApplyAlternative={(alt) => {
+                            // Re-parse the alternative's assignments into roster data
+                            const newRoster = parseSolverResponse(requestData, { Assignments: alt.Assignments });
+                            setRosterData(newRoster);
+                            setSolverAssignments(alt.Assignments);
+                            toast.success(`Alternatief #${alt.Rank} doorgevoerd`, {
+                              description: `${alt.ChangesFromBaseline} wijziging${alt.ChangesFromBaseline !== 1 ? "en" : ""} toegepast`,
+                            });
+                          }}
+                        />
+                      ) : (
                         <AiBriefingChat
                           employees={requestData?.Employees || []}
                           schedulePeriod={requestData ? `${requestData.Start} - ${requestData.End}` : ""}
