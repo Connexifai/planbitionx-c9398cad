@@ -236,7 +236,7 @@ export default function Index() {
       return;
     }
     setSolving(true);
-    setSolveStartTime(Date.now());
+    const startTime = Date.now();
     try {
       // Merge sidebar settings into the request payload
       const basePayload = JSON.parse(requestRawJson);
