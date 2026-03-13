@@ -25,7 +25,7 @@ ${empList}
 
 Schedule period: ${schedulePeriod}
 
-Day mapping (dayOfWeek): 0=zondag, 1=maandag, 2=dinsdag, 3=woensdag, 4=donderdag, 5=vrijdag, 6=zaterdag (same as JavaScript getDay())
+Day mapping (dayOfWeek) — uses ISO/solver convention: 0=maandag, 1=dinsdag, 2=woensdag, 3=donderdag, 4=vrijdag, 5=zaterdag, 6=zondag
 
 Constraint types:
 - "avoid_day": employee wants a specific weekday off. Use dayOfWeek (0-6).
