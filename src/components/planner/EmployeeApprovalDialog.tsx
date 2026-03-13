@@ -50,12 +50,14 @@ function IPhone17({ employee, onApprove, onReject }: {
       <div
         className="absolute inset-0 rounded-[3.6rem]"
         style={{
-          background: "linear-gradient(145deg, hsl(220 10% 25%), hsl(220 8% 35%), hsl(220 10% 28%))",
+          background: "linear-gradient(145deg, hsl(220 8% 45%), hsl(220 6% 55%), hsl(220 8% 48%))",
           boxShadow: `
-            0 0 0 1px hsl(220 10% 20%),
-            0 25px 60px -10px rgba(0,0,0,0.5),
-            0 10px 30px -5px rgba(0,0,0,0.3),
-            inset 0 1px 0 hsl(220 10% 40%)
+            0 0 0 1.5px hsl(220 10% 60%),
+            0 0 0 3px hsl(220 8% 40%),
+            0 30px 80px -10px rgba(0,0,0,0.6),
+            0 15px 40px -5px rgba(0,0,0,0.4),
+            inset 0 1px 0 hsl(220 10% 65%),
+            inset 0 -1px 0 hsl(220 10% 35%)
           `,
         }}
       >
@@ -121,30 +123,45 @@ function IPhone17({ employee, onApprove, onReject }: {
                     </p>
 
                     {/* Changes */}
-                    <div className="space-y-2">
+                    <div className="space-y-2.5">
                       {employee.changes.map((change, i) => (
                         <div
                           key={i}
                           className={cn(
-                            "flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-[13px]",
+                            "flex items-center gap-3 px-4 py-3 rounded-xl",
                             change.Action === "added"
-                              ? "bg-primary/8 border border-primary/15"
-                              : "bg-destructive/8 border border-destructive/15"
+                              ? "bg-primary/10 border-2 border-primary/25"
+                              : "bg-destructive/10 border-2 border-destructive/25"
                           )}
                         >
-                          <span className={cn(
-                            "text-[15px] font-bold w-4 text-center",
-                            change.Action === "added" ? "text-primary" : "text-destructive"
+                          <div className={cn(
+                            "flex items-center justify-center w-8 h-8 rounded-lg text-[18px] font-black shrink-0",
+                            change.Action === "added" 
+                              ? "bg-primary/15 text-primary" 
+                              : "bg-destructive/15 text-destructive"
                           )}>
                             {change.Action === "added" ? "+" : "−"}
-                          </span>
+                          </div>
                           <div className="flex-1 min-w-0">
-                            <span className="font-semibold text-foreground">{change.ShiftName}</span>
+                            <div className="text-[14px] font-bold text-foreground">{change.ShiftName}</div>
                             {change.Start && (
-                              <div className="text-[12px] text-muted-foreground mt-0.5">
-                                {formatDate(change.Start)} · {formatTime(change.Start, change.End)}
+                              <div className="text-[12px] text-muted-foreground mt-0.5 font-medium">
+                                📅 {formatDate(change.Start)}
                               </div>
                             )}
+                            {change.Start && (
+                              <div className="text-[12px] text-muted-foreground font-medium">
+                                🕐 {formatTime(change.Start, change.End)}
+                              </div>
+                            )}
+                          </div>
+                          <div className={cn(
+                            "text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0",
+                            change.Action === "added"
+                              ? "bg-primary/20 text-primary"
+                              : "bg-destructive/20 text-destructive"
+                          )}>
+                            {change.Action === "added" ? "NIEUW" : "VERVALT"}
                           </div>
                         </div>
                       ))}
