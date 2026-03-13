@@ -304,31 +304,52 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
 
       // Step 3: First search with "narrow" scope (fast, local solutions)
       const altResponse = await fetchAlternatives(constraint, "narrow");
-      const allAlts = altResponse.Alternatives || [];
-      const filledAlts = allAlts.filter((a) => a.ConflictShiftFilled !== false).slice(0, 5);
-      const openAlt = allAlts.find((a) => a.ConflictShiftFilled === false);
-      const validAlts = openAlt ? [...filledAlts, openAlt] : filledAlts;
+      const narrowPrepared = prepareAlternatives(altResponse.Alternatives || []);
       const resultMsgId = Date.now() + 2;
 
-      if (validAlts.length === 0) {
+      if (narrowPrepared.visibleAlts.length === 0) {
         setMessages((prev) => [
           ...prev,
           {
             id: resultMsgId,
             role: "assistant",
-            content: "⚠️ Geen directe alternatieven gevonden in de directe omgeving. Wil je breder zoeken?",
-            showSearchFull: true,
-            pendingConstraint: constraint,
+            content: "⚠️ Geen directe alternatieven gevonden in de directe omgeving, ik zoek nu automatisch breder.",
           },
         ]);
+
+        const fullResponse = await fetchAlternatives(constraint, "full");
+        const fullPrepared = prepareAlternatives(fullResponse.Alternatives || []);
+
+        if (fullPrepared.visibleAlts.length === 0) {
+          setMessages((prev) => [
+            ...prev,
+            {
+              id: resultMsgId + 1,
+              role: "assistant",
+              content: "❌ Ook met een breder zoekbereik zijn er geen alternatieven gevonden.",
+            },
+          ]);
+        } else {
+          setMessages((prev) => [
+            ...prev,
+            {
+              id: resultMsgId + 1,
+              role: "assistant",
+              content: `🔎 Met breder zoeken heb ik **${formatAlternativeCount(fullPrepared)}** gevonden:`,
+              alternatives: fullPrepared.visibleAlts,
+              baseline: fullResponse.Baseline,
+              constraintSummary: intent.summary,
+            },
+          ]);
+        }
       } else {
         setMessages((prev) => [
           ...prev,
           {
             id: resultMsgId,
             role: "assistant",
-            content: `Ik heb **${filledAlts.length} oplossing${filledAlts.length === 1 ? "" : "en"}** gevonden in de directe omgeving:`,
-            alternatives: validAlts,
+            content: `Ik heb **${formatAlternativeCount(narrowPrepared)}** gevonden in de directe omgeving:`,
+            alternatives: narrowPrepared.visibleAlts,
             baseline: altResponse.Baseline,
             constraintSummary: intent.summary,
             showSearchFull: true,
