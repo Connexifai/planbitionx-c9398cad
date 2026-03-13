@@ -16,7 +16,24 @@ const shiftClassMap: Record<string, string> = {
   nacht: "shift-night",
 };
 
-const ShiftCell = memo(function ShiftCell({ shift, t }: { shift: ShiftData; t: (key: string) => string }) {
+const dayNames = ["ma", "di", "wo", "do", "vr", "za", "zo"];
+const shiftKindLabels: Record<string, string> = { early: "Vroeg", day: "Dag", late: "Laat", night: "Nacht" };
+
+function ViolationIcon({ strength }: { strength: "hard" | "soft" }) {
+  if (strength === "hard") {
+    return <Ban className="h-3 w-3 text-destructive shrink-0" />;
+  }
+  return <ShieldAlert className="h-3 w-3 text-kpi-unfilled shrink-0" />;
+}
+
+interface ShiftCellProps {
+  shift: ShiftData;
+  t: (key: string) => string;
+  violationStrength?: "hard" | "soft";
+  constraints: EmployeeConstraint[];
+}
+
+const ShiftCell = memo(function ShiftCell({ shift, t, violationStrength, constraints }: ShiftCellProps) {
   if (!shift.type) {
     return (
       <div className="flex h-full items-center justify-center">
@@ -35,10 +52,23 @@ const ShiftCell = memo(function ShiftCell({ shift, t }: { shift: ShiftData; t: (
     nacht: t("grid.night"),
   };
 
+  const tooltipLines = constraints.map(c => {
+    const str = c.constraint.strength === "hard" ? "🚫" : "⚠️";
+    if (c.constraint.type === "avoid_day") return `${str} ${dayNames[c.constraint.dayOfWeek ?? 0]}`;
+    if (c.constraint.type === "avoid_shift_kind") return `${str} ${shiftKindLabels[c.constraint.shiftKind ?? ""] || c.constraint.shiftKind}`;
+    if (c.constraint.type === "avoid_date") return `${str} ${c.constraint.date}`;
+    return str;
+  });
+
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <div className={`shift-badge ${cls} cursor-default flex-col items-start w-full gap-0.5`}>
+        <div className={`shift-badge ${cls} cursor-default flex-col items-start w-full gap-0.5 relative`}>
+          {violationStrength && (
+            <div className="absolute top-0.5 right-0.5 z-10">
+              <ViolationIcon strength={violationStrength} />
+            </div>
+          )}
           <span className="font-semibold capitalize text-[13px] tracking-tight">
             {shiftTypeLabel[shift.type]}{role && <span className="opacity-70 font-medium"> [{role}]</span>}
           </span>
@@ -48,6 +78,15 @@ const ShiftCell = memo(function ShiftCell({ shift, t }: { shift: ShiftData; t: (
       <TooltipContent side="top">
         <p className="font-medium">{shift.label}</p>
         <p className="text-xs text-muted-foreground">{shift.time}</p>
+        {tooltipLines.length > 0 && (
+          <>
+            <div className="my-1 border-t border-border" />
+            <p className="text-xs font-semibold mb-1">Constraints:</p>
+            {tooltipLines.map((line, i) => (
+              <p key={i} className="text-xs">{line}</p>
+            ))}
+          </>
+        )}
       </TooltipContent>
     </Tooltip>
   );
@@ -72,45 +111,6 @@ function FillRateIndicator({ filled, target, pct }: { filled: number; target: nu
       <span className={`text-[18px] font-extrabold leading-none ${color}`}>{pct}%</span>
       <span className={`text-[10px] font-semibold ${color} opacity-80`}>{filled}/{target}</span>
     </div>
-  );
-}
-
-const dayNames = ["ma", "di", "wo", "do", "vr", "za", "zo"];
-const shiftKindLabels: Record<string, string> = { early: "Vroeg", day: "Dag", late: "Laat", night: "Nacht" };
-
-function ConstraintIcons({ constraints }: { constraints: EmployeeConstraint[] }) {
-  if (constraints.length === 0) return null;
-
-  const hardCount = constraints.filter(c => c.constraint.strength === "hard").length;
-  const softCount = constraints.length - hardCount;
-
-  const lines = constraints.map(c => {
-    const str = c.constraint.strength === "hard" ? "🚫" : "⚠️";
-    if (c.constraint.type === "avoid_day") return `${str} ${dayNames[c.constraint.dayOfWeek ?? 0]}`;
-    if (c.constraint.type === "avoid_shift_kind") return `${str} ${shiftKindLabels[c.constraint.shiftKind ?? ""] || c.constraint.shiftKind}`;
-    if (c.constraint.type === "avoid_date") return `${str} ${c.constraint.date}`;
-    return str;
-  });
-
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <div className="flex items-center gap-0.5 ml-1">
-          {hardCount > 0 && (
-            <Ban className="h-3 w-3 text-destructive shrink-0" />
-          )}
-          {softCount > 0 && (
-            <ShieldAlert className="h-3 w-3 text-kpi-unfilled shrink-0" />
-          )}
-        </div>
-      </TooltipTrigger>
-      <TooltipContent side="right" className="max-w-[220px]">
-        <p className="text-xs font-semibold mb-1">Constraints:</p>
-        {lines.map((line, i) => (
-          <p key={i} className="text-xs">{line}</p>
-        ))}
-      </TooltipContent>
-    </Tooltip>
   );
 }
 
@@ -162,7 +162,6 @@ const EmployeeRow = memo(function EmployeeRow({
           <p className="text-[13px] font-bold leading-snug truncate text-foreground">
             {emp.lastName}, <span className="font-medium">{emp.firstName}</span>
           </p>
-          <ConstraintIcons constraints={constraints} />
         </div>
         {emp.tags.length > 0 && (
           <div className="flex flex-wrap gap-1">
@@ -184,14 +183,14 @@ const EmployeeRow = memo(function EmployeeRow({
           if (c.constraint.type === "avoid_date" && dayConstraintFlags[i]) return true;
           if (c.constraint.type === "avoid_shift_kind" && hasShiftViolation) return true;
           return false;
-        })?.constraint.strength;
+        })?.constraint.strength as "hard" | "soft" | undefined;
 
         return (
           <div
             key={i}
             className={`flex items-center justify-center px-0.5 py-0.5 border-r last:border-r-0 relative ${days[i]?.weekend ? "bg-weekend" : ""} ${hasViolation ? (violationStrength === "hard" ? "ring-2 ring-inset ring-destructive/50 bg-destructive/10" : "ring-2 ring-inset ring-kpi-unfilled/40 bg-kpi-unfilled/10") : ""}`}
           >
-            <ShiftCell shift={shift} t={t} />
+            <ShiftCell shift={shift} t={t} violationStrength={violationStrength} constraints={constraints} />
           </div>
         );
       })}
