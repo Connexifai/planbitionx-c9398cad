@@ -4,7 +4,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { useTranslation } from "react-i18next";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useRef, memo, useMemo, useEffect } from "react";
-import { Ban, ShieldAlert } from "lucide-react";
+import { Ban, ShieldAlert, CheckCircle2 } from "lucide-react";
 import type { RosterData, ShiftData, DayColumn, RosterEmployee, DemandMap } from "@/lib/parseSolverResponse";
 import type { EmployeeConstraint } from "@/components/planner/AiBriefingChat";
 import type { RosterAnimationState } from "@/hooks/useRosterAnimation";
