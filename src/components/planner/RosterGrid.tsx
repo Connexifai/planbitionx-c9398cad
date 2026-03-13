@@ -204,7 +204,7 @@ interface RosterGridProps {
   employeeConstraints?: EmployeeConstraint[];
 }
 
-export function RosterGrid({ data }: RosterGridProps) {
+export function RosterGrid({ data, employeeConstraints = [] }: RosterGridProps) {
   const { t } = useTranslation();
   const parentRef = useRef<HTMLDivElement>(null);
 
