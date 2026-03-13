@@ -12,7 +12,7 @@ interface KpiCardProps {
 }
 
 const KpiCard = ({ label, value, subtitle, icon, colorClass, bgClass }: KpiCardProps) => (
-  <div className="flex items-center gap-4 rounded-xl bg-card p-5 shadow-sm border border-border/50">
+  <div className="flex items-center gap-4 rounded-xl bg-card p-5 shadow-sm border border-border/50 h-full">
     <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${bgClass}`}>
       <span className={colorClass}>{icon}</span>
     </div>
