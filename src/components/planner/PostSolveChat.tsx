@@ -658,7 +658,8 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
                           );
                         })()}
 
-                        {/* Action buttons */}
+                        {/* Action buttons — hidden for applied alternatives */}
+                        {!msg.applied && (
                         <div className={cn(
                           "border-t px-4 py-3 flex justify-end gap-2",
                           isRecommended ? "bg-primary/5" : "bg-muted/20"
@@ -687,6 +688,7 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
                             </Button>
                           )}
                         </div>
+                        )}
                       </div>
                     );
                   })}
