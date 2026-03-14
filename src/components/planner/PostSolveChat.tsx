@@ -286,6 +286,9 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
         date: intent.date ?? undefined,
         shiftKind: intent.shiftKind ?? undefined,
         strength: "hard",
+        // Swap fields
+        swapDayOfWeek: intent.swapDayOfWeek ?? undefined,
+        swapDate: intent.swapDate ?? undefined,
       };
       setLastConstraint(constraint);
 

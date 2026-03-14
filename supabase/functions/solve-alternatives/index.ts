@@ -96,6 +96,9 @@ serve(async (req) => {
     if (payload.DayOfWeek !== undefined) qp.set("dayOfWeek", String(payload.DayOfWeek));
     if (payload.Date) qp.set("date", String(payload.Date));
     if (payload.ShiftKind) qp.set("shiftKind", String(payload.ShiftKind));
+    // Swap fields for Phase 3 (dienstwissel)
+    if (payload.SwapDate) qp.set("swapDate", String(payload.SwapDate));
+    if (payload.SwapDayOfWeek !== undefined) qp.set("swapDayOfWeek", String(payload.SwapDayOfWeek));
 
     // Remove top-level constraint fields from body (API reads them from query)
     delete payload.TargetEmployeeId;
@@ -103,6 +106,8 @@ serve(async (req) => {
     delete payload.DayOfWeek;
     delete payload.Date;
     delete payload.ShiftKind;
+    delete payload.SwapDate;
+    delete payload.SwapDayOfWeek;
 
     const solverUrl = qp.toString() ? `${SOLVER_URL}?${qp.toString()}` : SOLVER_URL;
     console.log("Solver URL:", solverUrl);

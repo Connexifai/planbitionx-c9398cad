@@ -19,6 +19,9 @@ export interface AlternativeConstraint {
   date?: string; // YYYY-MM-DD
   shiftKind?: string; // "early","day","late","night"
   strength: "hard" | "soft";
+  // Swap fields
+  swapDayOfWeek?: number; // Day offered to work instead (0=ma,...,6=zo)
+  swapDate?: string; // Date offered to work instead (YYYY-MM-DD)
 }
 
 interface SolverAssignment {
@@ -226,6 +229,13 @@ export function buildAlternativesPayload(
   }
   if (constraint.type === "avoid_shift_kind" && constraint.shiftKind) {
     topLevelConstraint.ShiftKind = constraint.shiftKind;
+  }
+  // Swap fields for Phase 3 (dienstwissel)
+  if (constraint.swapDate) {
+    topLevelConstraint.SwapDate = constraint.swapDate;
+  }
+  if (constraint.swapDayOfWeek !== undefined) {
+    topLevelConstraint.SwapDayOfWeek = constraint.swapDayOfWeek;
   }
 
   return {
