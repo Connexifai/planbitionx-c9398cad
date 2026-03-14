@@ -881,7 +881,7 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
                               onClick={() => handleSolveForMe(alt)}
                             >
                               <Smartphone className="h-3.5 w-3.5" />
-                              Los het op voor mij
+                              Los het op voor mij!
                             </Button>
                           )}
                         </div>
