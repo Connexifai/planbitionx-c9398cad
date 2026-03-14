@@ -112,99 +112,120 @@ function IPhone17({ employee, onApprove, onReject, notificationMode }: {
                     </div>
                     <div>
                       <div className="text-[14px] font-semibold text-foreground leading-tight">Planbition X</div>
-                      <div className="text-[12px] text-muted-foreground leading-tight">Roosterwijziging</div>
+                      <div className="text-[12px] text-muted-foreground leading-tight">
+                        {notificationMode ? "Bevestiging" : "Roosterwijziging"}
+                      </div>
                     </div>
                     <div className="ml-auto text-[12px] text-muted-foreground">nu</div>
                   </div>
 
                   {/* Message content */}
                   <div className="px-5 py-4 space-y-4">
-                    <p className="text-[15px] font-medium text-foreground leading-snug">
-                      Hoi {employee.name.split(" ")[0]} 👋
-                    </p>
-                    <p className="text-[14px] text-muted-foreground leading-relaxed">
-                      Er is een roosterwijziging waar jouw akkoord voor nodig is:
-                    </p>
-
-                    {/* Changes */}
-                    <div className="space-y-2.5">
-                      {employee.changes.map((change, i) => (
-                        <div
-                          key={i}
-                          className={cn(
-                            "flex items-center gap-3 px-4 py-3 rounded-xl",
-                            change.Action === "added"
-                              ? "bg-primary/10 border-2 border-primary/25"
-                              : "bg-destructive/10 border-2 border-destructive/25"
-                          )}
-                        >
-                          <div className={cn(
-                            "flex items-center justify-center w-8 h-8 rounded-lg text-[18px] font-black shrink-0",
-                            change.Action === "added" 
-                              ? "bg-primary/15 text-primary" 
-                              : "bg-destructive/15 text-destructive"
-                          )}>
-                            {change.Action === "added" ? "+" : "−"}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="text-[14px] font-bold text-foreground">{change.ShiftName}</div>
-                            {change.Start && (
-                              <div className="text-[12px] text-muted-foreground mt-0.5 font-medium">
-                                📅 {formatDate(change.Start)}
-                              </div>
-                            )}
-                            {change.Start && (
-                              <div className="text-[12px] text-muted-foreground font-medium">
-                                🕐 {formatTime(change.Start, change.End)}
-                              </div>
-                            )}
-                          </div>
-                          <div className={cn(
-                            "text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0",
-                            change.Action === "added"
-                              ? "bg-primary/20 text-primary"
-                              : "bg-destructive/20 text-destructive"
-                          )}>
-                            {change.Action === "added" ? "NIEUW" : "VERVALT"}
-                          </div>
+                    {notificationMode ? (
+                      <>
+                        <p className="text-[15px] font-medium text-foreground leading-snug">
+                          {notificationMode.title}
+                        </p>
+                        <p className="text-[14px] text-muted-foreground leading-relaxed">
+                          {notificationMode.body}
+                        </p>
+                        <div className="flex items-center justify-center gap-2 py-3 text-primary text-[16px] font-semibold animate-fade-in">
+                          <CheckCircle2 className="h-6 w-6" />
+                          Goedgekeurd
                         </div>
-                      ))}
-                    </div>
-
-                    <p className="text-[14px] text-muted-foreground text-center pt-1">
-                      Ga je akkoord met deze wijziging?
-                    </p>
-                  </div>
-
-                  {/* iOS-style action buttons */}
-                  <div className="border-t border-border/40">
-                    {employee.status === "pending" ? (
-                      <div className="flex divide-x divide-border/40">
-                        <button
-                          onClick={onReject}
-                          className="flex-1 flex items-center justify-center gap-1.5 py-4 text-destructive text-[16px] font-medium active:bg-muted/50 transition-colors"
-                        >
-                          Afwijzen
-                        </button>
-                        <button
-                          onClick={onApprove}
-                          className="flex-1 flex items-center justify-center gap-1.5 py-4 text-primary text-[16px] font-semibold active:bg-muted/50 transition-colors"
-                        >
-                          Akkoord
-                        </button>
-                      </div>
-                    ) : employee.status === "approved" ? (
-                      <div className="flex items-center justify-center gap-2 py-4 text-primary text-[16px] font-semibold animate-fade-in">
-                        <CheckCircle2 className="h-5 w-5" />
-                        Akkoord gegeven
-                      </div>
+                      </>
                     ) : (
-                      <div className="flex items-center justify-center gap-2 py-4 text-destructive text-[16px] font-semibold animate-fade-in">
-                        <XCircle className="h-5 w-5" />
-                        Afgewezen
-                      </div>
+                      <>
+                        <p className="text-[15px] font-medium text-foreground leading-snug">
+                          Hoi {employee.name.split(" ")[0]} 👋
+                        </p>
+                        <p className="text-[14px] text-muted-foreground leading-relaxed">
+                          Er is een roosterwijziging waar jouw akkoord voor nodig is:
+                        </p>
+
+                        {/* Changes */}
+                        <div className="space-y-2.5">
+                          {employee.changes.map((change, i) => (
+                            <div
+                              key={i}
+                              className={cn(
+                                "flex items-center gap-3 px-4 py-3 rounded-xl",
+                                change.Action === "added"
+                                  ? "bg-primary/10 border-2 border-primary/25"
+                                  : "bg-destructive/10 border-2 border-destructive/25"
+                              )}
+                            >
+                              <div className={cn(
+                                "flex items-center justify-center w-8 h-8 rounded-lg text-[18px] font-black shrink-0",
+                                change.Action === "added" 
+                                  ? "bg-primary/15 text-primary" 
+                                  : "bg-destructive/15 text-destructive"
+                              )}>
+                                {change.Action === "added" ? "+" : "−"}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="text-[14px] font-bold text-foreground">{change.ShiftName}</div>
+                                {change.Start && (
+                                  <div className="text-[12px] text-muted-foreground mt-0.5 font-medium">
+                                    📅 {formatDate(change.Start)}
+                                  </div>
+                                )}
+                                {change.Start && (
+                                  <div className="text-[12px] text-muted-foreground font-medium">
+                                    🕐 {formatTime(change.Start, change.End)}
+                                  </div>
+                                )}
+                              </div>
+                              <div className={cn(
+                                "text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0",
+                                change.Action === "added"
+                                  ? "bg-primary/20 text-primary"
+                                  : "bg-destructive/20 text-destructive"
+                              )}>
+                                {change.Action === "added" ? "NIEUW" : "VERVALT"}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+
+                        <p className="text-[14px] text-muted-foreground text-center pt-1">
+                          Ga je akkoord met deze wijziging?
+                        </p>
+                      </>
                     )}
                   </div>
+
+                  {/* iOS-style action buttons — only for approval mode */}
+                  {!notificationMode && (
+                    <div className="border-t border-border/40">
+                      {employee.status === "pending" ? (
+                        <div className="flex divide-x divide-border/40">
+                          <button
+                            onClick={onReject}
+                            className="flex-1 flex items-center justify-center gap-1.5 py-4 text-destructive text-[16px] font-medium active:bg-muted/50 transition-colors"
+                          >
+                            Afwijzen
+                          </button>
+                          <button
+                            onClick={onApprove}
+                            className="flex-1 flex items-center justify-center gap-1.5 py-4 text-primary text-[16px] font-semibold active:bg-muted/50 transition-colors"
+                          >
+                            Akkoord
+                          </button>
+                        </div>
+                      ) : employee.status === "approved" ? (
+                        <div className="flex items-center justify-center gap-2 py-4 text-primary text-[16px] font-semibold animate-fade-in">
+                          <CheckCircle2 className="h-5 w-5" />
+                          Akkoord gegeven
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-center gap-2 py-4 text-destructive text-[16px] font-semibold animate-fade-in">
+                          <XCircle className="h-5 w-5" />
+                          Afgewezen
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
 
