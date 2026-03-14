@@ -702,17 +702,6 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
                           "border-t px-4 py-3 flex justify-end gap-2",
                           isRecommended ? "bg-primary/5" : "bg-muted/20"
                         )}>
-                          {!isOpenShift && (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="text-xs h-8 gap-1.5 px-3"
-                              onClick={() => handleSolveForMe(alt)}
-                            >
-                              <Smartphone className="h-3.5 w-3.5" />
-                              Los het op voor mij
-                            </Button>
-                          )}
                           <Button
                             size="sm"
                             variant={isOpenShift ? "outline" : isRecommended ? "default" : "outline"}
@@ -725,6 +714,17 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
                             <CheckCircle2 className="h-3.5 w-3.5" />
                             {isOpenShift ? "Dienst open laten" : "Doorvoeren"}
                           </Button>
+                          {!isOpenShift && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="text-xs h-8 gap-1.5 px-3"
+                              onClick={() => handleSolveForMe(alt)}
+                            >
+                              <Smartphone className="h-3.5 w-3.5" />
+                              Los het op voor mij
+                            </Button>
+                          )}
                         </div>
                       </div>
                     );
