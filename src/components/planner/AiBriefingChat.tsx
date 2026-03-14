@@ -203,7 +203,7 @@ export function AiBriefingChat({ employees, schedulePeriod, constraints, onConst
 
         <div className="bg-background pt-4 pb-3 px-4 border-t border-border">
           <div className="flex items-center gap-1 mb-2">
-            <img src={robotImg} alt="AI" className="h-6 w-6 object-cover object-top scale-[1.8] -translate-y-0.5" />
+            <img src={robotImg} alt="AI" className="h-6 w-6 object-cover object-top scale-[2.2] -translate-y-2" />
             <span className="text-xs font-medium text-muted-foreground">{t("chat.sendMessage")}</span>
           </div>
           <div className="flex items-center gap-2 rounded-xl border-2 border-primary/20 bg-card px-4 py-3 shadow-md focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/10 transition-all">
