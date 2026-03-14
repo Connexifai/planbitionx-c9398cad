@@ -591,15 +591,14 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
                                 <TypeIcon className="h-4 w-4" />
                                 {classified.label}
                               </div>
+                              {!isOpenShift && (
                               <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground mt-0.5">
                                 {(() => {
-                                  const targetName = msg.pendingConstraint?.employeeName;
-                                  const count = isOpenShift
-                                    ? (alt.Changes?.filter(c => c.Action === "removed" && targetName && c.EmployeeName === targetName).length || 1)
-                                    : alt.ChangesFromBaseline;
+                                  const count = alt.ChangesFromBaseline;
                                   return <span>{count} wijziging{count !== 1 && "en"}</span>;
                                 })()}
                               </div>
+                              )}
                             </div>
                           </div>
                           <div className="flex items-center gap-1.5">
@@ -623,16 +622,10 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
                           </p>
                         </div>
 
-                        {/* Changes detail */}
-                        {alt.Changes && alt.Changes.length > 0 && (() => {
-                          // For "open shift" alternatives, only show the removed shift(s) for the constraint employee
-                          const targetName = msg.pendingConstraint?.employeeName;
-                          const visibleChanges = isOpenShift
-                            ? alt.Changes.filter((c) => c.Action === "removed" && targetName && c.EmployeeName === targetName)
-                            : alt.Changes;
-                          return visibleChanges.length > 0 && (
+                        {/* Changes detail — hidden for open shift alternatives */}
+                        {!isOpenShift && alt.Changes && alt.Changes.length > 0 && (
                           <div className="px-4 pb-3 pt-1 space-y-1.5">
-                            {visibleChanges.map((change, i) => (
+                            {alt.Changes.map((change, i) => (
                               <div
                                 key={i}
                                 className={cn(
@@ -663,8 +656,7 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
                               </div>
                             ))}
                           </div>
-                          );
-                        })()}
+                        )}
 
                         {/* Action buttons — hidden for applied alternatives */}
                         {!msg.applied && (
