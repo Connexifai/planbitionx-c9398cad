@@ -653,9 +653,9 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
                             </div>
                           </div>
                           <div className="flex items-center gap-1.5">
-                            {alt.Rank === 1 && !isOpenShift && (
-                              <Badge className="text-[10px] bg-primary/10 text-primary border-primary/30 font-semibold">
-                                ⭐ Aanbevolen
+                            {isRecommended && (
+                              <Badge className="text-[10px] bg-primary text-primary-foreground border-primary font-semibold">
+                                Aanbevolen
                               </Badge>
                             )}
                             {isOpenShift && (
