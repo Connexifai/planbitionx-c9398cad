@@ -72,8 +72,15 @@ interface PreparedAlternatives {
 }
 
 function prepareAlternatives(alternatives: Alternative[]): PreparedAlternatives {
-  const filledAlts = alternatives.filter((a) => a.ConflictShiftFilled !== false).slice(0, 5);
-  const openAlt = alternatives.find((a) => a.ConflictShiftFilled === false);
+  // Deduplicate by rank to avoid showing the same alternative twice
+  const seen = new Set<number>();
+  const deduped = alternatives.filter((a) => {
+    if (seen.has(a.Rank)) return false;
+    seen.add(a.Rank);
+    return true;
+  });
+  const filledAlts = deduped.filter((a) => a.ConflictShiftFilled !== false).slice(0, 5);
+  const openAlt = deduped.find((a) => a.ConflictShiftFilled === false);
   return {
     filledAlts,
     openAlt,
