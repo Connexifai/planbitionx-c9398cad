@@ -209,7 +209,20 @@ export default function Index() {
   const [atw, setAtw] = useState<AtwConstraints>(defaultAtw);
   const [soft, setSoft] = useState<SoftConstraints>(defaultSoft);
   const [solver, setSolver] = useState<SolverSettings>(defaultSolver);
-  const { animationState, startAnimation, registerGridFns } = useRosterAnimation();
+  const { animationState, startAnimation, registerGridFns, scrollToEmployee } = useRosterAnimation();
+
+  const handleNavigateToEmployee = useCallback((employeeName: string) => {
+    if (!rosterData) return;
+    const emp = rosterData.employees.find(
+      (e) => e.name.toLowerCase() === employeeName.toLowerCase()
+    );
+    if (!emp) return;
+    setActiveTab("roster");
+    // Wait for tab switch to render roster, then scroll
+    setTimeout(() => {
+      scrollToEmployee.current?.(String(emp.id));
+    }, 150);
+  }, [rosterData, scrollToEmployee]);
 
   const handleApplyAlternative = useCallback((alt: any) => {
     const normalizedAlt = normalizeAlternativeShiftIds(alt);
@@ -569,6 +582,7 @@ export default function Index() {
                           requestData={requestData}
                           solverAssignments={solverAssignments}
                           onApplyAlternative={handleApplyAlternative}
+                          onNavigateToEmployee={handleNavigateToEmployee}
                         />
                       ) : (
                         <AiBriefingChat
@@ -613,6 +627,7 @@ export default function Index() {
                             requestData={requestData}
                             solverAssignments={solverAssignments}
                             onApplyAlternative={handleApplyAlternative}
+                            onNavigateToEmployee={handleNavigateToEmployee}
                           />
                         ) : (
                           <AiBriefingChat
