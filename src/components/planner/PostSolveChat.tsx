@@ -849,6 +849,8 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
         open={approvalDialogOpen}
         onOpenChange={setApprovalDialogOpen}
         alternative={approvalAlternative}
+        constraintEmployeeId={constraintEmployeeId}
+        constraintEmployeeName={constraintEmployeeName}
         onAllApproved={handleAllApproved}
         onRejected={handleRejected}
       />
