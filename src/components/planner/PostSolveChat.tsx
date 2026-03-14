@@ -72,8 +72,15 @@ interface PreparedAlternatives {
 }
 
 function prepareAlternatives(alternatives: Alternative[]): PreparedAlternatives {
-  const filledAlts = alternatives.filter((a) => a.ConflictShiftFilled !== false).slice(0, 5);
-  const openAlt = alternatives.find((a) => a.ConflictShiftFilled === false);
+  // Deduplicate by rank to avoid showing the same alternative twice
+  const seen = new Set<number>();
+  const deduped = alternatives.filter((a) => {
+    if (seen.has(a.Rank)) return false;
+    seen.add(a.Rank);
+    return true;
+  });
+  const filledAlts = deduped.filter((a) => a.ConflictShiftFilled !== false).slice(0, 5);
+  const openAlt = deduped.find((a) => a.ConflictShiftFilled === false);
   return {
     filledAlts,
     openAlt,
@@ -450,6 +457,10 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
     setApprovalDialogOpen(true);
   };
 
+  /** Get the constraint employee name for the current approval flow */
+  const constraintEmployeeId = lastConstraint?.employeeId;
+  const constraintEmployeeName = lastConstraint?.employeeName;
+
   const handleAllApproved = (alt: Alternative) => {
     onApplyAlternative?.(alt);
     setMessages((prev) => [
@@ -585,41 +596,42 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
                       </div>
                     )}
                   </div>
-                  {msg.alternatives.map((alt) => {
+                  {msg.alternatives.map((alt, altIdx) => {
                     const classified = classifyAlternative(alt, msg.constraintSummary);
                     const TypeIcon = classified.icon;
                     const isOpenShift = alt.ConflictShiftFilled === false;
+                    const isRecommended = altIdx === 0 && !isOpenShift;
 
                     return (
                       <div
                         key={alt.Rank}
                         className={cn(
-                          "border-2 rounded-xl overflow-hidden bg-card shadow-sm transition-all hover:shadow-lg",
-                          alt.Rank === 1 && !isOpenShift && "border-primary/50 ring-2 ring-primary/15 shadow-primary/5",
-                          alt.Rank !== 1 && !isOpenShift && "border-border hover:border-primary/30",
-                          isOpenShift && "border-dashed border-muted-foreground/30 opacity-75"
+                          "rounded-xl overflow-hidden bg-card transition-all",
+                          isRecommended && "border-2 border-primary ring-2 ring-primary/20 shadow-lg shadow-primary/10",
+                          !isRecommended && !isOpenShift && "border border-border shadow-sm hover:border-primary/30 hover:shadow-md",
+                          isOpenShift && "border border-dashed border-muted-foreground/30 opacity-75"
                         )}
                       >
                         {/* Colored top accent bar */}
-                        {!isOpenShift && (
-                          <div className={cn(
-                            "h-1",
-                            alt.Rank === 1 ? "bg-primary" : "bg-muted-foreground/20"
-                          )} />
+                        {isRecommended && (
+                          <div className="h-1.5 bg-gradient-to-r from-primary to-primary/60" />
+                        )}
+                        {!isRecommended && !isOpenShift && (
+                          <div className="h-0.5 bg-muted-foreground/15" />
                         )}
 
                         {/* Header */}
                         <div className="flex items-center justify-between px-4 pt-3 pb-1">
                           <div className="flex items-center gap-2.5">
                             <div className={cn(
-                              "flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold",
-                              alt.Rank === 1 && !isOpenShift
-                                ? "bg-primary text-primary-foreground"
+                              "flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold",
+                              isRecommended
+                                ? "bg-primary text-primary-foreground shadow-sm"
                                 : isOpenShift
                                   ? "bg-muted text-muted-foreground"
                                   : "bg-secondary text-secondary-foreground"
                             )}>
-                              {alt.Rank}
+                              {isRecommended ? "⭐" : alt.Rank}
                             </div>
                             <div className="flex flex-col">
                               <div className={cn(
@@ -641,9 +653,9 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
                             </div>
                           </div>
                           <div className="flex items-center gap-1.5">
-                            {alt.Rank === 1 && !isOpenShift && (
-                              <Badge className="text-[10px] bg-primary/10 text-primary border-primary/30 font-semibold">
-                                ⭐ Aanbevolen
+                            {isRecommended && (
+                              <Badge className="text-[10px] bg-primary text-primary-foreground border-primary font-semibold">
+                                Aanbevolen
                               </Badge>
                             )}
                             {isOpenShift && (
@@ -709,7 +721,10 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
                         )}
 
                         {/* Action buttons */}
-                        <div className="border-t px-4 py-3 bg-muted/20 flex justify-end gap-2">
+                        <div className={cn(
+                          "border-t px-4 py-3 flex justify-end gap-2",
+                          isRecommended ? "bg-primary/5" : "bg-muted/20"
+                        )}>
                           {!isOpenShift && (
                             <Button
                               size="sm"
@@ -723,10 +738,10 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
                           )}
                           <Button
                             size="sm"
-                            variant={isOpenShift ? "outline" : alt.Rank === 1 ? "default" : "outline"}
+                            variant={isOpenShift ? "outline" : isRecommended ? "default" : "outline"}
                             className={cn(
                               "text-xs h-8 gap-1.5 px-3",
-                              alt.Rank === 1 && !isOpenShift && "shadow-sm"
+                              isRecommended && "shadow-sm"
                             )}
                             onClick={() => handleApplyAlternative(alt)}
                           >
@@ -845,6 +860,8 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
         open={approvalDialogOpen}
         onOpenChange={setApprovalDialogOpen}
         alternative={approvalAlternative}
+        constraintEmployeeId={constraintEmployeeId}
+        constraintEmployeeName={constraintEmployeeName}
         onAllApproved={handleAllApproved}
         onRejected={handleRejected}
       />
