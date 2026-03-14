@@ -543,6 +543,7 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
                       </div>
                     )}
                   </div>
+                  )}
                   {msg.alternatives.map((alt, altIdx) => {
                     const classified = classifyAlternative(alt, msg.constraintSummary);
                     const TypeIcon = classified.icon;
