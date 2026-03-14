@@ -235,6 +235,9 @@ export default function Index() {
     const normalizedAlt = normalizeAlternativeShiftIds(alt);
     const changes: AlternativeChange[] = normalizedAlt.Changes || [];
 
+    // Switch to roster tab so the animation is visible
+    setActiveTab("roster");
+
     // Apply changes to current assignments instead of replacing with (empty) alt.Assignments
     const applyChangesToAssignments = () => {
       let updated = [...solverAssignments];
@@ -268,6 +271,8 @@ export default function Index() {
         setSolverAssignments(updatedAssignments);
       },
       () => {
+        // Clear any active roster filter after animation completes
+        setRosterFilter(null);
         toast.success(`Alternatief #${alt.Rank} doorgevoerd`, {
           description: `${alt.ChangesFromBaseline} wijziging${alt.ChangesFromBaseline !== 1 ? "en" : ""} toegepast`,
         });
