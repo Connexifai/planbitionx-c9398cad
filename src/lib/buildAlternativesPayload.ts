@@ -19,6 +19,9 @@ export interface AlternativeConstraint {
   date?: string; // YYYY-MM-DD
   shiftKind?: string; // "early","day","late","night"
   strength: "hard" | "soft";
+  // Swap fields
+  swapDayOfWeek?: number; // Day offered to work instead (0=ma,...,6=zo)
+  swapDate?: string; // Date offered to work instead (YYYY-MM-DD)
 }
 
 interface SolverAssignment {
