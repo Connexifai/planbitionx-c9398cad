@@ -555,6 +555,86 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
     }
   };
 
+  /** Handle user picking a day for an open swap */
+  const handleSwapDaySelected = async (baseConstraint: AlternativeConstraint, dayOfWeek: number, dayLabel: string) => {
+    // Remove swap options from the message
+    setMessages((prev) =>
+      prev.map((m) => m.swapOptions ? { ...m, swapOptions: undefined, swapConstraintBase: undefined } : m)
+    );
+
+    // Show user "choice" as a user message
+    setMessages((prev) => [
+      ...prev,
+      { id: Date.now(), role: "user", content: dayLabel },
+    ]);
+    setIsTyping(true);
+
+    const constraint: AlternativeConstraint = {
+      ...baseConstraint,
+      swapDayOfWeek: dayOfWeek,
+    };
+    setLastConstraint(constraint);
+
+    try {
+      const dayNamesNL = ["maandag", "dinsdag", "woensdag", "donderdag", "vrijdag", "zaterdag", "zondag"];
+      const offDay = constraint.dayOfWeek !== undefined ? dayNamesNL[constraint.dayOfWeek] : constraint.date || "";
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: Date.now() + 1,
+          role: "assistant",
+          content: `🔄 **Begrepen:** ${constraint.employeeName} wil ${offDay} ruilen met ${dayLabel.toLowerCase()}.\n\n⏳ Ik zoek de beste ruilopties...`,
+        },
+      ]);
+
+      // Pre-check
+      const removedShifts = getRemovedAssignments(solverAssignments, constraint, requestData?.Shifts || []);
+      if (removedShifts.length === 0) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: Date.now() + 2,
+            role: "assistant",
+            content: `ℹ️ **${constraint.employeeName}** is niet ingepland op ${offDay}. Er is geen dienst om te ruilen.\n\nProbeer een andere dag.`,
+          },
+        ]);
+        setIsTyping(false);
+        return;
+      }
+
+      const altResponse = await fetchAlternatives(constraint, "narrow");
+      const prepared = prepareAlternatives(altResponse.Alternatives || []);
+
+      if (prepared.visibleAlts.length === 0) {
+        setMessages((prev) => [
+          ...prev,
+          { id: Date.now() + 2, role: "assistant", content: "⚠️ Geen ruilopties gevonden voor deze combinatie." },
+        ]);
+      } else {
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: Date.now() + 2,
+            role: "assistant",
+            content: `Ik heb **${formatAlternativeCount(prepared)}** gevonden:`,
+            alternatives: prepared.visibleAlts,
+            baseline: altResponse.Baseline,
+            constraintSummary: `${constraint.employeeName} ruilt ${offDay} met ${dayLabel.toLowerCase()}`,
+            pendingConstraint: constraint,
+          },
+        ]);
+      }
+    } catch (error) {
+      console.error("Swap day selection error:", error);
+      setMessages((prev) => [
+        ...prev,
+        { id: Date.now() + 1, role: "assistant", content: `❌ Er ging iets mis: ${error instanceof Error ? error.message : "Onbekende fout"}` },
+      ]);
+    } finally {
+      setIsTyping(false);
+    }
+  };
 
 
 
