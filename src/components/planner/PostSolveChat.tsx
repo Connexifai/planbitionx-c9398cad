@@ -612,16 +612,14 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
                           isOpenShift && "border border-dashed border-muted-foreground/30 opacity-75"
                         )}
                       >
-                        {/* Colored top accent bar */}
-                        {isRecommended && (
-                          <div className="h-1.5 bg-gradient-to-r from-primary to-primary/60" />
-                        )}
-                        {!isRecommended && !isOpenShift && (
-                          <div className="h-0.5 bg-muted-foreground/15" />
-                        )}
-
-                        {/* Header */}
-                        <div className="flex items-center justify-between px-4 pt-3 pb-1">
+                        {/* Colored type header */}
+                        <div className={cn(
+                          "px-4 py-2.5 flex items-center justify-between",
+                          classified.type === "direct_replacement" && !isOpenShift && "bg-emerald-500/15 dark:bg-emerald-500/10",
+                          classified.type === "swap" && "bg-sky-500/15 dark:bg-sky-500/10",
+                          classified.type === "chain" && "bg-amber-500/15 dark:bg-amber-500/10",
+                          isOpenShift && "bg-muted/40",
+                        )}>
                           <div className="flex items-center gap-2.5">
                             <div className={cn(
                               "flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold",
@@ -629,16 +627,21 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
                                 ? "bg-primary text-primary-foreground shadow-sm"
                                 : isOpenShift
                                   ? "bg-muted text-muted-foreground"
-                                  : "bg-secondary text-secondary-foreground"
+                                  : classified.type === "direct_replacement" ? "bg-emerald-500/20 text-emerald-700 dark:text-emerald-400"
+                                  : classified.type === "swap" ? "bg-sky-500/20 text-sky-700 dark:text-sky-400"
+                                  : "bg-amber-500/20 text-amber-700 dark:text-amber-400"
                             )}>
                               {isRecommended ? "⭐" : alt.Rank}
                             </div>
                             <div className="flex flex-col">
                               <div className={cn(
                                 "flex items-center gap-1.5 text-sm font-semibold",
-                                isOpenShift ? "text-muted-foreground" : "text-foreground"
+                                isOpenShift ? "text-muted-foreground"
+                                  : classified.type === "direct_replacement" ? "text-emerald-700 dark:text-emerald-400"
+                                  : classified.type === "swap" ? "text-sky-700 dark:text-sky-400"
+                                  : "text-amber-700 dark:text-amber-400"
                               )}>
-                                <TypeIcon className={cn("h-4 w-4", isOpenShift ? "text-muted-foreground" : "text-primary")} />
+                                <TypeIcon className="h-4 w-4" />
                                 {classified.label}
                               </div>
                               <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground mt-0.5">
@@ -660,10 +663,16 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
                           </div>
                         </div>
 
+                        {/* Explanation */}
+                        <div className="px-4 py-2 mx-3 mb-1 mt-2 bg-muted/40 rounded-lg border border-border/50">
+                          <p className="text-xs text-muted-foreground leading-relaxed">
+                            {isOpenShift ? "⚠️" : "💡"} {classified.explanation}
+                          </p>
+                        </div>
 
                         {/* Changes detail */}
                         {alt.Changes && alt.Changes.length > 0 && (
-                          <div className="px-4 pb-3 space-y-1.5">
+                          <div className="px-4 pb-3 pt-1 space-y-1.5">
                             {alt.Changes.map((change, i) => (
                               <div
                                 key={i}
