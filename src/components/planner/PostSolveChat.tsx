@@ -694,17 +694,6 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
                                 )}
                               </div>
                             ))}
-                            {/* Show Reason from solver if available */}
-                            {alt.Changes.some((c) => c.Reason) && (
-                              <div className="mt-1.5 px-3 py-1.5 text-[11px] text-muted-foreground bg-muted/30 rounded-lg">
-                                {alt.Changes.filter((c) => c.Reason).map((c, i) => (
-                                  <div key={i} className="flex items-start gap-1.5">
-                                    <span className="shrink-0">📝</span>
-                                    <span className="italic">{c.Reason}</span>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
                           </div>
                         )}
 
