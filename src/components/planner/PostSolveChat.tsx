@@ -275,16 +275,6 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
         return;
       }
 
-      // Show understanding message
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: Date.now() + 1,
-          role: "assistant",
-          content: `✅ **Begrepen:** ${intent.summary}\n\n⏳ Ik zoek nu snel de beste alternatieven...`,
-        },
-      ]);
-
       // Step 2: Build constraint
       const constraint: AlternativeConstraint = {
         employeeId: String(intent.employeeId),
@@ -298,6 +288,71 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
         swapDayOfWeek: intent.swapDayOfWeek ?? undefined,
         swapDate: intent.swapDate ?? undefined,
       };
+
+      // Open swap: isSwap=true but no specific target day → ask user which free day
+      const isOpenSwap = intent.isSwap === true
+        && constraint.swapDayOfWeek === undefined
+        && constraint.swapDate === undefined;
+
+      if (isOpenSwap) {
+        // Find the employee's free days so we can suggest them
+        const dayNamesNL = ["maandag", "dinsdag", "woensdag", "donderdag", "vrijdag", "zaterdag", "zondag"];
+        const empAssignments = (solverAssignments || []).filter(
+          (a: any) => String(a.PersonId) === String(constraint.employeeId)
+        );
+        // Get which ISO day-of-week numbers are occupied
+        const occupiedDays = new Set<number>();
+        for (const a of empAssignments) {
+          const d = new Date(a.Start);
+          const solverDay = d.getDay() === 0 ? 6 : d.getDay() - 1; // JS→ISO
+          occupiedDays.add(solverDay);
+        }
+        const freeDays = dayNamesNL
+          .map((name, idx) => ({ name, idx }))
+          .filter(({ idx }) => !occupiedDays.has(idx));
+
+        const conflictDay = constraint.dayOfWeek !== undefined ? dayNamesNL[constraint.dayOfWeek] : constraint.date || "";
+
+        if (freeDays.length === 0) {
+          setMessages((prev) => [
+            ...prev,
+            {
+              id: Date.now() + 1,
+              role: "assistant",
+              content: `⚠️ **${constraint.employeeName}** is elke dag ingepland in het huidige rooster, er zijn geen vrije dagen beschikbaar om mee te ruilen.`,
+            },
+          ]);
+          setIsTyping(false);
+          return;
+        }
+
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: Date.now() + 1,
+            role: "assistant",
+            content: `🔄 **${constraint.employeeName}** wil ${conflictDay} ruilen met een andere dag.\n\nWelke vrije dag wil ${constraint.employeeName} daarvoor werken?`,
+            swapOptions: freeDays.map(d => ({ dayOfWeek: d.idx, label: d.name.charAt(0).toUpperCase() + d.name.slice(1) })),
+            swapConstraintBase: constraint,
+          },
+        ]);
+        setIsTyping(false);
+        return;
+      }
+
+      // Show understanding message
+      const isSwapWithTarget = intent.isSwap === true;
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: Date.now() + 1,
+          role: "assistant",
+          content: isSwapWithTarget
+            ? `✅ **Begrepen:** ${intent.summary}\n\n🔄 Ik zoek nu de beste ruilopties...`
+            : `✅ **Begrepen:** ${intent.summary}\n\n⏳ Ik zoek nu snel de beste alternatieven...`,
+        },
+      ]);
+
       setLastConstraint(constraint);
 
       // Debug: log target employee's assignments from solver output
