@@ -627,6 +627,7 @@ export default function Index() {
                             requestData={requestData}
                             solverAssignments={solverAssignments}
                             onApplyAlternative={handleApplyAlternative}
+                            onNavigateToEmployee={handleNavigateToEmployee}
                           />
                         ) : (
                           <AiBriefingChat
