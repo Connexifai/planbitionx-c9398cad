@@ -545,7 +545,7 @@ export default function Index() {
                           }}
                         />
                         {!jsonLoaded && !isMobile && (
-                          <div className="absolute right-[95%] top-[45%]">
+                          <div className="absolute right-[95%] top-[50%]">
                             <RobotQuoteBubble />
                           </div>
                         )}
