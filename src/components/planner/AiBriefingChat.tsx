@@ -176,34 +176,17 @@ export function AiBriefingChat({ employees, schedulePeriod, constraints, onConst
           {messages.map((msg) => (
             <div key={msg.id} className={cn("flex gap-3 max-w-[85%]", msg.role === "user" ? "ml-auto flex-row-reverse" : "")}>
               <div className={cn("flex items-center justify-center w-8 h-8 rounded-lg shrink-0 mt-0.5 overflow-hidden", msg.role === "assistant" ? "bg-primary/10" : "bg-accent")}>
-                {msg.role === "assistant" ? <img src={robotImg} alt="AI" className="h-10 w-10 object-cover object-top scale-[2.2] -translate-y-3" /> : <User className="h-4 w-4 text-muted-foreground" />}
+                {msg.role === "assistant" ? <img src={robotImg} alt="AI" className="h-full w-full object-cover object-[center_28%] scale-[2.7]" /> : <User className="h-4 w-4 text-muted-foreground" />}
               </div>
-              <div className={cn("rounded-xl px-4 py-3 text-sm leading-relaxed", msg.role === "assistant" ? "bg-card border shadow-sm" : "bg-primary text-primary-foreground")}>
-                {msg.role === "assistant" ? (
-                  <div className="prose prose-sm dark:prose-invert max-w-none [&>p]:my-1 [&>ul]:my-1 [&>ol]:my-1">
-                    <ReactMarkdown>{msg.content}</ReactMarkdown>
-                  </div>
-                ) : (
-                  <p>{msg.content}</p>
-                )}
-              </div>
-            </div>
-          ))}
-          {loading && (
-            <div className="flex gap-3 max-w-[85%]">
+...
               <div className="flex items-center justify-center w-8 h-8 rounded-lg shrink-0 mt-0.5 bg-primary/10 overflow-hidden">
-                <img src={robotImg} alt="AI" className="h-10 w-10 object-cover object-top scale-[2.2] -translate-y-3" />
+                <img src={robotImg} alt="AI" className="h-full w-full object-cover object-[center_28%] scale-[2.7]" />
               </div>
-              <div className="rounded-xl px-4 py-3 text-sm bg-card border shadow-sm">
-                <Loader2 className="h-4 w-4 animate-spin text-primary" />
-              </div>
-            </div>
-          )}
-        </div>
-
-        <div className="bg-background pt-4 pb-3 px-4 border-t border-border">
+...
           <div className="flex items-center gap-1 mb-2">
-            <img src={robotImg} alt="AI" className="h-6 w-6 object-cover object-top scale-[2.2] -translate-y-2" />
+            <span className="h-6 w-6 overflow-hidden rounded-md">
+              <img src={robotImg} alt="AI" className="h-full w-full object-cover object-[center_28%] scale-[2.7]" />
+            </span>
             <span className="text-xs font-medium text-muted-foreground">{t("chat.sendMessage")}</span>
           </div>
           <div className="flex items-center gap-2 rounded-xl border-2 border-primary/20 bg-card px-4 py-3 shadow-md focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/10 transition-all">
