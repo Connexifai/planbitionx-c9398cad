@@ -948,8 +948,25 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
                 </div>
               </div>
             </div>
-          )}
+              )}
 
+              {/* Open swap day picker */}
+              {msg.swapOptions && msg.swapOptions.length > 0 && msg.swapConstraintBase && (
+                <div className="mt-3 ml-11 flex flex-wrap gap-2">
+                  {msg.swapOptions.map((opt) => (
+                    <Button
+                      key={opt.dayOfWeek}
+                      variant="outline"
+                      size="sm"
+                      className="gap-2 text-xs"
+                      disabled={isTyping}
+                      onClick={() => handleSwapDaySelected(msg.swapConstraintBase!, opt.dayOfWeek, opt.label)}
+                    >
+                      🔄 {opt.label}
+                    </Button>
+                  ))}
+                </div>
+              )}
 
 
         </div>
