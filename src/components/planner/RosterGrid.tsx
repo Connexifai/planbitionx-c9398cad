@@ -435,12 +435,15 @@ export function RosterGrid({ data, employeeConstraints = [], animationState, fil
                   pickupDayDate={isPickupPhase && currentMove?.source.employeeId === empIdStr ? currentMove.source.dayDate : undefined}
                   isLandingRow={isLandingPhase && currentMove?.target.employeeId === empIdStr}
                   landingDayDate={isLandingPhase && currentMove?.target.employeeId === empIdStr ? currentMove.target.dayDate : undefined}
+                  isConflictEmployee={!!filter?.conflictEmployeeName && emp.name.toLowerCase() === filter.conflictEmployeeName.toLowerCase()}
+                  conflictDayDate={filter?.conflictDayDate}
                 />
               </div>
             );
           })}
         </div>
       </div>
+    </div>
     </div>
   );
 }
