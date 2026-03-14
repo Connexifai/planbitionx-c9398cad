@@ -645,7 +645,7 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
                                 {classified.label}
                               </div>
                               <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground mt-0.5">
-                                <span>{alt.ChangesFromBaseline} wijziging{alt.ChangesFromBaseline !== 1 && "en"}</span>
+                                <span>{isOpenShift ? (alt.Changes?.filter(c => c.Action === "removed").length || 1) : alt.ChangesFromBaseline} wijziging{(isOpenShift ? (alt.Changes?.filter(c => c.Action === "removed").length || 1) : alt.ChangesFromBaseline) !== 1 && "en"}</span>
                               </div>
                             </div>
                           </div>
@@ -671,9 +671,14 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
                         </div>
 
                         {/* Changes detail */}
-                        {alt.Changes && alt.Changes.length > 0 && (
+                        {alt.Changes && alt.Changes.length > 0 && (() => {
+                          // For "open shift" alternatives, only show the removed shift(s) for the constraint employee
+                          const visibleChanges = isOpenShift
+                            ? alt.Changes.filter((c) => c.Action === "removed")
+                            : alt.Changes;
+                          return visibleChanges.length > 0 && (
                           <div className="px-4 pb-3 pt-1 space-y-1.5">
-                            {alt.Changes.map((change, i) => (
+                            {visibleChanges.map((change, i) => (
                               <div
                                 key={i}
                                 className={cn(
@@ -704,7 +709,8 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
                               </div>
                             ))}
                           </div>
-                        )}
+                          );
+                        })()}
 
                         {/* Action buttons */}
                         <div className={cn(
