@@ -226,12 +226,14 @@ export function EmployeeApprovalDialog({
   open,
   onOpenChange,
   alternative,
+  constraintEmployeeId,
+  constraintEmployeeName,
   onAllApproved,
   onRejected,
 }: EmployeeApprovalDialogProps) {
   const [employees, setEmployees] = useState<AffectedEmployee[]>([]);
   const [activeIndex, setActiveIndex] = useState(0);
-  const [phase, setPhase] = useState<"approving" | "done">("approving");
+  const [phase, setPhase] = useState<"approving" | "done" | "notifying">("approving");
 
   useEffect(() => {
     if (!alternative || !open) return;
@@ -240,6 +242,8 @@ export function EmployeeApprovalDialog({
 
     for (const change of changes) {
       const id = String(change.EmployeeId);
+      // Skip the constraint employee — they requested the change, no approval needed
+      if (constraintEmployeeId && id === constraintEmployeeId) continue;
       if (!empMap.has(id)) {
         empMap.set(id, {
           id,
@@ -254,7 +258,7 @@ export function EmployeeApprovalDialog({
     setEmployees(Array.from(empMap.values()));
     setActiveIndex(0);
     setPhase("approving");
-  }, [alternative, open]);
+  }, [alternative, open, constraintEmployeeId]);
 
   const handleApprove = (index: number) => {
     setEmployees((prev) => {
