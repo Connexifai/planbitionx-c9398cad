@@ -643,12 +643,6 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
                               </div>
                               <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground mt-0.5">
                                 <span>{alt.ChangesFromBaseline} wijziging{alt.ChangesFromBaseline !== 1 && "en"}</span>
-                                {alt.Score && (
-                                  <>
-                                    <span>·</span>
-                                    <span>{alt.Score.FillRatePercentage.toFixed(0)}% bezetting</span>
-                                  </>
-                                )}
                               </div>
                             </div>
                           </div>
