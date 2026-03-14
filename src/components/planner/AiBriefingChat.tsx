@@ -191,7 +191,7 @@ export function AiBriefingChat({ employees, schedulePeriod, constraints, onConst
           ))}
           {loading && (
             <div className="flex gap-3 max-w-[85%]">
-              <div className="flex items-center justify-center w-8 h-8 rounded-lg shrink-0 mt-0.5 bg-primary/10 overflow-hidden">
+              <div className="flex items-center justify-center w-10 h-10 rounded-lg shrink-0 mt-0.5 bg-primary/10 overflow-hidden">
                 <img src={robotImg} alt="AI" className="h-full w-full object-cover" />
               </div>
               <div className="rounded-xl px-4 py-3 text-sm bg-card border shadow-sm">
