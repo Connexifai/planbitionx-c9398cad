@@ -8,6 +8,12 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+// Hardcoded VAPID keys generated via web-push library
+// These are the correct format (raw EC keys in base64url)
+const VAPID_PUBLIC_KEY = "BKFmwF9MQCm4D3ipLzjzDZZALjkPlmV1a_wzLNz-pHcIPM-rqU4S_3N3XtwiOv3nUL83zHZovFOBVYi6hE8i1ns";
+const VAPID_PRIVATE_KEY = "s-HZSby-O4OUA0Bvz--1JFG-mhSThQ4ZALueNx9ufqg";
+const VAPID_SUBJECT = "mailto:admin@example.com";
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -18,23 +24,6 @@ serve(async (req) => {
 
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const VAPID_PRIVATE_KEY = Deno.env.get("VAPID_PRIVATE_KEY");
-    const VAPID_PUBLIC_KEY = Deno.env.get("VAPID_PUBLIC_KEY");
-    let VAPID_SUBJECT = Deno.env.get("VAPID_SUBJECT") || "mailto:admin@example.com";
-    // Ensure VAPID_SUBJECT is a valid mailto: or https: URL
-    if (!VAPID_SUBJECT.startsWith("mailto:") && !VAPID_SUBJECT.startsWith("https://")) {
-      VAPID_SUBJECT = "mailto:admin@example.com";
-    }
-
-    if (!VAPID_PRIVATE_KEY || !VAPID_PUBLIC_KEY) {
-      return new Response(
-        JSON.stringify({ error: "VAPID keys not configured" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-      );
-    }
-
-    console.log("VAPID_PUBLIC_KEY length:", VAPID_PUBLIC_KEY.length);
-    console.log("VAPID_PRIVATE_KEY length:", VAPID_PRIVATE_KEY.length);
 
     webpush.setVapidDetails(VAPID_SUBJECT, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
 
@@ -86,7 +75,7 @@ serve(async (req) => {
         await webpush.sendNotification(pushSubscription, notificationPayload);
         sent++;
       } catch (err: any) {
-        console.error(`Push error for ${sub.id}:`, err?.statusCode, err?.body);
+        console.error(`Push error for ${sub.id}:`, err?.statusCode, err?.body, err?.message);
         if (err?.statusCode === 404 || err?.statusCode === 410) {
           expiredIds.push(sub.id);
         }
