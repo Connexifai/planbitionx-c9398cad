@@ -267,7 +267,7 @@ function SolverSection({ solver, setSolver }: { solver: SolverSettings; setSolve
         </div>
         <Switch checked={solver.aiExplanation} onCheckedChange={(v) => update({ aiExplanation: v })} />
       </div>
-      <RuleRow label={t("sidebar.seedRepeat")} sublabel={t("sidebar.seedRepeatSub")} value={solver.seed} unit="" onChange={(v) => update({ seed: v })} />
+      
     </div>
   );
 }
