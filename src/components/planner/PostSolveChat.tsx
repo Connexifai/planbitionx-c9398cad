@@ -501,7 +501,7 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
               >
                 <div
                   className={cn(
-                    "flex items-center justify-center w-8 h-8 rounded-lg shrink-0 mt-0.5 overflow-hidden",
+                    "flex items-center justify-center w-10 h-10 rounded-lg shrink-0 mt-0.5 overflow-hidden",
                     msg.role === "assistant" ? "bg-primary/10" : "bg-accent"
                   )}
                 >
