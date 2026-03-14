@@ -29,6 +29,8 @@ interface Message {
   candidates?: CandidateEmployee[];
   /** Original user message to retry after disambiguation */
   originalMessage?: string;
+  /** Whether this is a confirmation of an applied alternative (hides action buttons) */
+  applied?: boolean;
 }
 
 export interface PostSolveChatProps {
