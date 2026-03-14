@@ -254,9 +254,20 @@ export function RosterGrid({ data, employeeConstraints = [], animationState, fil
   const { t } = useTranslation();
   const parentRef = useRef<HTMLDivElement>(null);
 
-  const employees = data?.employees ?? [];
+  const allEmployees = data?.employees ?? [];
   const days = data?.days ?? [];
   const numDays = days.length;
+
+  // Filter employees when a filter is active
+  const filterNameSet = useMemo(() => {
+    if (!filter?.employeeNames?.length) return null;
+    return new Set(filter.employeeNames.map(n => n.toLowerCase()));
+  }, [filter]);
+
+  const employees = useMemo(() => {
+    if (!filterNameSet) return allEmployees;
+    return allEmployees.filter(emp => filterNameSet.has(emp.name.toLowerCase()));
+  }, [allEmployees, filterNameSet]);
 
   const rowVirtualizer = useVirtualizer({
     count: employees.length,
