@@ -517,7 +517,8 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
 
       // Step 3: First search with "narrow" scope (fast, local solutions)
       const altResponse = await fetchAlternatives(constraint, "narrow");
-      const narrowPrepared = prepareAlternatives(altResponse.Alternatives || []);
+      const swapEnriched = enrichSwapAlternatives(altResponse.Alternatives || [], constraint, solverAssignments, requestData);
+      const narrowPrepared = prepareAlternatives(swapEnriched);
       const resultMsgId = Date.now() + 2;
 
       if (narrowPrepared.visibleAlts.length === 0) {
