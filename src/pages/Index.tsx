@@ -172,6 +172,7 @@ function SolvingOverlay() {
 export default function Index() {
   const { t } = useTranslation();
   const { signOut, user } = useAuth();
+  const isMobile = useIsMobile();
   const [dark, setDark] = useState(() => document.documentElement.classList.contains("dark"));
   const [solved, setSolved] = useState(false);
   const [solving, setSolving] = useState(false);
