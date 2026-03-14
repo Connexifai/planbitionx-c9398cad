@@ -622,16 +622,10 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
                           </p>
                         </div>
 
-                        {/* Changes detail */}
-                        {alt.Changes && alt.Changes.length > 0 && (() => {
-                          // For "open shift" alternatives, only show the removed shift(s) for the constraint employee
-                          const targetName = msg.pendingConstraint?.employeeName;
-                          const visibleChanges = isOpenShift
-                            ? alt.Changes.filter((c) => c.Action === "removed" && targetName && c.EmployeeName === targetName)
-                            : alt.Changes;
-                          return visibleChanges.length > 0 && (
+                        {/* Changes detail — hidden for open shift alternatives */}
+                        {!isOpenShift && alt.Changes && alt.Changes.length > 0 && (
                           <div className="px-4 pb-3 pt-1 space-y-1.5">
-                            {visibleChanges.map((change, i) => (
+                            {alt.Changes.map((change, i) => (
                               <div
                                 key={i}
                                 className={cn(
@@ -662,8 +656,7 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
                               </div>
                             ))}
                           </div>
-                          );
-                        })()}
+                        )}
 
                         {/* Action buttons — hidden for applied alternatives */}
                         {!msg.applied && (
