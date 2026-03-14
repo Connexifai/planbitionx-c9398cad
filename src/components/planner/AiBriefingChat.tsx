@@ -175,7 +175,7 @@ export function AiBriefingChat({ employees, schedulePeriod, constraints, onConst
         <div ref={scrollRef} className="flex-1 overflow-y-auto roster-scroll space-y-4 px-2 min-h-0">
           {messages.map((msg) => (
             <div key={msg.id} className={cn("flex gap-3 max-w-[85%]", msg.role === "user" ? "ml-auto flex-row-reverse" : "")}>
-              <div className={cn("flex items-center justify-center w-8 h-8 rounded-lg shrink-0 mt-0.5 overflow-hidden", msg.role === "assistant" ? "bg-primary/10" : "bg-accent")}>
+              <div className={cn("flex items-center justify-center w-10 h-10 rounded-lg shrink-0 mt-0.5 overflow-hidden", msg.role === "assistant" ? "bg-primary/10" : "bg-accent")}>
                 {msg.role === "assistant" ? <img src={robotImg} alt="AI" className="h-full w-full object-cover" /> : <User className="h-4 w-4 text-muted-foreground" />}
               </div>
               <div className={cn("rounded-xl px-4 py-3 text-sm leading-relaxed", msg.role === "assistant" ? "bg-card border shadow-sm" : "bg-primary text-primary-foreground")}>
