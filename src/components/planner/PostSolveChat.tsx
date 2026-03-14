@@ -24,7 +24,6 @@ interface Message {
   alternatives?: Alternative[];
   baseline?: AlternativesResponse["Baseline"];
   constraintSummary?: string;
-  showSearchFull?: boolean;
   pendingConstraint?: AlternativeConstraint;
   /** Disambiguation candidates */
   candidates?: CandidateEmployee[];
