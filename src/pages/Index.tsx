@@ -199,7 +199,7 @@ export default function Index() {
 
   useEffect(() => {
     if (entranceVisible) {
-      const timer = setTimeout(() => setEntranceVisible(false), 1200);
+      const timer = setTimeout(() => setEntranceVisible(false), 1800);
       return () => clearTimeout(timer);
     }
   }, [entranceVisible]);
