@@ -622,8 +622,9 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
                         {/* Changes detail */}
                         {alt.Changes && alt.Changes.length > 0 && (() => {
                           // For "open shift" alternatives, only show the removed shift(s) for the constraint employee
+                          const targetName = msg.pendingConstraint?.employeeName;
                           const visibleChanges = isOpenShift
-                            ? alt.Changes.filter((c) => c.Action === "removed" && msg.constraintSummary?.employeeName && c.EmployeeName === msg.constraintSummary.employeeName)
+                            ? alt.Changes.filter((c) => c.Action === "removed" && targetName && c.EmployeeName === targetName)
                             : alt.Changes;
                           return visibleChanges.length > 0 && (
                           <div className="px-4 pb-3 pt-1 space-y-1.5">
