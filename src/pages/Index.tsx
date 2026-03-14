@@ -37,6 +37,8 @@ import robotImg from "@/assets/robot-assistant.png";
 import { useRosterAnimation } from "@/hooks/useRosterAnimation";
 import { normalizeAlternativeShiftIds, type AlternativeChange } from "@/lib/buildAlternativesPayload";
 import { useAuth } from "@/contexts/AuthContext";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 function useTypingText(text: string, speed = 40) {
   const [displayed, setDisplayed] = useState("");
