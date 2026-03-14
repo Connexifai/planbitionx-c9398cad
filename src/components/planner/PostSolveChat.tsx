@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { SendHorizontal, User, CheckCircle2, UserPlus, Repeat2, GitBranch, Search, AlertCircle, Smartphone } from "lucide-react";
+import { SendHorizontal, User, CheckCircle2, UserPlus, Repeat2, GitBranch, AlertCircle, Smartphone } from "lucide-react";
 import robotImg from "@/assets/robot-assistant.png";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -24,7 +24,6 @@ interface Message {
   alternatives?: Alternative[];
   baseline?: AlternativesResponse["Baseline"];
   constraintSummary?: string;
-  showSearchFull?: boolean;
   pendingConstraint?: AlternativeConstraint;
   /** Disambiguation candidates */
   candidates?: CandidateEmployee[];
@@ -209,63 +208,6 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
     return response;
   }, [requestData, solverAssignments]);
 
-  /** Handle "Zoek verder" — re-search with full scope */
-  const handleSearchFull = useCallback(async (constraint: AlternativeConstraint, messageId: number) => {
-    // Remove the "zoek verder" button from the message
-    setMessages((prev) =>
-      prev.map((m) => m.id === messageId ? { ...m, showSearchFull: false } : m)
-    );
-    setIsTyping(true);
-
-    try {
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: Date.now(),
-          role: "assistant",
-          content: "🔍 Breder zoeken met alle medewerkers en diensten...",
-        },
-      ]);
-
-      const altResponse = await fetchAlternatives(constraint, "full");
-      const prepared = prepareAlternatives(altResponse.Alternatives || []);
-
-      if (prepared.visibleAlts.length === 0) {
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: Date.now() + 1,
-            role: "assistant",
-            content: "❌ Ook met een breder zoekbereik zijn er geen extra alternatieven gevonden.",
-          },
-        ]);
-      } else {
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: Date.now() + 1,
-            role: "assistant",
-            content: `🔎 Met een breder zoekbereik heb ik **${formatAlternativeCount(prepared)}** gevonden:`,
-            alternatives: prepared.visibleAlts,
-            baseline: altResponse.Baseline,
-          },
-        ]);
-      }
-    } catch (error) {
-      console.error("Full search error:", error);
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: Date.now() + 1,
-          role: "assistant",
-          content: `❌ Er ging iets mis bij het uitgebreid zoeken: ${error instanceof Error ? error.message : "Onbekende fout"}`,
-        },
-      ]);
-    } finally {
-      setIsTyping(false);
-    }
-  }, [fetchAlternatives]);
-
   const handleSend = async (text?: string) => {
     const msg = text || input;
     if (!msg.trim() || isTyping) return;
@@ -405,9 +347,7 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
           {
             id: resultMsgId,
             role: "assistant",
-            content: "⚠️ Geen directe alternatieven gevonden in de directe omgeving. Wil je breder zoeken?",
-            showSearchFull: true,
-            pendingConstraint: constraint,
+            content: "⚠️ Geen alternatieven gevonden voor dit verzoek.",
           },
         ]);
       } else {
@@ -416,12 +356,10 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
           {
             id: resultMsgId,
             role: "assistant",
-            content: `Ik heb **${formatAlternativeCount(narrowPrepared)}** gevonden in de directe omgeving:`,
+            content: `Ik heb **${formatAlternativeCount(narrowPrepared)}** gevonden:`,
             alternatives: narrowPrepared.visibleAlts,
             baseline: altResponse.Baseline,
             constraintSummary: intent.summary,
-            showSearchFull: true,
-            pendingConstraint: constraint,
           },
         ]);
       }
@@ -442,12 +380,14 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
 
   const handleApplyAlternative = (alt: Alternative) => {
     onApplyAlternative?.(alt);
+    // Clear alternatives from all previous messages and show applied change
     setMessages((prev) => [
-      ...prev,
+      ...prev.map((m) => m.alternatives ? { ...m, alternatives: undefined } : m),
       {
         id: Date.now(),
         role: "assistant",
-        content: `✅ **Alternatief #${alt.Rank} wordt doorgevoerd!** Bekijk het rooster voor de stapsgewijze animatie van ${alt.ChangesFromBaseline} wijziging${alt.ChangesFromBaseline === 1 ? "" : "en"}.`,
+        content: `✅ **Wijziging doorgevoerd!**`,
+        alternatives: [alt],
       },
     ]);
   };
@@ -463,12 +403,14 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
 
   const handleAllApproved = (alt: Alternative) => {
     onApplyAlternative?.(alt);
+    // Clear alternatives from all previous messages and show applied change
     setMessages((prev) => [
-      ...prev,
+      ...prev.map((m) => m.alternatives ? { ...m, alternatives: undefined } : m),
       {
         id: Date.now(),
         role: "assistant",
-        content: `✅ **Alle medewerkers akkoord!** Alternatief #${alt.Rank} wordt doorgevoerd met ${alt.ChangesFromBaseline} wijziging${alt.ChangesFromBaseline === 1 ? "" : "en"}. Bekijk het rooster voor de animatie.`,
+        content: `✅ **Alle medewerkers akkoord — wijziging doorgevoerd!**`,
+        alternatives: [alt],
       },
     ]);
   };
@@ -786,21 +728,6 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
                 </div>
               )}
 
-              {/* "Zoek verder" button */}
-              {msg.showSearchFull && msg.pendingConstraint && (
-                <div className="mt-3 ml-11">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="gap-2 text-xs"
-                    disabled={isTyping}
-                    onClick={() => handleSearchFull(msg.pendingConstraint!, msg.id)}
-                  >
-                    <Search className="h-3.5 w-3.5" />
-                    🔍 Zoek verder (breder zoekbereik)
-                  </Button>
-                </div>
-              )}
             </div>
           ))}
 
