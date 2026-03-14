@@ -728,21 +728,6 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
                 </div>
               )}
 
-              {/* "Zoek verder" button */}
-              {msg.showSearchFull && msg.pendingConstraint && (
-                <div className="mt-3 ml-11">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="gap-2 text-xs"
-                    disabled={isTyping}
-                    onClick={() => handleSearchFull(msg.pendingConstraint!, msg.id)}
-                  >
-                    <Search className="h-3.5 w-3.5" />
-                    🔍 Zoek verder (breder zoekbereik)
-                  </Button>
-                </div>
-              )}
             </div>
           ))}
 
