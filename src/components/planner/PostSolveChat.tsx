@@ -17,6 +17,11 @@ interface CandidateEmployee {
   name: string;
 }
 
+interface SwapOption {
+  dayOfWeek: number;
+  label: string;
+}
+
 interface Message {
   id: number;
   role: "user" | "assistant";
@@ -31,6 +36,10 @@ interface Message {
   originalMessage?: string;
   /** Whether this is a confirmation of an applied alternative (hides action buttons) */
   applied?: boolean;
+  /** Open swap: available free days to pick from */
+  swapOptions?: SwapOption[];
+  /** Base constraint for open swap (missing swapDayOfWeek) */
+  swapConstraintBase?: AlternativeConstraint;
 }
 
 export interface RosterFilterState {
