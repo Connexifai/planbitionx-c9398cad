@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 // This key should match VAPID_PUBLIC_KEY secret (set via edge function secrets)
-const VAPID_PUBLIC_KEY = "BEkdTDffyKaG7Rcm5LyjCQgECBwdO60uFhtfpbvamY5SUo6M4qA-gn4fU939-XVYd8H742ZxpO2Hu1uc9e4kANI";
+const VAPID_PUBLIC_KEY = "BKFmwF9MQCm4D3ipLzjzDZZALjkPlmV1a_wzLNz-pHcIPM-rqU4S_3N3XtwiOv3nUL83zHZovFOBVYi6hE8i1ns";
 
 function urlBase64ToUint8Array(base64String: string): Uint8Array {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
