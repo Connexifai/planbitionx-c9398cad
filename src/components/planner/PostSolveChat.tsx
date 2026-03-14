@@ -390,6 +390,7 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
         role: "assistant",
         content: `✅ **Wijziging doorgevoerd!**`,
         alternatives: [alt],
+        applied: true,
       },
     ]);
   };
