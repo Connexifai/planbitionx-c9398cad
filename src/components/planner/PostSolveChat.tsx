@@ -562,7 +562,11 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
                         const end = new Date(requestData.End);
                         for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
                           if ((d.getDay() + 6) % 7 === c.dayOfWeek) {
-                            conflictDayDate = d.toISOString().slice(0, 10);
+                            // Use local date to avoid UTC timezone shift
+                            const yyyy = d.getFullYear();
+                            const mm = String(d.getMonth() + 1).padStart(2, '0');
+                            const dd = String(d.getDate()).padStart(2, '0');
+                            conflictDayDate = `${yyyy}-${mm}-${dd}`;
                             break;
                           }
                         }
