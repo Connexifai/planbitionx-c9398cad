@@ -631,7 +631,7 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
                                   : classified.type === "swap" ? "bg-sky-500/20 text-sky-700 dark:text-sky-400"
                                   : "bg-amber-500/20 text-amber-700 dark:text-amber-400"
                             )}>
-                              {isRecommended ? "⭐" : alt.Rank}
+                              {isRecommended ? "⭐" : altIdx + 1}
                             </div>
                             <div className="flex flex-col">
                               <div className={cn(
