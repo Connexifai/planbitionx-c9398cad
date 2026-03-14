@@ -132,7 +132,7 @@
     "postSolvePlaceholder": "Bijv. 'Wie kan de dienst van woensdag overnemen van Franz-Xaver?'"
   },
   "robot": {
-    "uploadJson": "Upload een JSON-bestand om te beginnen",
+    "uploadJson": "Upload een JSON-bestand of klik op voorbeeld om te beginnen",
     "clickMe": "Hey! 👋 Klik op mij om je roosterwensen door te geven in de chat!",
     "clickMePost": "Hey! 👋 Klik op mij, ik help je met verstoringen of verzoeken om het rooster te wijzigen!",
     "quotes": [
