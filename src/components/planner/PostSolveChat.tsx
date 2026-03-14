@@ -706,7 +706,9 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
       }
 
       const altResponse = await fetchAlternatives(constraint, "narrow");
-      const prepared = prepareAlternatives(altResponse.Alternatives || []);
+      // Enrich with swap-day changes: filter to only show swap-compatible alternatives
+      const swapEnriched = enrichSwapAlternatives(altResponse.Alternatives || [], constraint, solverAssignments, requestData);
+      const prepared = prepareAlternatives(swapEnriched);
 
       if (prepared.visibleAlts.length === 0) {
         setMessages((prev) => [
