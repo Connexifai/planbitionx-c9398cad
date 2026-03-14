@@ -204,7 +204,7 @@ export function AiBriefingChat({ employees, schedulePeriod, constraints, onConst
         <div className="bg-background pt-4 pb-3 px-4 border-t border-border">
           <div className="flex items-center gap-1 mb-2">
             <span className="h-6 w-6 overflow-hidden rounded-md">
-              <img src={robotImg} alt="AI" className="h-full w-full object-cover scale-[2.7]" style={{ objectPosition: '50% 15%' }} />
+              <img src={robotImg} alt="AI" className="h-full w-full object-cover" />
             </span>
             <span className="text-xs font-medium text-muted-foreground">{t("chat.sendMessage")}</span>
           </div>
