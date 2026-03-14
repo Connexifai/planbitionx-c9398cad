@@ -506,7 +506,7 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
                   )}
                 >
                   {msg.role === "assistant" ? (
-                    <img src={robotImg} alt="AI" className="h-full w-full object-cover scale-[2.7]" style={{ objectPosition: '50% 28%' }} />
+                    <img src={robotImg} alt="AI" className="h-full w-full object-cover scale-[2.7]" style={{ objectPosition: '50% 15%' }} />
                   ) : (
                     <User className="h-4 w-4 text-muted-foreground" />
                   )}
