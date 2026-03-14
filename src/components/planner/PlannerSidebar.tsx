@@ -156,24 +156,12 @@ function JsonSection({ onJsonLoaded }: { onJsonLoaded?: (rawJson?: string) => vo
       <textarea
         className="w-full h-28 rounded-lg border bg-background px-3 py-2 text-xs font-mono resize-none focus:outline-none focus:ring-1 focus:ring-ring"
         value={jsonText}
-        onChange={(e) => setJsonText(e.target.value)}
+        onChange={(e) => {
+          setJsonText(e.target.value);
+          onJsonLoaded?.(e.target.value);
+          setLoaded(true);
+        }}
       />
-      <div className="flex gap-2">
-        <Button variant={loaded ? "default" : "outline"} size="sm" className="flex-1 text-xs" onClick={handleLoadFromTextarea}>
-          {loaded ? t("sidebar.loaded") : t("sidebar.validateLoad")}
-        </Button>
-        <Button variant="outline" size="sm" className="flex-1 text-xs" onClick={async () => {
-          try {
-            const res = await fetch("/data/schedule-request.json");
-            const text = await res.text();
-            setJsonText(text);
-            onJsonLoaded?.(text);
-            setLoaded(true);
-          } catch {}
-        }}>
-          {t("sidebar.example", "Voorbeeld")}
-        </Button>
-      </div>
     </div>
   );
 }
