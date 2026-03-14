@@ -414,6 +414,7 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
         role: "assistant",
         content: `✅ **Alle medewerkers akkoord — wijziging doorgevoerd!**`,
         alternatives: [alt],
+        applied: true,
       },
     ]);
   };
