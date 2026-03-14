@@ -17,6 +17,9 @@ interface EmployeeApprovalDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   alternative: Alternative | null;
+  /** The employee who requested the change — will be skipped in approval flow */
+  constraintEmployeeId?: string;
+  constraintEmployeeName?: string;
   onAllApproved: (alt: Alternative) => void;
   onRejected: (rejectedByName: string, rejectedById: string) => void;
 }
