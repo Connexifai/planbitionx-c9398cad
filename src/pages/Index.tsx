@@ -224,6 +224,13 @@ export default function Index() {
     }, 150);
   }, [rosterData, scrollToEmployee]);
 
+  const [rosterFilter, setRosterFilter] = useState<import("@/components/planner/RosterGrid").RosterFilterState | null>(null);
+
+  const handleFilterRoster = useCallback((filter: import("@/components/planner/RosterGrid").RosterFilterState | null) => {
+    setActiveTab("roster");
+    setRosterFilter(filter);
+  }, []);
+
   const handleApplyAlternative = useCallback((alt: any) => {
     const normalizedAlt = normalizeAlternativeShiftIds(alt);
     const changes: AlternativeChange[] = normalizedAlt.Changes || [];
@@ -480,7 +487,7 @@ export default function Index() {
               <main className="flex-1 overflow-y-auto overflow-x-hidden p-3 md:p-5 space-y-3 md:space-y-5">
                 <KpiCards solved data={rosterData ?? undefined} solveTime={solveDurationMs} />
                 <RosterTabs value={activeTab} onChange={setActiveTab} />
-                {activeTab === "roster" && <RosterGrid data={rosterData ?? undefined} employeeConstraints={employeeConstraints} animationState={animationState} onRegisterGridFns={registerGridFns} />}
+                {activeTab === "roster" && <RosterGrid data={rosterData ?? undefined} employeeConstraints={employeeConstraints} animationState={animationState} onRegisterGridFns={registerGridFns} filter={rosterFilter} onClearFilter={() => setRosterFilter(null)} />}
                 {activeTab === "dienst" && <ServiceRosterGrid data={rosterData ?? undefined} />}
                 {activeTab === "stats" && <StatsDashboard data={rosterData ?? undefined} />}
                 {activeTab === "uitleg" && <ExplanationView data={rosterData ?? undefined} solverExplanations={solverExplanations} solverStatistics={solverStatistics} />}
@@ -583,6 +590,7 @@ export default function Index() {
                           solverAssignments={solverAssignments}
                           onApplyAlternative={handleApplyAlternative}
                           onNavigateToEmployee={handleNavigateToEmployee}
+                          onFilterRoster={handleFilterRoster}
                         />
                       ) : (
                         <AiBriefingChat
@@ -628,6 +636,7 @@ export default function Index() {
                             solverAssignments={solverAssignments}
                             onApplyAlternative={handleApplyAlternative}
                             onNavigateToEmployee={handleNavigateToEmployee}
+                            onFilterRoster={handleFilterRoster}
                           />
                         ) : (
                           <AiBriefingChat

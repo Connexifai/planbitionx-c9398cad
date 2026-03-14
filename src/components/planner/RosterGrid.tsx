@@ -1,4 +1,6 @@
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { X, Filter } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useTranslation } from "react-i18next";
@@ -115,6 +117,8 @@ const EmployeeRow = memo(function EmployeeRow({
   pickupDayDate,
   isLandingRow,
   landingDayDate,
+  isConflictEmployee,
+  conflictDayDate,
 }: {
   emp: RosterEmployee;
   numDays: number;
@@ -125,6 +129,8 @@ const EmployeeRow = memo(function EmployeeRow({
   pickupDayDate?: string;
   isLandingRow?: boolean;
   landingDayDate?: string;
+  isConflictEmployee?: boolean;
+  conflictDayDate?: string;
 }) {
   const dayConstraintFlags = useMemo(() => {
     return days.map((day) => {
@@ -145,14 +151,22 @@ const EmployeeRow = memo(function EmployeeRow({
         "grid border-b border-border/60 transition-colors hover:bg-accent/30",
         isPickupRow && "bg-destructive/5",
         isLandingRow && "bg-primary/5",
+        isConflictEmployee && "bg-destructive/5",
       )}
       style={{
         gridTemplateColumns: `230px repeat(${numDays}, minmax(85px, 1fr))`,
       }}
     >
-      <div className="flex flex-col justify-center gap-0.5 px-3 py-1.5 border-r sticky left-0 z-[2] bg-card">
-        <div className="flex items-center">
-          <p className="text-[13px] font-bold leading-snug truncate text-foreground">
+      <div className={cn(
+        "flex flex-col justify-center gap-0.5 px-3 py-1.5 border-r sticky left-0 z-[2] bg-card",
+        isConflictEmployee && "bg-destructive/5",
+      )}>
+        <div className="flex items-center gap-1.5">
+          {isConflictEmployee && <span className="text-destructive text-xs">🚫</span>}
+          <p className={cn(
+            "text-[13px] font-bold leading-snug truncate text-foreground",
+            isConflictEmployee && "text-destructive",
+          )}>
             {emp.lastName}, <span className="font-medium">{emp.firstName}</span>
           </p>
         </div>
@@ -188,6 +202,7 @@ const EmployeeRow = memo(function EmployeeRow({
 
         const isBeingPickedUp = isPickupRow && pickupDayDate === dayDate;
         const isLandingTarget = isLandingRow && landingDayDate === dayDate;
+        const isConflictCell = isConflictEmployee && conflictDayDate === dayDate;
 
         return (
           <div
@@ -199,6 +214,7 @@ const EmployeeRow = memo(function EmployeeRow({
               showViolationRing && (cellStrength === "hard" ? "ring-2 ring-inset ring-destructive/50 bg-destructive/10" : "ring-2 ring-inset ring-kpi-unfilled/40 bg-kpi-unfilled/10"),
               isBeingPickedUp && "roster-cell-pickup",
               isLandingTarget && "roster-cell-landing",
+              isConflictCell && "ring-2 ring-inset ring-destructive bg-destructive/15",
             )}
           >
             {hasConstraintOnCell && (
@@ -229,10 +245,18 @@ const EmployeeRow = memo(function EmployeeRow({
   );
 });
 
+export interface RosterFilterState {
+  employeeNames: string[];
+  conflictEmployeeName?: string;
+  conflictDayDate?: string;
+}
+
 interface RosterGridProps {
   data?: RosterData;
   employeeConstraints?: EmployeeConstraint[];
   animationState?: RosterAnimationState;
+  filter?: RosterFilterState | null;
+  onClearFilter?: () => void;
   onRegisterGridFns?: (fns: {
     scrollToEmployee: (empId: string) => Promise<void>;
     getCellRect: (empId: string, dayDate: string) => DOMRect | null;
@@ -240,13 +264,24 @@ interface RosterGridProps {
   }) => void;
 }
 
-export function RosterGrid({ data, employeeConstraints = [], animationState, onRegisterGridFns }: RosterGridProps) {
+export function RosterGrid({ data, employeeConstraints = [], animationState, filter, onClearFilter, onRegisterGridFns }: RosterGridProps) {
   const { t } = useTranslation();
   const parentRef = useRef<HTMLDivElement>(null);
 
-  const employees = data?.employees ?? [];
+  const allEmployees = data?.employees ?? [];
   const days = data?.days ?? [];
   const numDays = days.length;
+
+  // Filter employees when a filter is active
+  const filterNameSet = useMemo(() => {
+    if (!filter?.employeeNames?.length) return null;
+    return new Set(filter.employeeNames.map(n => n.toLowerCase()));
+  }, [filter]);
+
+  const employees = useMemo(() => {
+    if (!filterNameSet) return allEmployees;
+    return allEmployees.filter(emp => filterNameSet.has(emp.name.toLowerCase()));
+  }, [allEmployees, filterNameSet]);
 
   const rowVirtualizer = useVirtualizer({
     count: employees.length,
@@ -323,6 +358,27 @@ export function RosterGrid({ data, employeeConstraints = [], animationState, onR
   const isLandingPhase = phase === "landing";
 
   return (
+    <div className="space-y-2">
+      {/* Filter banner */}
+      {filter && filterNameSet && (
+        <div className="flex items-center justify-between bg-primary/10 border border-primary/20 rounded-lg px-4 py-2">
+          <div className="flex items-center gap-2 text-sm">
+            <Filter className="h-4 w-4 text-primary" />
+            <span className="font-medium text-foreground">
+              Gefilterd: {employees.length} medewerker{employees.length !== 1 && "s"}
+            </span>
+            {filter.conflictEmployeeName && (
+              <Badge variant="destructive" className="text-[10px]">
+                🚫 {filter.conflictEmployeeName}
+              </Badge>
+            )}
+          </div>
+          <Button variant="ghost" size="sm" className="h-7 gap-1 text-xs text-muted-foreground hover:text-foreground" onClick={onClearFilter}>
+            <X className="h-3 w-3" />
+            Wis filter
+          </Button>
+        </div>
+      )}
     <div
       ref={parentRef}
       className="roster-scroll w-full max-w-full rounded-xl border border-border/50 bg-card shadow-sm overflow-x-auto overflow-y-auto max-h-[calc(100vh-280px)]"
@@ -379,12 +435,15 @@ export function RosterGrid({ data, employeeConstraints = [], animationState, onR
                   pickupDayDate={isPickupPhase && currentMove?.source.employeeId === empIdStr ? currentMove.source.dayDate : undefined}
                   isLandingRow={isLandingPhase && currentMove?.target.employeeId === empIdStr}
                   landingDayDate={isLandingPhase && currentMove?.target.employeeId === empIdStr ? currentMove.target.dayDate : undefined}
+                  isConflictEmployee={!!filter?.conflictEmployeeName && emp.name.toLowerCase() === filter.conflictEmployeeName.toLowerCase()}
+                  conflictDayDate={filter?.conflictDayDate}
                 />
               </div>
             );
           })}
         </div>
       </div>
+    </div>
     </div>
   );
 }

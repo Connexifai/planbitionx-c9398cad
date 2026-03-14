@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect, useCallback } from "react";
-import { SendHorizontal, User, CheckCircle2, UserPlus, Repeat2, GitBranch, AlertCircle, Smartphone } from "lucide-react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
+import { SendHorizontal, User, CheckCircle2, UserPlus, Repeat2, GitBranch, AlertCircle, Smartphone, Filter } from "lucide-react";
 import robotImg from "@/assets/robot-head-avatar.png";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -33,11 +33,18 @@ interface Message {
   applied?: boolean;
 }
 
+export interface RosterFilterState {
+  employeeNames: string[];
+  conflictEmployeeName?: string;
+  conflictDayDate?: string;
+}
+
 export interface PostSolveChatProps {
   requestData: any;
   solverAssignments: any[];
   onApplyAlternative?: (alternative: Alternative) => void;
   onNavigateToEmployee?: (employeeName: string) => void;
+  onFilterRoster?: (filter: RosterFilterState | null) => void;
 }
 
 // ─── Helpers to classify and explain alternatives ──────────────
@@ -152,7 +159,7 @@ function classifyAlternative(alt: Alternative, constraintEmployee?: string): Cla
 
 // ─── Main component ────────────────────────────────────────────
 
-export function PostSolveChat({ requestData, solverAssignments, onApplyAlternative, onNavigateToEmployee }: PostSolveChatProps) {
+export function PostSolveChat({ requestData, solverAssignments, onApplyAlternative, onNavigateToEmployee, onFilterRoster }: PostSolveChatProps) {
   const { t } = useTranslation();
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -533,17 +540,58 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
               {msg.alternatives && msg.alternatives.length > 0 && (
                 <div className="mt-4 space-y-4 ml-11">
                   {/* Section header — hidden for applied confirmations */}
-                  {!msg.applied && (
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-sm font-semibold text-foreground flex items-center gap-2">
-                      🔄 Alternatieven
-                      <Badge variant="secondary" className="text-[10px] font-normal">
-                        {msg.alternatives.length} optie{msg.alternatives.length !== 1 && "s"}
-                      </Badge>
-                    </h4>
-                    {msg.baseline && (<></>)}
-                  </div>
-                  )}
+                  {!msg.applied && (() => {
+                    // Collect unique employee names from all alternatives for filtering
+                    const allNames = new Set<string>();
+                    const constraintEmpName = msg.pendingConstraint?.employeeName;
+                    if (constraintEmpName) allNames.add(constraintEmpName);
+                    msg.alternatives!.forEach(alt => {
+                      alt.Changes?.forEach(c => {
+                        if (c.EmployeeName) allNames.add(c.EmployeeName);
+                      });
+                    });
+                    // Determine conflict day date from the constraint
+                    let conflictDayDate: string | undefined;
+                    if (msg.pendingConstraint) {
+                      const c = msg.pendingConstraint;
+                      if (c.date) {
+                        conflictDayDate = c.date;
+                      } else if (c.dayOfWeek !== undefined && requestData?.Start) {
+                        // Find the date matching this dayOfWeek in the schedule period
+                        const start = new Date(requestData.Start);
+                        const end = new Date(requestData.End);
+                        for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+                          if ((d.getDay() + 6) % 7 === c.dayOfWeek) {
+                            conflictDayDate = d.toISOString().slice(0, 10);
+                            break;
+                          }
+                        }
+                      }
+                    }
+                    return (
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                        🔄 Alternatieven
+                        <Badge variant="secondary" className="text-[10px] font-normal">
+                          {msg.alternatives!.length} optie{msg.alternatives!.length !== 1 && "s"}
+                        </Badge>
+                      </h4>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-xs h-7 gap-1.5 px-2.5"
+                        onClick={() => onFilterRoster?.({
+                          employeeNames: Array.from(allNames),
+                          conflictEmployeeName: constraintEmpName,
+                          conflictDayDate,
+                        })}
+                      >
+                        <Filter className="h-3 w-3" />
+                        Filteren
+                      </Button>
+                    </div>
+                    );
+                  })()}
                   {msg.alternatives.map((alt, altIdx) => {
                     const classified = classifyAlternative(alt, msg.constraintSummary);
                     const TypeIcon = classified.icon;
