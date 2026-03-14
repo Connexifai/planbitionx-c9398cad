@@ -268,17 +268,6 @@ function SolverSection({ solver, setSolver }: { solver: SolverSettings; setSolve
         <Switch checked={solver.aiExplanation} onCheckedChange={(v) => update({ aiExplanation: v })} />
       </div>
       <RuleRow label={t("sidebar.seedRepeat")} sublabel={t("sidebar.seedRepeatSub")} value={solver.seed} unit="" onChange={(v) => update({ seed: v })} />
-      <div>
-        <p className="text-sm font-medium mb-1">{t("sidebar.callbackUrl")}</p>
-        <div className="flex items-center gap-1.5 rounded-lg border bg-background px-3 py-1.5 text-xs">
-          <span className="text-kpi-assignments">🔒</span>
-          <Input
-            value={solver.callbackUrl}
-            onChange={(e) => update({ callbackUrl: e.target.value })}
-            className="h-6 border-0 bg-transparent p-0 text-xs shadow-none focus-visible:ring-0"
-          />
-        </div>
-      </div>
     </div>
   );
 }
