@@ -297,6 +297,7 @@ export function PlannerSidebar({
   setSoft,
   solver,
   setSolver,
+  hideIconStrip,
 }: {
   onSolve?: () => void;
   hideFooter?: boolean;
@@ -314,7 +315,6 @@ export function PlannerSidebar({
   const { t } = useTranslation();
   const [activeSection, setActiveSection] = useState<SectionId>("json");
   const [internalCollapsed, setInternalCollapsed] = useState(true);
-  const { hideIconStrip } = arguments[0] as { hideIconStrip?: boolean };
 
   const contentCollapsed = collapsedProp !== undefined ? collapsedProp : internalCollapsed;
   const setContentCollapsed = (value: boolean) => {
