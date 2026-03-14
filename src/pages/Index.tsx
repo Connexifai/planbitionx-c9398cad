@@ -474,24 +474,24 @@ export default function Index() {
                     style={{
                       transition: 'all 3s cubic-bezier(0.4, 0, 0.2, 1)',
                       ...(jsonLoaded
-                        ? { bottom: 24, right: 24, top: 'auto', left: 'auto' }
+                        ? { bottom: isMobile ? 16 : 24, right: isMobile ? 16 : 24, top: 'auto', left: 'auto' }
                         : { top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }
                       ),
                     }}
                   >
                     <div className="flex flex-col items-center">
                       {!jsonLoaded && (
-                        <p className="absolute -bottom-16 left-1/2 -translate-x-1/2 whitespace-nowrap text-lg font-semibold text-muted-foreground">
+                        <p className="absolute -bottom-16 left-1/2 -translate-x-1/2 whitespace-nowrap text-sm md:text-lg font-semibold text-muted-foreground">
                           {t("robot.uploadJson")}
                         </p>
                       )}
 
                       {robotLanded && jsonLoaded && (
                         <div
-                          className="relative bg-card/95 backdrop-blur-md border border-border shadow-2xl rounded-3xl px-5 py-3 max-w-[240px] mb-2 animate-fade-in cursor-pointer pointer-events-auto"
+                          className="relative bg-card/95 backdrop-blur-md border border-border shadow-2xl rounded-3xl px-4 md:px-5 py-2.5 md:py-3 max-w-[200px] md:max-w-[240px] mb-2 animate-fade-in cursor-pointer pointer-events-auto"
                           onClick={() => setChatOpen(true)}
                         >
-                          <p className="text-sm font-semibold leading-snug text-foreground tracking-wide">{t("robot.clickMe")}</p>
+                          <p className="text-xs md:text-sm font-semibold leading-snug text-foreground tracking-wide">{t("robot.clickMe")}</p>
                           <div className="absolute -bottom-2.5 right-6 w-5 h-5 bg-card/95 backdrop-blur-md border-b border-r border-border rotate-45 rounded-sm" />
                         </div>
                       )}
@@ -509,11 +509,11 @@ export default function Index() {
                           className="object-contain drop-shadow-2xl robot-float"
                           style={{
                             transition: 'width 3s cubic-bezier(0.4, 0, 0.2, 1), height 3s cubic-bezier(0.4, 0, 0.2, 1)',
-                            width: jsonLoaded ? 224 : 420,
-                            height: jsonLoaded ? 224 : 420,
+                            width: jsonLoaded ? (isMobile ? 140 : 224) : (isMobile ? 240 : 420),
+                            height: jsonLoaded ? (isMobile ? 140 : 224) : (isMobile ? 240 : 420),
                           }}
                         />
-                        {!jsonLoaded && (
+                        {!jsonLoaded && !isMobile && (
                           <div className="absolute right-[95%] top-[20%]">
                             <RobotQuoteBubble />
                           </div>
