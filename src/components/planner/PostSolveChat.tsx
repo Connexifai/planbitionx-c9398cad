@@ -666,12 +666,6 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
                           </div>
                         </div>
 
-                        {/* Explanation */}
-                        <div className="px-4 py-2 mx-3 mb-2 mt-1 bg-muted/40 rounded-lg border border-border/50">
-                          <p className="text-xs text-muted-foreground leading-relaxed">
-                            {isOpenShift ? "⚠️" : "💡"} {classified.explanation}
-                          </p>
-                        </div>
 
                         {/* Changes detail */}
                         {alt.Changes && alt.Changes.length > 0 && (
