@@ -1,82 +1,12 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import webpush from "npm:web-push@3.6.7";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
-
-// Web Push requires signing with VAPID keys
-// We use the Web Crypto API to sign JWT for VAPID
-
-async function generateVapidJwt(
-  endpoint: string,
-  privateKeyBase64: string,
-  publicKeyBase64: string,
-  subject: string,
-): Promise<{ authorization: string; cryptoKey: string }> {
-  const audience = new URL(endpoint).origin;
-  const expiration = Math.floor(Date.now() / 1000) + 12 * 60 * 60;
-
-  const header = { typ: "JWT", alg: "ES256" };
-  const payload = { aud: audience, exp: expiration, sub: subject };
-
-  const headerB64 = base64urlEncode(new TextEncoder().encode(JSON.stringify(header)));
-  const payloadB64 = base64urlEncode(new TextEncoder().encode(JSON.stringify(payload)));
-  const unsignedToken = `${headerB64}.${payloadB64}`;
-
-  // Import private key
-  const privateKeyBytes = base64urlDecode(privateKeyBase64);
-  const key = await crypto.subtle.importKey(
-    "pkcs8",
-    privateKeyBytes,
-    { name: "ECDSA", namedCurve: "P-256" },
-    false,
-    ["sign"],
-  );
-
-  const signature = await crypto.subtle.sign(
-    { name: "ECDSA", hash: "SHA-256" },
-    key,
-    new TextEncoder().encode(unsignedToken),
-  );
-
-  // Convert DER signature to raw r||s format
-  const sigBytes = new Uint8Array(signature);
-  const token = `${unsignedToken}.${base64urlEncode(sigBytes)}`;
-
-  return {
-    authorization: `vapid t=${token}, k=${publicKeyBase64}`,
-    cryptoKey: `p256ecdsa=${publicKeyBase64}`,
-  };
-}
-
-function base64urlEncode(bytes: Uint8Array): string {
-  let binary = "";
-  for (const b of bytes) binary += String.fromCharCode(b);
-  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-}
-
-function base64urlDecode(str: string): Uint8Array {
-  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-  let s = str.replace(/-/g, "+").replace(/_/g, "/");
-  const pad = s.length % 4;
-  if (pad) s += "=".repeat(4 - pad);
-  
-  const bytes: number[] = [];
-  for (let i = 0; i < s.length; i += 4) {
-    const a = s[i] === "=" ? 0 : chars.indexOf(s[i]);
-    const b = s[i + 1] === "=" ? 0 : chars.indexOf(s[i + 1]);
-    const c = s[i + 2] === "=" ? 0 : chars.indexOf(s[i + 2]);
-    const d = s[i + 3] === "=" ? 0 : chars.indexOf(s[i + 3]);
-    const n = (a << 18) | (b << 12) | (c << 6) | d;
-    bytes.push((n >> 16) & 0xff);
-    if (s[i + 2] !== "=") bytes.push((n >> 8) & 0xff);
-    if (s[i + 3] !== "=") bytes.push(n & 0xff);
-  }
-  return new Uint8Array(bytes);
-}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -98,6 +28,11 @@ serve(async (req) => {
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
+
+    console.log("VAPID_PUBLIC_KEY length:", VAPID_PUBLIC_KEY.length);
+    console.log("VAPID_PRIVATE_KEY length:", VAPID_PRIVATE_KEY.length);
+
+    webpush.setVapidDetails(VAPID_SUBJECT, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
@@ -136,36 +71,21 @@ serve(async (req) => {
 
     for (const sub of subscriptions) {
       try {
-        const { authorization, cryptoKey } = await generateVapidJwt(
-          sub.endpoint,
-          VAPID_PRIVATE_KEY,
-          VAPID_PUBLIC_KEY,
-          VAPID_SUBJECT,
-        );
-
-        const response = await fetch(sub.endpoint, {
-          method: "POST",
-          headers: {
-            Authorization: authorization,
-            "Crypto-Key": cryptoKey,
-            "Content-Type": "application/json",
-            TTL: "86400",
+        const pushSubscription = {
+          endpoint: sub.endpoint,
+          keys: {
+            p256dh: sub.p256dh,
+            auth: sub.auth,
           },
-          body: notificationPayload,
-        });
+        };
 
-        if (response.status === 201 || response.status === 200) {
-          sent++;
-        } else if (response.status === 404 || response.status === 410) {
-          // Subscription expired, mark for deletion
+        await webpush.sendNotification(pushSubscription, notificationPayload);
+        sent++;
+      } catch (err: any) {
+        console.error(`Push error for ${sub.id}:`, err?.statusCode, err?.body);
+        if (err?.statusCode === 404 || err?.statusCode === 410) {
           expiredIds.push(sub.id);
-          failed++;
-        } else {
-          console.error(`Push failed for ${sub.id}: ${response.status}`);
-          failed++;
         }
-      } catch (err) {
-        console.error(`Push error for ${sub.id}:`, err);
         failed++;
       }
     }
