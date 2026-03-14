@@ -220,6 +220,16 @@ function classifyAlternative(alt: Alternative, constraintEmployee?: string, isSw
   const added = changes.filter((c) => c.Action === "added");
   const removed = changes.filter((c) => c.Action === "removed");
 
+  // Swap-enriched alternatives: classify as swap
+  if (isSwapRequest && added.length >= 2 && removed.length >= 2) {
+    return {
+      type: "swap",
+      icon: Repeat2,
+      label: "Dienstruil",
+      explanation: alt.Summary || "Medewerkers wisselen van dienst.",
+    };
+  }
+
   if (removed.length <= 1 && added.length >= 1 && added.length <= 2) {
     const replacers = [...new Set(added.map((c) => c.EmployeeName))];
     return {
