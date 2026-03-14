@@ -380,12 +380,14 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
 
   const handleApplyAlternative = (alt: Alternative) => {
     onApplyAlternative?.(alt);
+    // Clear alternatives from all previous messages and show applied change
     setMessages((prev) => [
-      ...prev,
+      ...prev.map((m) => m.alternatives ? { ...m, alternatives: undefined } : m),
       {
         id: Date.now(),
         role: "assistant",
-        content: `✅ **Alternatief #${alt.Rank} wordt doorgevoerd!** Bekijk het rooster voor de stapsgewijze animatie van ${alt.ChangesFromBaseline} wijziging${alt.ChangesFromBaseline === 1 ? "" : "en"}.`,
+        content: `✅ **Wijziging doorgevoerd!**`,
+        alternatives: [alt],
       },
     ]);
   };
@@ -401,12 +403,14 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
 
   const handleAllApproved = (alt: Alternative) => {
     onApplyAlternative?.(alt);
+    // Clear alternatives from all previous messages and show applied change
     setMessages((prev) => [
-      ...prev,
+      ...prev.map((m) => m.alternatives ? { ...m, alternatives: undefined } : m),
       {
         id: Date.now(),
         role: "assistant",
-        content: `✅ **Alle medewerkers akkoord!** Alternatief #${alt.Rank} wordt doorgevoerd met ${alt.ChangesFromBaseline} wijziging${alt.ChangesFromBaseline === 1 ? "" : "en"}. Bekijk het rooster voor de animatie.`,
+        content: `✅ **Alle medewerkers akkoord — wijziging doorgevoerd!**`,
+        alternatives: [alt],
       },
     ]);
   };
