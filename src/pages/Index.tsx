@@ -529,43 +529,28 @@ export default function Index() {
           {(solved || (jsonLoaded && !solved)) && (
             <>
               {solved && !chatOpen && (
-                <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2 cursor-pointer" onClick={() => setChatOpen(true)}>
-                  <div className="relative bg-card/95 backdrop-blur-md border border-border shadow-2xl rounded-3xl px-5 py-3 max-w-[240px] animate-[bounce_2s_ease-in-out_3] mr-4">
-                    <p className="text-sm font-semibold leading-snug text-foreground tracking-wide">{t("robot.clickMePost")}</p>
+                <div className={cn("fixed z-50 flex flex-col items-end gap-2 cursor-pointer", isMobile ? "bottom-4 right-4" : "bottom-6 right-6")} onClick={() => setChatOpen(true)}>
+                  <div className="relative bg-card/95 backdrop-blur-md border border-border shadow-2xl rounded-3xl px-4 md:px-5 py-2.5 md:py-3 max-w-[200px] md:max-w-[240px] animate-[bounce_2s_ease-in-out_3] mr-4">
+                    <p className="text-xs md:text-sm font-semibold leading-snug text-foreground tracking-wide">{t("robot.clickMePost")}</p>
                     <div className="absolute -bottom-2.5 right-6 w-5 h-5 bg-card/95 backdrop-blur-md border-b border-r border-border rotate-45 rounded-sm" />
                   </div>
                   <img
                     src={robotImg}
                     alt="AI Assistent"
-                    className="w-56 h-56 object-contain drop-shadow-2xl robot-float hover:scale-110 transition-transform duration-500"
+                    className={cn("object-contain drop-shadow-2xl robot-float hover:scale-110 transition-transform duration-500", isMobile ? "w-36 h-36" : "w-56 h-56")}
                   />
                 </div>
               )}
 
-              <div
-                className={cn(
-                  "flex flex-col border-l bg-sidebar shrink-0 transition-all duration-300 overflow-hidden",
-                  chatOpen ? "w-[800px]" : "w-0"
-                )}
-              >
-                {chatOpen && (
-                  <>
+              {/* Chat panel: fullscreen sheet on mobile, inline on desktop */}
+              {isMobile ? (
+                <Sheet open={chatOpen} onOpenChange={setChatOpen}>
+                  <SheetContent side="bottom" className="p-0 h-[90vh] flex flex-col">
                     <div className="flex items-center justify-between px-4 py-3 border-b">
                       <div className="flex items-center gap-2">
                         <MessageCircle className="h-4 w-4 text-primary" />
                         <h3 className="text-sm font-semibold">{solved ? t("chat.aiAssistant") : t("chat.aiBriefing")}</h3>
                       </div>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <button
-                            onClick={() => setChatOpen(false)}
-                            className="flex items-center justify-center w-7 h-7 rounded-md text-muted-foreground hover:bg-accent hover:text-foreground transition-all"
-                          >
-                            <PanelRightClose className="h-4 w-4" />
-                          </button>
-                        </TooltipTrigger>
-                        <TooltipContent side="left">{t("sidebar.closePanel")}</TooltipContent>
-                      </Tooltip>
                     </div>
                     <div className="flex-1 min-h-0">
                       {solved ? (
@@ -583,9 +568,54 @@ export default function Index() {
                         />
                       )}
                     </div>
-                  </>
-                )}
-              </div>
+                  </SheetContent>
+                </Sheet>
+              ) : (
+                <div
+                  className={cn(
+                    "flex flex-col border-l bg-sidebar shrink-0 transition-all duration-300 overflow-hidden",
+                    chatOpen ? "w-[800px]" : "w-0"
+                  )}
+                >
+                  {chatOpen && (
+                    <>
+                      <div className="flex items-center justify-between px-4 py-3 border-b">
+                        <div className="flex items-center gap-2">
+                          <MessageCircle className="h-4 w-4 text-primary" />
+                          <h3 className="text-sm font-semibold">{solved ? t("chat.aiAssistant") : t("chat.aiBriefing")}</h3>
+                        </div>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <button
+                              onClick={() => setChatOpen(false)}
+                              className="flex items-center justify-center w-7 h-7 rounded-md text-muted-foreground hover:bg-accent hover:text-foreground transition-all"
+                            >
+                              <PanelRightClose className="h-4 w-4" />
+                            </button>
+                          </TooltipTrigger>
+                          <TooltipContent side="left">{t("sidebar.closePanel")}</TooltipContent>
+                        </Tooltip>
+                      </div>
+                      <div className="flex-1 min-h-0">
+                        {solved ? (
+                          <PostSolveChat
+                            requestData={requestData}
+                            solverAssignments={solverAssignments}
+                            onApplyAlternative={handleApplyAlternative}
+                          />
+                        ) : (
+                          <AiBriefingChat
+                            employees={requestData?.Employees || []}
+                            schedulePeriod={requestData ? `${requestData.Start} - ${requestData.End}` : ""}
+                            constraints={employeeConstraints}
+                            onConstraintsChange={setEmployeeConstraints}
+                          />
+                        )}
+                      </div>
+                    </>
+                  )}
+                </div>
+              )
             </>
           )}
         </div>
