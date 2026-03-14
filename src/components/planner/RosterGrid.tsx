@@ -117,6 +117,8 @@ const EmployeeRow = memo(function EmployeeRow({
   pickupDayDate,
   isLandingRow,
   landingDayDate,
+  isConflictEmployee,
+  conflictDayDate,
 }: {
   emp: RosterEmployee;
   numDays: number;
@@ -127,6 +129,8 @@ const EmployeeRow = memo(function EmployeeRow({
   pickupDayDate?: string;
   isLandingRow?: boolean;
   landingDayDate?: string;
+  isConflictEmployee?: boolean;
+  conflictDayDate?: string;
 }) {
   const dayConstraintFlags = useMemo(() => {
     return days.map((day) => {
