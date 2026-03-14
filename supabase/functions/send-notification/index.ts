@@ -59,11 +59,23 @@ function base64urlEncode(bytes: Uint8Array): string {
 }
 
 function base64urlDecode(str: string): Uint8Array {
-  const padded = str.replace(/-/g, "+").replace(/_/g, "/");
-  const binary = atob(padded);
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-  return bytes;
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+  let s = str.replace(/-/g, "+").replace(/_/g, "/");
+  const pad = s.length % 4;
+  if (pad) s += "=".repeat(4 - pad);
+  
+  const bytes: number[] = [];
+  for (let i = 0; i < s.length; i += 4) {
+    const a = s[i] === "=" ? 0 : chars.indexOf(s[i]);
+    const b = s[i + 1] === "=" ? 0 : chars.indexOf(s[i + 1]);
+    const c = s[i + 2] === "=" ? 0 : chars.indexOf(s[i + 2]);
+    const d = s[i + 3] === "=" ? 0 : chars.indexOf(s[i + 3]);
+    const n = (a << 18) | (b << 12) | (c << 6) | d;
+    bytes.push((n >> 16) & 0xff);
+    if (s[i + 2] !== "=") bytes.push((n >> 8) & 0xff);
+    if (s[i + 3] !== "=") bytes.push(n & 0xff);
+  }
+  return new Uint8Array(bytes);
 }
 
 serve(async (req) => {
