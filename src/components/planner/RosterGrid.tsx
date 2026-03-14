@@ -150,7 +150,7 @@ const EmployeeRow = memo(function EmployeeRow({
         gridTemplateColumns: `230px repeat(${numDays}, minmax(85px, 1fr))`,
       }}
     >
-      <div className="flex flex-col justify-center gap-0.5 px-3 py-1.5 border-r">
+      <div className="flex flex-col justify-center gap-0.5 px-3 py-1.5 border-r sticky left-0 z-[2] bg-card">
         <div className="flex items-center">
           <p className="text-[13px] font-bold leading-snug truncate text-foreground">
             {emp.lastName}, <span className="font-medium">{emp.firstName}</span>
@@ -333,7 +333,7 @@ export function RosterGrid({ data, employeeConstraints = [], animationState, onR
           className="sticky top-0 z-[5] grid border-b-2 border-border bg-card shadow-sm"
           style={{ gridTemplateColumns: `230px repeat(${numDays}, minmax(85px, 1fr))` }}
         >
-          <div className="flex items-center gap-2 px-4 py-3 border-r">
+          <div className="flex items-center gap-2 px-4 py-3 border-r sticky left-0 z-[6] bg-card">
             <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t("grid.employee")}</span>
           </div>
           {days.map((d, i) => (

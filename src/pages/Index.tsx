@@ -28,7 +28,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Download, Moon, Sun, MessageCircle, PanelRightClose, LogOut, User } from "lucide-react";
+import { Download, Moon, Sun, MessageCircle, PanelRightClose, LogOut, User, Menu } from "lucide-react";
 import { useEffect, useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -37,6 +37,8 @@ import robotImg from "@/assets/robot-assistant.png";
 import { useRosterAnimation } from "@/hooks/useRosterAnimation";
 import { normalizeAlternativeShiftIds, type AlternativeChange } from "@/lib/buildAlternativesPayload";
 import { useAuth } from "@/contexts/AuthContext";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 function useTypingText(text: string, speed = 40) {
   const [displayed, setDisplayed] = useState("");
@@ -60,7 +62,7 @@ function RobotQuoteBubble() {
   const typed = useTypingText(quote, 45);
 
   return (
-    <div className="relative bg-card/95 backdrop-blur-md border border-border shadow-2xl rounded-3xl px-6 py-4 w-[480px] animate-fade-in">
+    <div className="relative bg-card/95 backdrop-blur-md border border-border shadow-2xl rounded-3xl px-6 py-4 w-[320px] md:w-[480px] animate-fade-in">
       <p className="text-sm font-medium text-foreground leading-relaxed tracking-wide">
         {typed}
         <span className="inline-block w-[2px] h-4 bg-primary ml-0.5 animate-pulse align-middle rounded-full" />
@@ -170,6 +172,7 @@ function SolvingOverlay() {
 export default function Index() {
   const { t } = useTranslation();
   const { signOut, user } = useAuth();
+  const isMobile = useIsMobile();
   const [dark, setDark] = useState(() => document.documentElement.classList.contains("dark"));
   const [solved, setSolved] = useState(false);
   const [solving, setSolving] = useState(false);
@@ -365,41 +368,69 @@ export default function Index() {
       {entranceVisible && (
         <div className="fixed inset-0 z-[200] bg-background pointer-events-none animate-[fade-out_1.2s_ease-out_forwards]" />
       )}
-      <PlannerSidebar 
-        onSolve={handleSolve} 
-        onJsonLoaded={handleJsonLoaded} 
-        collapsed={sidebarCollapsed}
-        onCollapsedChange={setSidebarCollapsed}
-        atw={atw}
-        setAtw={setAtw}
-        soft={soft}
-        setSoft={setSoft}
-        solver={solver}
-        setSolver={setSolver}
-      />
+
+      {/* Sidebar: inline on desktop, Sheet on mobile */}
+      {!isMobile && (
+        <PlannerSidebar 
+          onSolve={handleSolve} 
+          onJsonLoaded={handleJsonLoaded} 
+          collapsed={sidebarCollapsed}
+          onCollapsedChange={setSidebarCollapsed}
+          atw={atw}
+          setAtw={setAtw}
+          soft={soft}
+          setSoft={setSoft}
+          solver={solver}
+          setSolver={setSolver}
+        />
+      )}
 
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="flex items-center justify-between gap-4 border-b bg-card px-4 py-2.5 shadow-sm">
-          <div className="flex items-center gap-3">
-            <h1 className="text-lg font-bold tracking-tight">{t("app.title")}</h1>
+        <header className="flex items-center justify-between gap-2 md:gap-4 border-b bg-card px-3 md:px-4 py-2.5 shadow-sm">
+          <div className="flex items-center gap-2 md:gap-3">
+            {isMobile && (
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
+                    <Menu className="h-5 w-5" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="left" className="p-0 w-[320px]">
+                  <PlannerSidebar 
+                    onSolve={() => { handleSolve(); }}
+                    onJsonLoaded={handleJsonLoaded} 
+                    collapsed={false}
+                    onCollapsedChange={() => {}}
+                    atw={atw}
+                    setAtw={setAtw}
+                    soft={soft}
+                    setSoft={setSoft}
+                    solver={solver}
+                    setSolver={setSolver}
+                    hideIconStrip
+                  />
+                </SheetContent>
+              </Sheet>
+            )}
+            <h1 className="text-base md:text-lg font-bold tracking-tight truncate">{t("app.title")}</h1>
           </div>
-          <div className="flex items-center gap-2">
-            {solved && (
+          <div className="flex items-center gap-1.5 md:gap-2">
+            {solved && !isMobile && (
               <Button variant="outline" size="sm" className="gap-1.5 text-xs">
                 <Download className="h-3.5 w-3.5" />
                 {t("app.downloadJson")}
               </Button>
             )}
-            <PushNotificationManager />
+            {!isMobile && <PushNotificationManager />}
             <LanguageSwitcher />
-            <div className="flex items-center gap-1.5 ml-1">
+            <div className="flex items-center gap-1 md:gap-1.5 ml-0.5 md:ml-1">
               <Sun className="h-3.5 w-3.5 text-muted-foreground" />
               <Switch checked={dark} onCheckedChange={setDark} className="scale-75" />
               <Moon className="h-3.5 w-3.5 text-muted-foreground" />
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Avatar className="h-8 w-8 cursor-pointer ml-2">
+                <Avatar className="h-8 w-8 cursor-pointer ml-1 md:ml-2">
                   <AvatarFallback className="bg-primary text-primary-foreground text-xs font-semibold">
                     {user?.email?.charAt(0).toUpperCase() || "U"}
                   </AvatarFallback>
@@ -422,7 +453,7 @@ export default function Index() {
         <div className="flex-1 flex min-h-0">
           <div className="flex-1 flex flex-col min-w-0 overflow-visible">
             {solved ? (
-              <main className="flex-1 overflow-y-auto overflow-x-hidden p-5 space-y-5">
+              <main className="flex-1 overflow-y-auto overflow-x-hidden p-3 md:p-5 space-y-3 md:space-y-5">
                 <KpiCards solved data={rosterData ?? undefined} solveTime={solveDurationMs} />
                 <RosterTabs value={activeTab} onChange={setActiveTab} />
                 {activeTab === "roster" && <RosterGrid data={rosterData ?? undefined} employeeConstraints={employeeConstraints} animationState={animationState} onRegisterGridFns={registerGridFns} />}
@@ -432,7 +463,7 @@ export default function Index() {
               </main>
             ) : (
               <div className="flex-1 flex flex-col min-h-0">
-                <div className="flex-1 overflow-y-auto roster-scroll p-5 space-y-5">
+                <div className="flex-1 overflow-y-auto roster-scroll p-3 md:p-5 space-y-3 md:space-y-5">
                   <KpiCards solved={false} data={undefined} />
                   {jsonLoaded && scheduleData && <JsonDataViewer data={scheduleData} />}
                 </div>
@@ -443,24 +474,24 @@ export default function Index() {
                     style={{
                       transition: 'all 3s cubic-bezier(0.4, 0, 0.2, 1)',
                       ...(jsonLoaded
-                        ? { bottom: 24, right: 24, top: 'auto', left: 'auto' }
+                        ? { bottom: isMobile ? 16 : 24, right: isMobile ? 16 : 24, top: 'auto', left: 'auto' }
                         : { top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }
                       ),
                     }}
                   >
                     <div className="flex flex-col items-center">
                       {!jsonLoaded && (
-                        <p className="absolute -bottom-16 left-1/2 -translate-x-1/2 whitespace-nowrap text-lg font-semibold text-muted-foreground">
+                        <p className="absolute -bottom-16 left-1/2 -translate-x-1/2 whitespace-nowrap text-sm md:text-lg font-semibold text-muted-foreground">
                           {t("robot.uploadJson")}
                         </p>
                       )}
 
                       {robotLanded && jsonLoaded && (
                         <div
-                          className="relative bg-card/95 backdrop-blur-md border border-border shadow-2xl rounded-3xl px-5 py-3 max-w-[240px] mb-2 animate-fade-in cursor-pointer pointer-events-auto"
+                          className="relative bg-card/95 backdrop-blur-md border border-border shadow-2xl rounded-3xl px-4 md:px-5 py-2.5 md:py-3 max-w-[200px] md:max-w-[240px] mb-2 animate-fade-in cursor-pointer pointer-events-auto"
                           onClick={() => setChatOpen(true)}
                         >
-                          <p className="text-sm font-semibold leading-snug text-foreground tracking-wide">{t("robot.clickMe")}</p>
+                          <p className="text-xs md:text-sm font-semibold leading-snug text-foreground tracking-wide">{t("robot.clickMe")}</p>
                           <div className="absolute -bottom-2.5 right-6 w-5 h-5 bg-card/95 backdrop-blur-md border-b border-r border-border rotate-45 rounded-sm" />
                         </div>
                       )}
@@ -478,11 +509,11 @@ export default function Index() {
                           className="object-contain drop-shadow-2xl robot-float"
                           style={{
                             transition: 'width 3s cubic-bezier(0.4, 0, 0.2, 1), height 3s cubic-bezier(0.4, 0, 0.2, 1)',
-                            width: jsonLoaded ? 224 : 420,
-                            height: jsonLoaded ? 224 : 420,
+                            width: jsonLoaded ? (isMobile ? 140 : 224) : (isMobile ? 240 : 420),
+                            height: jsonLoaded ? (isMobile ? 140 : 224) : (isMobile ? 240 : 420),
                           }}
                         />
-                        {!jsonLoaded && (
+                        {!jsonLoaded && !isMobile && (
                           <div className="absolute right-[95%] top-[20%]">
                             <RobotQuoteBubble />
                           </div>
@@ -498,43 +529,28 @@ export default function Index() {
           {(solved || (jsonLoaded && !solved)) && (
             <>
               {solved && !chatOpen && (
-                <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2 cursor-pointer" onClick={() => setChatOpen(true)}>
-                  <div className="relative bg-card/95 backdrop-blur-md border border-border shadow-2xl rounded-3xl px-5 py-3 max-w-[240px] animate-[bounce_2s_ease-in-out_3] mr-4">
-                    <p className="text-sm font-semibold leading-snug text-foreground tracking-wide">{t("robot.clickMePost")}</p>
+                <div className={cn("fixed z-50 flex flex-col items-end gap-2 cursor-pointer", isMobile ? "bottom-4 right-4" : "bottom-6 right-6")} onClick={() => setChatOpen(true)}>
+                  <div className="relative bg-card/95 backdrop-blur-md border border-border shadow-2xl rounded-3xl px-4 md:px-5 py-2.5 md:py-3 max-w-[200px] md:max-w-[240px] animate-[bounce_2s_ease-in-out_3] mr-4">
+                    <p className="text-xs md:text-sm font-semibold leading-snug text-foreground tracking-wide">{t("robot.clickMePost")}</p>
                     <div className="absolute -bottom-2.5 right-6 w-5 h-5 bg-card/95 backdrop-blur-md border-b border-r border-border rotate-45 rounded-sm" />
                   </div>
                   <img
                     src={robotImg}
                     alt="AI Assistent"
-                    className="w-56 h-56 object-contain drop-shadow-2xl robot-float hover:scale-110 transition-transform duration-500"
+                    className={cn("object-contain drop-shadow-2xl robot-float hover:scale-110 transition-transform duration-500", isMobile ? "w-36 h-36" : "w-56 h-56")}
                   />
                 </div>
               )}
 
-              <div
-                className={cn(
-                  "flex flex-col border-l bg-sidebar shrink-0 transition-all duration-300 overflow-hidden",
-                  chatOpen ? "w-[800px]" : "w-0"
-                )}
-              >
-                {chatOpen && (
-                  <>
+              {/* Chat panel: fullscreen sheet on mobile, inline on desktop */}
+              {isMobile ? (
+                <Sheet open={chatOpen} onOpenChange={setChatOpen}>
+                  <SheetContent side="bottom" className="p-0 h-[90vh] flex flex-col">
                     <div className="flex items-center justify-between px-4 py-3 border-b">
                       <div className="flex items-center gap-2">
                         <MessageCircle className="h-4 w-4 text-primary" />
                         <h3 className="text-sm font-semibold">{solved ? t("chat.aiAssistant") : t("chat.aiBriefing")}</h3>
                       </div>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <button
-                            onClick={() => setChatOpen(false)}
-                            className="flex items-center justify-center w-7 h-7 rounded-md text-muted-foreground hover:bg-accent hover:text-foreground transition-all"
-                          >
-                            <PanelRightClose className="h-4 w-4" />
-                          </button>
-                        </TooltipTrigger>
-                        <TooltipContent side="left">{t("sidebar.closePanel")}</TooltipContent>
-                      </Tooltip>
                     </div>
                     <div className="flex-1 min-h-0">
                       {solved ? (
@@ -552,9 +568,54 @@ export default function Index() {
                         />
                       )}
                     </div>
-                  </>
-                )}
-              </div>
+                  </SheetContent>
+                </Sheet>
+              ) : (
+                <div
+                  className={cn(
+                    "flex flex-col border-l bg-sidebar shrink-0 transition-all duration-300 overflow-hidden",
+                    chatOpen ? "w-[800px]" : "w-0"
+                  )}
+                >
+                  {chatOpen && (
+                    <>
+                      <div className="flex items-center justify-between px-4 py-3 border-b">
+                        <div className="flex items-center gap-2">
+                          <MessageCircle className="h-4 w-4 text-primary" />
+                          <h3 className="text-sm font-semibold">{solved ? t("chat.aiAssistant") : t("chat.aiBriefing")}</h3>
+                        </div>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <button
+                              onClick={() => setChatOpen(false)}
+                              className="flex items-center justify-center w-7 h-7 rounded-md text-muted-foreground hover:bg-accent hover:text-foreground transition-all"
+                            >
+                              <PanelRightClose className="h-4 w-4" />
+                            </button>
+                          </TooltipTrigger>
+                          <TooltipContent side="left">{t("sidebar.closePanel")}</TooltipContent>
+                        </Tooltip>
+                      </div>
+                      <div className="flex-1 min-h-0">
+                        {solved ? (
+                          <PostSolveChat
+                            requestData={requestData}
+                            solverAssignments={solverAssignments}
+                            onApplyAlternative={handleApplyAlternative}
+                          />
+                        ) : (
+                          <AiBriefingChat
+                            employees={requestData?.Employees || []}
+                            schedulePeriod={requestData ? `${requestData.Start} - ${requestData.End}` : ""}
+                            constraints={employeeConstraints}
+                            onConstraintsChange={setEmployeeConstraints}
+                          />
+                        )}
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
             </>
           )}
         </div>
