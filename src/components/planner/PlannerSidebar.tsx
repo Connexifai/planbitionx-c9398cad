@@ -346,11 +346,12 @@ export function PlannerSidebar({
     <div
       className={cn(
         "flex flex-col border-r bg-sidebar shrink-0 transition-all duration-300 h-screen sticky top-0",
-        contentCollapsed ? "w-[52px]" : "w-[360px]"
+        hideIconStrip ? "w-full h-full static" : (contentCollapsed ? "w-[52px]" : "w-[360px]")
       )}
     >
       <div className="flex flex-row flex-1 min-h-0">
         {/* Icon strip */}
+        {!hideIconStrip && (
         <div className="flex flex-col items-center gap-1 border-r bg-muted/30 px-1.5 py-3 shrink-0">
           {sections.map((section) => {
             const Icon = section.icon;
