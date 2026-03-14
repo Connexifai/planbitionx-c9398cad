@@ -306,30 +306,34 @@ export function EmployeeApprovalDialog({
           {/* Header info above phone */}
           <div className="text-center space-y-1.5 animate-fade-in">
             <p className="text-sm font-semibold text-foreground">
-              Goedkeuring vragen
+              {phase === "notifying" ? "Bevestiging verzenden" : phase === "done" ? "Afgerond" : "Goedkeuring vragen"}
             </p>
             <p className="text-xs text-muted-foreground">
-              {activeEmployee?.name ?? ""} · {approvedCount}/{employees.length} akkoord
+              {phase === "notifying" || phase === "done"
+                ? `${constraintEmployeeName || "Aanvrager"} wordt op de hoogte gebracht`
+                : `${activeEmployee?.name ?? ""} · ${approvedCount}/${employees.length} akkoord`}
             </p>
             {/* Dot indicators */}
-            <div className="flex justify-center gap-1.5 pt-1">
-              {employees.map((emp, i) => (
-                <div
-                  key={emp.id}
-                  className={cn(
-                    "w-2 h-2 rounded-full transition-all duration-500",
-                    emp.status === "approved" ? "bg-primary scale-100" :
-                    emp.status === "rejected" ? "bg-destructive scale-100" :
-                    i === activeIndex ? "bg-primary/60 scale-125" :
-                    "bg-muted-foreground/30 scale-100"
-                  )}
-                />
-              ))}
-            </div>
+            {phase === "approving" && (
+              <div className="flex justify-center gap-1.5 pt-1">
+                {employees.map((emp, i) => (
+                  <div
+                    key={emp.id}
+                    className={cn(
+                      "w-2 h-2 rounded-full transition-all duration-500",
+                      emp.status === "approved" ? "bg-primary scale-100" :
+                      emp.status === "rejected" ? "bg-destructive scale-100" :
+                      i === activeIndex ? "bg-primary/60 scale-125" :
+                      "bg-muted-foreground/30 scale-100"
+                    )}
+                  />
+                ))}
+              </div>
+            )}
           </div>
 
-          {/* The iPhone */}
-          {activeEmployee && (
+          {/* The iPhone — approval phase */}
+          {phase === "approving" && activeEmployee && (
             <IPhone17
               key={activeEmployee.id}
               employee={activeEmployee}
@@ -338,11 +342,30 @@ export function EmployeeApprovalDialog({
             />
           )}
 
+          {/* Notification phone for requester */}
+          {phase === "notifying" && (
+            <IPhone17
+              key="requester-notification"
+              employee={{
+                id: constraintEmployeeId || "requester",
+                name: constraintEmployeeName || "Aanvrager",
+                changes: [],
+                status: "approved",
+              }}
+              onApprove={() => {}}
+              onReject={() => {}}
+              notificationMode={{
+                title: `Goed nieuws, ${(constraintEmployeeName || "").split(" ")[0]}! 🎉`,
+                body: "Alle betrokken collega's zijn akkoord gegaan met de roosterwijziging. Je verzoek is goedgekeurd!",
+              }}
+            />
+          )}
+
           {/* All approved */}
           {phase === "done" && (
             <div className="flex items-center gap-2 text-primary font-semibold text-sm animate-fade-in">
               <CheckCircle2 className="h-5 w-5" />
-              Alle medewerkers akkoord!
+              Alle medewerkers akkoord — {constraintEmployeeName || "aanvrager"} is op de hoogte!
             </div>
           )}
         </div>
