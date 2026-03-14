@@ -10,8 +10,8 @@ const corsHeaders = {
 
 // Hardcoded VAPID keys generated via web-push library
 // These are the correct format (raw EC keys in base64url)
-const VAPID_PUBLIC_KEY = "BKFmwF9MQCm4D3ipLzjzDZZALjkPlmV1a_wzLNz-pHcIPM-rqU4S_3N3XtwiOv3nUL83zHZovFOBVYi6hE8i1ns";
-const VAPID_PRIVATE_KEY = "s-HZSby-O4OUA0Bvz--1JFG-mhSThQ4ZALueNx9ufqg";
+const VAPID_PUBLIC_KEY = "BBTWXlqsP18VcIZmznjW8iENe2hhgENPcHel9qFoWAx2TZdq2o0DkRPt34Q6hVPvyaT0kF5JrteLANMXEWIrR2g";
+const VAPID_PRIVATE_KEY = "mmXkTkxnP5jlW4hNaK82BunM3R03o2f1olGuQ5W8jGQ";
 const VAPID_SUBJECT = "mailto:admin@example.com";
 
 serve(async (req) => {
