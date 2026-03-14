@@ -591,15 +591,14 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
                                 <TypeIcon className="h-4 w-4" />
                                 {classified.label}
                               </div>
+                              {!isOpenShift && (
                               <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground mt-0.5">
                                 {(() => {
-                                  const targetName = msg.pendingConstraint?.employeeName;
-                                  const count = isOpenShift
-                                    ? (alt.Changes?.filter(c => c.Action === "removed" && targetName && c.EmployeeName === targetName).length || 1)
-                                    : alt.ChangesFromBaseline;
+                                  const count = alt.ChangesFromBaseline;
                                   return <span>{count} wijziging{count !== 1 && "en"}</span>;
                                 })()}
                               </div>
+                              )}
                             </div>
                           </div>
                           <div className="flex items-center gap-1.5">
