@@ -278,5 +278,5 @@ export function useRosterAnimation() {
     setState(INITIAL_STATE);
   }, []);
 
-  return { animationState: state, startAnimation, cancelAnimation, registerGridFns };
+  return { animationState: state, startAnimation, cancelAnimation, registerGridFns, scrollToEmployee: scrollFnRef };
 }
