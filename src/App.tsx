@@ -7,8 +7,33 @@ import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import Index from "./pages/Index.tsx";
 import Login from "./pages/Login.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import robotImg from "@/assets/robot-assistant.png";
 
 const queryClient = new QueryClient();
+
+function LoadingScreen() {
+  return (
+    <div className="fixed inset-0 z-[300] bg-background flex flex-col items-center justify-center">
+      <div className="pulsating-x pointer-events-none">
+        <div className="pulsating-x-blob" />
+        <div className="pulsating-x-blob" />
+        <div className="pulsating-x-blob" />
+        <div className="pulsating-x-blob" />
+        <div className="pulsating-x-blob" />
+      </div>
+      <img
+        src={robotImg}
+        alt="Loading"
+        className="w-24 h-24 object-contain drop-shadow-2xl robot-float relative z-10"
+      />
+      <div className="mt-4 relative z-10">
+        <div className="h-1 w-32 rounded-full bg-muted overflow-hidden">
+          <div className="h-full rounded-full bg-primary animate-[loading-bar_1.5s_ease-in-out_infinite]" />
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { session, loading } = useAuth();

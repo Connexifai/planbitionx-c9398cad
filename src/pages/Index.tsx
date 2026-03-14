@@ -366,7 +366,18 @@ export default function Index() {
       <RosterChangeOverlay state={animationState} />
       {/* Smooth entrance overlay after login */}
       {entranceVisible && (
-        <div className="fixed inset-0 z-[200] bg-background pointer-events-none animate-[fade-out_1.2s_ease-out_forwards]" />
+        <div className="fixed inset-0 z-[200] pointer-events-none flex flex-col items-center justify-center animate-[entrance-reveal_1.4s_ease-out_forwards]">
+          <div className="absolute inset-0 bg-background" />
+          <div className="pulsating-x pointer-events-none">
+            <div className="pulsating-x-blob" />
+            <div className="pulsating-x-blob" />
+            <div className="pulsating-x-blob" />
+            <div className="pulsating-x-blob" />
+            <div className="pulsating-x-blob" />
+          </div>
+          <img src={robotImg} alt="" className="w-20 h-20 object-contain drop-shadow-2xl robot-float relative z-10 animate-[scale-out_0.8s_0.6s_ease-in_forwards]" />
+          <p className="mt-3 text-sm font-semibold text-primary relative z-10 animate-[fade-out_0.5s_0.5s_ease-out_forwards]">{t("app.title")}</p>
+        </div>
       )}
 
       {/* Sidebar: inline on desktop, Sheet on mobile */}
