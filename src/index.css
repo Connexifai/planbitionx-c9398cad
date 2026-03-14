@@ -263,6 +263,18 @@
   animation: orbit 4s ease-in-out infinite;
 }
 
+@keyframes entrance-reveal {
+  0% { opacity: 1; }
+  60% { opacity: 1; }
+  100% { opacity: 0; visibility: hidden; }
+}
+
+@keyframes loading-bar {
+  0% { width: 0%; margin-left: 0; }
+  50% { width: 70%; margin-left: 15%; }
+  100% { width: 0%; margin-left: 100%; }
+}
+
 @keyframes pulse-x-blob {
   0%, 100% {
     transform: scale(0.92);
