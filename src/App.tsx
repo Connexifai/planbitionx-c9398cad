@@ -19,7 +19,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
 function PublicRoute({ children }: { children: React.ReactNode }) {
   const { session, loading } = useAuth();
-  if (loading) return null;
+  if (loading) return <LoadingScreen />;
   if (session) return <Navigate to="/" replace />;
   return <>{children}</>;
 }
