@@ -347,9 +347,7 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
           {
             id: resultMsgId,
             role: "assistant",
-            content: "⚠️ Geen directe alternatieven gevonden in de directe omgeving. Wil je breder zoeken?",
-            showSearchFull: true,
-            pendingConstraint: constraint,
+            content: "⚠️ Geen alternatieven gevonden voor dit verzoek.",
           },
         ]);
       } else {
@@ -358,12 +356,10 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
           {
             id: resultMsgId,
             role: "assistant",
-            content: `Ik heb **${formatAlternativeCount(narrowPrepared)}** gevonden in de directe omgeving:`,
+            content: `Ik heb **${formatAlternativeCount(narrowPrepared)}** gevonden:`,
             alternatives: narrowPrepared.visibleAlts,
             baseline: altResponse.Baseline,
             constraintSummary: intent.summary,
-            showSearchFull: true,
-            pendingConstraint: constraint,
           },
         ]);
       }
