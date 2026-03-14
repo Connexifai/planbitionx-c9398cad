@@ -596,41 +596,42 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
                       </div>
                     )}
                   </div>
-                  {msg.alternatives.map((alt) => {
+                  {msg.alternatives.map((alt, altIdx) => {
                     const classified = classifyAlternative(alt, msg.constraintSummary);
                     const TypeIcon = classified.icon;
                     const isOpenShift = alt.ConflictShiftFilled === false;
+                    const isRecommended = altIdx === 0 && !isOpenShift;
 
                     return (
                       <div
                         key={alt.Rank}
                         className={cn(
-                          "border-2 rounded-xl overflow-hidden bg-card shadow-sm transition-all hover:shadow-lg",
-                          alt.Rank === 1 && !isOpenShift && "border-primary/50 ring-2 ring-primary/15 shadow-primary/5",
-                          alt.Rank !== 1 && !isOpenShift && "border-border hover:border-primary/30",
-                          isOpenShift && "border-dashed border-muted-foreground/30 opacity-75"
+                          "rounded-xl overflow-hidden bg-card transition-all",
+                          isRecommended && "border-2 border-primary ring-2 ring-primary/20 shadow-lg shadow-primary/10",
+                          !isRecommended && !isOpenShift && "border border-border shadow-sm hover:border-primary/30 hover:shadow-md",
+                          isOpenShift && "border border-dashed border-muted-foreground/30 opacity-75"
                         )}
                       >
                         {/* Colored top accent bar */}
-                        {!isOpenShift && (
-                          <div className={cn(
-                            "h-1",
-                            alt.Rank === 1 ? "bg-primary" : "bg-muted-foreground/20"
-                          )} />
+                        {isRecommended && (
+                          <div className="h-1.5 bg-gradient-to-r from-primary to-primary/60" />
+                        )}
+                        {!isRecommended && !isOpenShift && (
+                          <div className="h-0.5 bg-muted-foreground/15" />
                         )}
 
                         {/* Header */}
                         <div className="flex items-center justify-between px-4 pt-3 pb-1">
                           <div className="flex items-center gap-2.5">
                             <div className={cn(
-                              "flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold",
-                              alt.Rank === 1 && !isOpenShift
-                                ? "bg-primary text-primary-foreground"
+                              "flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold",
+                              isRecommended
+                                ? "bg-primary text-primary-foreground shadow-sm"
                                 : isOpenShift
                                   ? "bg-muted text-muted-foreground"
                                   : "bg-secondary text-secondary-foreground"
                             )}>
-                              {alt.Rank}
+                              {isRecommended ? "⭐" : alt.Rank}
                             </div>
                             <div className="flex flex-col">
                               <div className={cn(
