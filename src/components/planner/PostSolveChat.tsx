@@ -192,7 +192,13 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
       throw new Error(`Alternatives API error: ${errText}`);
     }
 
-    const response: AlternativesResponse = await altRes.json();
+    const raw = await altRes.json();
+    // Normalize: solver may return lowercase keys ("alternatives") vs PascalCase ("Alternatives")
+    const response: AlternativesResponse = {
+      Alternatives: raw.Alternatives ?? raw.alternatives ?? [],
+      Baseline: raw.Baseline ?? raw.baseline ?? { TotalAssignments: 0, FillRatePercentage: 0 },
+    };
+    console.log("[PostSolveChat] Parsed alternatives count:", response.Alternatives.length);
     return response;
   }, [requestData, solverAssignments]);
 
