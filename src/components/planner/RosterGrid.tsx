@@ -202,6 +202,7 @@ const EmployeeRow = memo(function EmployeeRow({
 
         const isBeingPickedUp = isPickupRow && pickupDayDate === dayDate;
         const isLandingTarget = isLandingRow && landingDayDate === dayDate;
+        const isConflictCell = isConflictEmployee && conflictDayDate === dayDate;
 
         return (
           <div
@@ -213,6 +214,7 @@ const EmployeeRow = memo(function EmployeeRow({
               showViolationRing && (cellStrength === "hard" ? "ring-2 ring-inset ring-destructive/50 bg-destructive/10" : "ring-2 ring-inset ring-kpi-unfilled/40 bg-kpi-unfilled/10"),
               isBeingPickedUp && "roster-cell-pickup",
               isLandingTarget && "roster-cell-landing",
+              isConflictCell && "ring-2 ring-inset ring-destructive bg-destructive/15",
             )}
           >
             {hasConstraintOnCell && (
