@@ -643,12 +643,6 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
                               </div>
                               <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground mt-0.5">
                                 <span>{alt.ChangesFromBaseline} wijziging{alt.ChangesFromBaseline !== 1 && "en"}</span>
-                                {alt.Score && (
-                                  <>
-                                    <span>·</span>
-                                    <span>{alt.Score.FillRatePercentage.toFixed(0)}% bezetting</span>
-                                  </>
-                                )}
                               </div>
                             </div>
                           </div>
@@ -666,12 +660,6 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
                           </div>
                         </div>
 
-                        {/* Explanation */}
-                        <div className="px-4 py-2 mx-3 mb-2 mt-1 bg-muted/40 rounded-lg border border-border/50">
-                          <p className="text-xs text-muted-foreground leading-relaxed">
-                            {isOpenShift ? "⚠️" : "💡"} {classified.explanation}
-                          </p>
-                        </div>
 
                         {/* Changes detail */}
                         {alt.Changes && alt.Changes.length > 0 && (
@@ -706,17 +694,6 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
                                 )}
                               </div>
                             ))}
-                            {/* Show Reason from solver if available */}
-                            {alt.Changes.some((c) => c.Reason) && (
-                              <div className="mt-1.5 px-3 py-1.5 text-[11px] text-muted-foreground bg-muted/30 rounded-lg">
-                                {alt.Changes.filter((c) => c.Reason).map((c, i) => (
-                                  <div key={i} className="flex items-start gap-1.5">
-                                    <span className="shrink-0">📝</span>
-                                    <span className="italic">{c.Reason}</span>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
                           </div>
                         )}
 
@@ -725,17 +702,6 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
                           "border-t px-4 py-3 flex justify-end gap-2",
                           isRecommended ? "bg-primary/5" : "bg-muted/20"
                         )}>
-                          {!isOpenShift && (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="text-xs h-8 gap-1.5 px-3"
-                              onClick={() => handleSolveForMe(alt)}
-                            >
-                              <Smartphone className="h-3.5 w-3.5" />
-                              Los het op voor mij
-                            </Button>
-                          )}
                           <Button
                             size="sm"
                             variant={isOpenShift ? "outline" : isRecommended ? "default" : "outline"}
@@ -748,6 +714,17 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
                             <CheckCircle2 className="h-3.5 w-3.5" />
                             {isOpenShift ? "Dienst open laten" : "Doorvoeren"}
                           </Button>
+                          {!isOpenShift && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="text-xs h-8 gap-1.5 px-3"
+                              onClick={() => handleSolveForMe(alt)}
+                            >
+                              <Smartphone className="h-3.5 w-3.5" />
+                              Los het op voor mij
+                            </Button>
+                          )}
                         </div>
                       </div>
                     );
