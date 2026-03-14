@@ -33,12 +33,15 @@ Constraint types:
 - "avoid_shift_kind": employee wants to avoid a shift type. Use shiftKind: "early", "day", "late", or "night".
 
 SWAP support (dienstwissel / ruilen):
-- When the user wants to SWAP a day (e.g. "ruil dinsdag met donderdag", "wissel maandag met woensdag"), detect the swap intent.
+- When the user wants to SWAP or EXCHANGE a day (e.g. "ruil dinsdag met donderdag", "wissel maandag met woensdag", "ruil dinsdag met een andere dag"), detect the swap intent.
 - Use the same constraintType ("avoid_day" or "avoid_date") for the day they want OFF.
-- Additionally set swapDayOfWeek (0-6) or swapDate ("YYYY-MM-DD") for the day they OFFER to work instead.
-- Example: "Ruil dinsdag met donderdag" → constraintType="avoid_day", dayOfWeek=1 (dinsdag=off), swapDayOfWeek=3 (donderdag=work instead)
-- Example: "Ruil 8 april met 10 april" → constraintType="avoid_date", date="2026-04-08" (off), swapDate="2026-04-10" (work instead)
-- isSwap should be true when a swap is detected.
+- If a SPECIFIC target day is mentioned: set swapDayOfWeek (0-6) or swapDate ("YYYY-MM-DD") for the day they OFFER to work instead.
+- If NO specific target day is mentioned (e.g. "ruil dinsdag met een andere dag", "wil dinsdag ruilen"): still set isSwap=true but leave swapDayOfWeek and swapDate empty/undefined. This is an "open swap" — the employee wants the day off but is willing to work on another (unspecified) free day.
+- IMPORTANT: "ruilen" (swap/exchange) is NOT the same as "vervanging" (replacement). A swap means the employee trades one working day for a free day. A replacement means someone else covers the shift.
+- Example: "Ruil dinsdag met donderdag" → constraintType="avoid_day", dayOfWeek=1 (dinsdag=off), swapDayOfWeek=3 (donderdag=work instead), isSwap=true
+- Example: "Ruil 8 april met 10 april" → constraintType="avoid_date", date="2026-04-08" (off), swapDate="2026-04-10" (work instead), isSwap=true
+- Example: "Wil dinsdag ruilen met een andere dag" → constraintType="avoid_day", dayOfWeek=1 (dinsdag=off), isSwap=true (NO swapDayOfWeek)
+- isSwap should be true whenever the user mentions ruilen/wisselen/swap/exchange.
 
 IMPORTANT - Ambiguity check:
 - Before returning a result, check if the employee name mentioned by the user matches MULTIPLE employees in the list (e.g. multiple people named "Sarah" or "Jan").
