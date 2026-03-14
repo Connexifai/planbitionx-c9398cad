@@ -132,7 +132,7 @@
     "postSolvePlaceholder": "E.g. 'Who can take over Franz-Xaver's Wednesday shift?'"
   },
   "robot": {
-    "uploadJson": "Upload a JSON file to get started",
+    "uploadJson": "Upload a JSON file or click on example to get started",
     "clickMe": "Hey! 👋 Click on me to share your roster preferences in the chat!",
     "clickMePost": "Hey! 👋 Click on me, I'll help you with disruptions or requests to change the roster!",
     "quotes": [
