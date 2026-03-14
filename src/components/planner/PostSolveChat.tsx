@@ -208,63 +208,6 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
     return response;
   }, [requestData, solverAssignments]);
 
-  /** Handle "Zoek verder" — re-search with full scope */
-  const handleSearchFull = useCallback(async (constraint: AlternativeConstraint, messageId: number) => {
-    // Remove the "zoek verder" button from the message
-    setMessages((prev) =>
-      prev.map((m) => m.id === messageId ? { ...m, showSearchFull: false } : m)
-    );
-    setIsTyping(true);
-
-    try {
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: Date.now(),
-          role: "assistant",
-          content: "🔍 Breder zoeken met alle medewerkers en diensten...",
-        },
-      ]);
-
-      const altResponse = await fetchAlternatives(constraint, "full");
-      const prepared = prepareAlternatives(altResponse.Alternatives || []);
-
-      if (prepared.visibleAlts.length === 0) {
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: Date.now() + 1,
-            role: "assistant",
-            content: "❌ Ook met een breder zoekbereik zijn er geen extra alternatieven gevonden.",
-          },
-        ]);
-      } else {
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: Date.now() + 1,
-            role: "assistant",
-            content: `🔎 Met een breder zoekbereik heb ik **${formatAlternativeCount(prepared)}** gevonden:`,
-            alternatives: prepared.visibleAlts,
-            baseline: altResponse.Baseline,
-          },
-        ]);
-      }
-    } catch (error) {
-      console.error("Full search error:", error);
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: Date.now() + 1,
-          role: "assistant",
-          content: `❌ Er ging iets mis bij het uitgebreid zoeken: ${error instanceof Error ? error.message : "Onbekende fout"}`,
-        },
-      ]);
-    } finally {
-      setIsTyping(false);
-    }
-  }, [fetchAlternatives]);
-
   const handleSend = async (text?: string) => {
     const msg = text || input;
     if (!msg.trim() || isTyping) return;
