@@ -537,12 +537,7 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
                         {msg.alternatives.length} optie{msg.alternatives.length !== 1 && "s"}
                       </Badge>
                     </h4>
-                    {msg.baseline && (
-                      <div className="text-[11px] text-muted-foreground flex items-center gap-1.5">
-                        <span>📊</span>
-                        <span>{msg.baseline.TotalAssignments} toewijzingen · {msg.baseline.FillRatePercentage.toFixed(1)}% bezetting</span>
-                      </div>
-                    )}
+                    {msg.baseline && (<></>)}
                   </div>
                   )}
                   {msg.alternatives.map((alt, altIdx) => {
