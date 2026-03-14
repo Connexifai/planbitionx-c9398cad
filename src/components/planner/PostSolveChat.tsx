@@ -547,7 +547,252 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
                     <User className="h-4 w-4 text-muted-foreground" />
                   )}
                 </div>
-...
+                <div
+                  className={cn(
+                    "rounded-xl px-4 py-3 text-sm leading-relaxed",
+                    msg.role === "assistant"
+                      ? "bg-card border shadow-sm"
+                      : "bg-primary text-primary-foreground"
+                  )}
+                >
+                  <div className="prose prose-sm dark:prose-invert max-w-none">
+                    <ReactMarkdown>{msg.content}</ReactMarkdown>
+                  </div>
+                </div>
+              </div>
+
+              {/* Alternatives cards */}
+              {msg.alternatives && msg.alternatives.length > 0 && (
+                <div className="mt-4 space-y-4 ml-11">
+                  {/* Section header */}
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                      🔄 Alternatieven
+                      <Badge variant="secondary" className="text-[10px] font-normal">
+                        {msg.alternatives.length} optie{msg.alternatives.length !== 1 && "s"}
+                      </Badge>
+                    </h4>
+                    {msg.baseline && (
+                      <div className="text-[11px] text-muted-foreground flex items-center gap-1.5">
+                        <span>📊</span>
+                        <span>{msg.baseline.TotalAssignments} toewijzingen · {msg.baseline.FillRatePercentage.toFixed(1)}% bezetting</span>
+                      </div>
+                    )}
+                  </div>
+                  {msg.alternatives.map((alt) => {
+                    const classified = classifyAlternative(alt, msg.constraintSummary);
+                    const TypeIcon = classified.icon;
+                    const isOpenShift = alt.ConflictShiftFilled === false;
+
+                    return (
+                      <div
+                        key={alt.Rank}
+                        className={cn(
+                          "border-2 rounded-xl overflow-hidden bg-card shadow-sm transition-all hover:shadow-lg",
+                          alt.Rank === 1 && !isOpenShift && "border-primary/50 ring-2 ring-primary/15 shadow-primary/5",
+                          alt.Rank !== 1 && !isOpenShift && "border-border hover:border-primary/30",
+                          isOpenShift && "border-dashed border-muted-foreground/30 opacity-75"
+                        )}
+                      >
+                        {/* Colored top accent bar */}
+                        {!isOpenShift && (
+                          <div className={cn(
+                            "h-1",
+                            alt.Rank === 1 ? "bg-primary" : "bg-muted-foreground/20"
+                          )} />
+                        )}
+
+                        {/* Header */}
+                        <div className="flex items-center justify-between px-4 pt-3 pb-1">
+                          <div className="flex items-center gap-2.5">
+                            <div className={cn(
+                              "flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold",
+                              alt.Rank === 1 && !isOpenShift
+                                ? "bg-primary text-primary-foreground"
+                                : isOpenShift
+                                  ? "bg-muted text-muted-foreground"
+                                  : "bg-secondary text-secondary-foreground"
+                            )}>
+                              {alt.Rank}
+                            </div>
+                            <div className="flex flex-col">
+                              <div className={cn(
+                                "flex items-center gap-1.5 text-sm font-semibold",
+                                isOpenShift ? "text-muted-foreground" : "text-foreground"
+                              )}>
+                                <TypeIcon className={cn("h-4 w-4", isOpenShift ? "text-muted-foreground" : "text-primary")} />
+                                {classified.label}
+                              </div>
+                              <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground mt-0.5">
+                                <span>{alt.ChangesFromBaseline} wijziging{alt.ChangesFromBaseline !== 1 && "en"}</span>
+                                {alt.Score && (
+                                  <>
+                                    <span>·</span>
+                                    <span>{alt.Score.FillRatePercentage.toFixed(0)}% bezetting</span>
+                                  </>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            {alt.Rank === 1 && !isOpenShift && (
+                              <Badge className="text-[10px] bg-primary/10 text-primary border-primary/30 font-semibold">
+                                ⭐ Aanbevolen
+                              </Badge>
+                            )}
+                            {isOpenShift && (
+                              <Badge variant="outline" className="text-[10px] text-muted-foreground border-muted-foreground/30">
+                                Geen vervanging
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Explanation */}
+                        <div className="px-4 py-2 mx-3 mb-2 mt-1 bg-muted/40 rounded-lg border border-border/50">
+                          <p className="text-xs text-muted-foreground leading-relaxed">
+                            {isOpenShift ? "⚠️" : "💡"} {classified.explanation}
+                          </p>
+                        </div>
+
+                        {/* Changes detail */}
+                        {alt.Changes && alt.Changes.length > 0 && (
+                          <div className="px-4 pb-3 space-y-1.5">
+                            {alt.Changes.map((change, i) => (
+                              <div
+                                key={i}
+                                className={cn(
+                                  "flex items-center gap-2 text-xs px-3 py-2 rounded-lg border",
+                                  change.Action === "added"
+                                    ? "bg-primary/5 text-primary border-primary/15 dark:text-primary"
+                                    : "bg-destructive/5 text-destructive border-destructive/15 dark:text-destructive"
+                                )}
+                              >
+                                <span className={cn(
+                                  "flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold shrink-0",
+                                  change.Action === "added"
+                                    ? "bg-primary/15 text-primary"
+                                    : "bg-destructive/15 text-destructive"
+                                )}>
+                                  {change.Action === "added" ? "+" : "−"}
+                                </span>
+                                <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                                  {change.EmployeeName && <span className="font-semibold truncate">{change.EmployeeName}</span>}
+                                  {change.EmployeeName && change.ShiftName && <span className="text-muted-foreground shrink-0">→</span>}
+                                  {change.ShiftName && <span className="truncate">{change.ShiftName}</span>}
+                                </div>
+                                {change.Start && (
+                                  <span className="text-muted-foreground text-[10px] shrink-0 ml-auto whitespace-nowrap">
+                                    {formatShiftDate(change.Start)} · {formatShiftTime(change.Start, change.End)}
+                                  </span>
+                                )}
+                              </div>
+                            ))}
+                            {/* Show Reason from solver if available */}
+                            {alt.Changes.some((c) => c.Reason) && (
+                              <div className="mt-1.5 px-3 py-1.5 text-[11px] text-muted-foreground bg-muted/30 rounded-lg">
+                                {alt.Changes.filter((c) => c.Reason).map((c, i) => (
+                                  <div key={i} className="flex items-start gap-1.5">
+                                    <span className="shrink-0">📝</span>
+                                    <span className="italic">{c.Reason}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Action buttons */}
+                        <div className="border-t px-4 py-3 bg-muted/20 flex justify-end gap-2">
+                          {!isOpenShift && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="text-xs h-8 gap-1.5 px-3"
+                              onClick={() => handleSolveForMe(alt)}
+                            >
+                              <Smartphone className="h-3.5 w-3.5" />
+                              Los het op voor mij
+                            </Button>
+                          )}
+                          <Button
+                            size="sm"
+                            variant={isOpenShift ? "outline" : alt.Rank === 1 ? "default" : "outline"}
+                            className={cn(
+                              "text-xs h-8 gap-1.5 px-3",
+                              alt.Rank === 1 && !isOpenShift && "shadow-sm"
+                            )}
+                            onClick={() => handleApplyAlternative(alt)}
+                          >
+                            <CheckCircle2 className="h-3.5 w-3.5" />
+                            {isOpenShift ? "Dienst open laten" : "Doorvoeren"}
+                          </Button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Disambiguation candidates */}
+              {msg.candidates && msg.candidates.length > 0 && (
+                <div className="mt-3 ml-11 flex flex-wrap gap-2">
+                  {msg.candidates.map((c) => (
+                    <Button
+                      key={c.id}
+                      variant="outline"
+                      size="sm"
+                      className="gap-2 text-xs"
+                      disabled={isTyping}
+                      onClick={() => {
+                        // Replace the original message with the full name and re-send
+                        const original = msg.originalMessage || "";
+                        // Build a clarified message using the full name
+                        const clarified = original.replace(
+                          /\b\w+\b/i,
+                          (match) => {
+                            // Replace the first word that partially matches the candidate name
+                            if (c.name.toLowerCase().includes(match.toLowerCase())) return c.name;
+                            return match;
+                          }
+                        );
+                        // If no replacement happened, just prepend the full name
+                        const finalMsg = clarified === original
+                          ? `${c.name}: ${original}`
+                          : clarified;
+                        // Remove candidates from this message
+                        setMessages((prev) =>
+                          prev.map((m) => m.id === msg.id ? { ...m, candidates: undefined } : m)
+                        );
+                        handleSend(finalMsg);
+                      }}
+                    >
+                      👤 {c.name}
+                    </Button>
+                  ))}
+                </div>
+              )}
+
+              {/* "Zoek verder" button */}
+              {msg.showSearchFull && msg.pendingConstraint && (
+                <div className="mt-3 ml-11">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-2 text-xs"
+                    disabled={isTyping}
+                    onClick={() => handleSearchFull(msg.pendingConstraint!, msg.id)}
+                  >
+                    <Search className="h-3.5 w-3.5" />
+                    🔍 Zoek verder (breder zoekbereik)
+                  </Button>
+                </div>
+              )}
+            </div>
+          ))}
+
+          {isTyping && (
+            <div className="flex gap-3 max-w-[85%]">
               <div className="flex items-center justify-center w-8 h-8 rounded-lg shrink-0 mt-0.5 bg-primary/10 overflow-hidden">
                 <img src={robotImg} alt="AI" className="h-full w-full object-cover object-[center_28%] scale-[2.7]" />
               </div>
