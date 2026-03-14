@@ -231,10 +231,18 @@ const EmployeeRow = memo(function EmployeeRow({
   );
 });
 
+export interface RosterFilterState {
+  employeeNames: string[];
+  conflictEmployeeName?: string;
+  conflictDayDate?: string;
+}
+
 interface RosterGridProps {
   data?: RosterData;
   employeeConstraints?: EmployeeConstraint[];
   animationState?: RosterAnimationState;
+  filter?: RosterFilterState | null;
+  onClearFilter?: () => void;
   onRegisterGridFns?: (fns: {
     scrollToEmployee: (empId: string) => Promise<void>;
     getCellRect: (empId: string, dayDate: string) => DOMRect | null;
@@ -242,7 +250,7 @@ interface RosterGridProps {
   }) => void;
 }
 
-export function RosterGrid({ data, employeeConstraints = [], animationState, onRegisterGridFns }: RosterGridProps) {
+export function RosterGrid({ data, employeeConstraints = [], animationState, filter, onClearFilter, onRegisterGridFns }: RosterGridProps) {
   const { t } = useTranslation();
   const parentRef = useRef<HTMLDivElement>(null);
 
