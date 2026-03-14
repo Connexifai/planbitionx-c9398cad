@@ -113,7 +113,99 @@ function formatAlternativeCount(prepared: PreparedAlternatives): string {
   return prepared.openAlt ? "1 optie" : "0 oplossingen";
 }
 
-function classifyAlternative(alt: Alternative, constraintEmployee?: string): ClassifiedAlternative {
+/**
+ * For swap requests: enrich alternatives with swap-day changes.
+ * - Filters to only show alternatives where the replacing employee works on the swap day
+ * - Adds synthetic changes: replacer removed from swap day, target added to swap day
+ */
+function enrichSwapAlternatives(
+  alternatives: Alternative[],
+  constraint: AlternativeConstraint,
+  solverAssignments: any[],
+  requestData: any,
+): Alternative[] {
+  if (constraint.swapDayOfWeek === undefined && !constraint.swapDate) return alternatives;
+
+  const dayNamesNL = ["maandag", "dinsdag", "woensdag", "donderdag", "vrijdag", "zaterdag", "zondag"];
+  const swapDayLabel = constraint.swapDayOfWeek !== undefined ? dayNamesNL[constraint.swapDayOfWeek] : constraint.swapDate || "";
+
+  // Build shift name lookup
+  const shiftNameMap = new Map<string, string>();
+  for (const s of (requestData?.Shifts || [])) {
+    shiftNameMap.set(String(s.Id), s.Name || "");
+  }
+
+  const enriched: Alternative[] = [];
+
+  for (const alt of alternatives) {
+    const addedChanges = (alt.Changes || []).filter(c => c.Action === "added");
+    if (addedChanges.length === 0) {
+      enriched.push(alt);
+      continue;
+    }
+
+    // Find if any replacing employee works on the swap day
+    const replacerIds = new Set(addedChanges.map(c => String(c.EmployeeId)));
+    let foundSwapMatch = false;
+
+    for (const replacerId of replacerIds) {
+      // Find this employee's assignments on the swap day
+      const swapDayAssignments = (solverAssignments || []).filter((a: any) => {
+        if (String(a.PersonId) !== replacerId) return false;
+        const d = new Date(a.Start);
+        const solverDay = d.getDay() === 0 ? 6 : d.getDay() - 1;
+        if (constraint.swapDayOfWeek !== undefined) return solverDay === constraint.swapDayOfWeek;
+        if (constraint.swapDate) return a.Start?.startsWith(constraint.swapDate);
+        return false;
+      });
+
+      if (swapDayAssignments.length > 0) {
+        foundSwapMatch = true;
+        const swapAssignment = swapDayAssignments[0];
+        const replacerName = addedChanges.find(c => String(c.EmployeeId) === replacerId)?.EmployeeName || "";
+        const shiftName = shiftNameMap.get(String(swapAssignment.ShiftId)) || "";
+
+        // Add synthetic swap changes
+        const swapChanges: AlternativeChange[] = [
+          {
+            EmployeeId: replacerId,
+            EmployeeName: replacerName,
+            ShiftId: String(swapAssignment.ShiftId),
+            ShiftName: shiftName,
+            Action: "removed",
+            Reason: `${replacerName} wordt van ${shiftName} gehaald op ${swapDayLabel} (ruil)`,
+            Start: swapAssignment.Start,
+            End: swapAssignment.End,
+          },
+          {
+            EmployeeId: constraint.employeeId,
+            EmployeeName: constraint.employeeName,
+            ShiftId: String(swapAssignment.ShiftId),
+            ShiftName: shiftName,
+            Action: "added",
+            Reason: `${constraint.employeeName} werkt ${swapDayLabel} in plaats van ${replacerName} (ruil)`,
+            Start: swapAssignment.Start,
+            End: swapAssignment.End,
+          },
+        ];
+
+        enriched.push({
+          ...alt,
+          Summary: `${constraint.employeeName} en ${replacerName} ruilen: ${replacerName} werkt ${constraint.dayOfWeek !== undefined ? dayNamesNL[constraint.dayOfWeek] : ""}, ${constraint.employeeName} werkt ${swapDayLabel}`,
+          Changes: [...(alt.Changes || []), ...swapChanges],
+          ChangesFromBaseline: (alt.Changes?.length || 0) + swapChanges.length,
+        });
+      }
+    }
+
+    // If no replacer works on the swap day, skip this alternative (not a valid swap)
+    if (!foundSwapMatch) continue;
+  }
+
+  return enriched;
+}
+
+function classifyAlternative(alt: Alternative, constraintEmployee?: string, isSwapRequest?: boolean): ClassifiedAlternative {
   // "Dienst open laten" option
   if (alt.ConflictShiftFilled === false) {
     return {
