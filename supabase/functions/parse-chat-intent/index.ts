@@ -32,6 +32,14 @@ Constraint types:
 - "avoid_date": employee wants a specific date off. Use date as "YYYY-MM-DD".
 - "avoid_shift_kind": employee wants to avoid a shift type. Use shiftKind: "early", "day", "late", or "night".
 
+SWAP support (dienstwissel / ruilen):
+- When the user wants to SWAP a day (e.g. "ruil dinsdag met donderdag", "wissel maandag met woensdag"), detect the swap intent.
+- Use the same constraintType ("avoid_day" or "avoid_date") for the day they want OFF.
+- Additionally set swapDayOfWeek (0-6) or swapDate ("YYYY-MM-DD") for the day they OFFER to work instead.
+- Example: "Ruil dinsdag met donderdag" → constraintType="avoid_day", dayOfWeek=1 (dinsdag=off), swapDayOfWeek=3 (donderdag=work instead)
+- Example: "Ruil 8 april met 10 april" → constraintType="avoid_date", date="2026-04-08" (off), swapDate="2026-04-10" (work instead)
+- isSwap should be true when a swap is detected.
+
 IMPORTANT - Ambiguity check:
 - Before returning a result, check if the employee name mentioned by the user matches MULTIPLE employees in the list (e.g. multiple people named "Sarah" or "Jan").
 - Compare using first names, last names, or partial matches.
