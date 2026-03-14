@@ -39,10 +39,11 @@ function formatTime(start?: string, end?: string) {
   return e ? `${s} – ${e}` : s;
 }
 
-function IPhone17({ employee, onApprove, onReject }: {
+function IPhone17({ employee, onApprove, onReject, notificationMode }: {
   employee: AffectedEmployee;
   onApprove: () => void;
   onReject: () => void;
+  notificationMode?: { title: string; body: string };
 }) {
   const now = new Date();
   const timeStr = `${now.getHours()}:${String(now.getMinutes()).padStart(2, "0")}`;
