@@ -151,14 +151,22 @@ const EmployeeRow = memo(function EmployeeRow({
         "grid border-b border-border/60 transition-colors hover:bg-accent/30",
         isPickupRow && "bg-destructive/5",
         isLandingRow && "bg-primary/5",
+        isConflictEmployee && "bg-destructive/5",
       )}
       style={{
         gridTemplateColumns: `230px repeat(${numDays}, minmax(85px, 1fr))`,
       }}
     >
-      <div className="flex flex-col justify-center gap-0.5 px-3 py-1.5 border-r sticky left-0 z-[2] bg-card">
-        <div className="flex items-center">
-          <p className="text-[13px] font-bold leading-snug truncate text-foreground">
+      <div className={cn(
+        "flex flex-col justify-center gap-0.5 px-3 py-1.5 border-r sticky left-0 z-[2] bg-card",
+        isConflictEmployee && "bg-destructive/5",
+      )}>
+        <div className="flex items-center gap-1.5">
+          {isConflictEmployee && <span className="text-destructive text-xs">🚫</span>}
+          <p className={cn(
+            "text-[13px] font-bold leading-snug truncate text-foreground",
+            isConflictEmployee && "text-destructive",
+          )}>
             {emp.lastName}, <span className="font-medium">{emp.firstName}</span>
           </p>
         </div>
