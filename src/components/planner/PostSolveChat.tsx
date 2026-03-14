@@ -645,7 +645,7 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
                                 {classified.label}
                               </div>
                               <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground mt-0.5">
-                                <span>{alt.ChangesFromBaseline} wijziging{alt.ChangesFromBaseline !== 1 && "en"}</span>
+                                <span>{isOpenShift ? (alt.Changes?.filter(c => c.Action === "removed").length || 1) : alt.ChangesFromBaseline} wijziging{(isOpenShift ? (alt.Changes?.filter(c => c.Action === "removed").length || 1) : alt.ChangesFromBaseline) !== 1 && "en"}</span>
                               </div>
                             </div>
                           </div>
