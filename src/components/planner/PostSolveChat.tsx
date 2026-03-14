@@ -17,6 +17,11 @@ interface CandidateEmployee {
   name: string;
 }
 
+interface SwapOption {
+  dayOfWeek: number;
+  label: string;
+}
+
 interface Message {
   id: number;
   role: "user" | "assistant";
@@ -31,6 +36,10 @@ interface Message {
   originalMessage?: string;
   /** Whether this is a confirmation of an applied alternative (hides action buttons) */
   applied?: boolean;
+  /** Open swap: available free days to pick from */
+  swapOptions?: SwapOption[];
+  /** Base constraint for open swap (missing swapDayOfWeek) */
+  swapConstraintBase?: AlternativeConstraint;
 }
 
 export interface RosterFilterState {
@@ -275,16 +284,6 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
         return;
       }
 
-      // Show understanding message
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: Date.now() + 1,
-          role: "assistant",
-          content: `✅ **Begrepen:** ${intent.summary}\n\n⏳ Ik zoek nu snel de beste alternatieven...`,
-        },
-      ]);
-
       // Step 2: Build constraint
       const constraint: AlternativeConstraint = {
         employeeId: String(intent.employeeId),
@@ -298,6 +297,71 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
         swapDayOfWeek: intent.swapDayOfWeek ?? undefined,
         swapDate: intent.swapDate ?? undefined,
       };
+
+      // Open swap: isSwap=true but no specific target day → ask user which free day
+      const isOpenSwap = intent.isSwap === true
+        && constraint.swapDayOfWeek === undefined
+        && constraint.swapDate === undefined;
+
+      if (isOpenSwap) {
+        // Find the employee's free days so we can suggest them
+        const dayNamesNL = ["maandag", "dinsdag", "woensdag", "donderdag", "vrijdag", "zaterdag", "zondag"];
+        const empAssignments = (solverAssignments || []).filter(
+          (a: any) => String(a.PersonId) === String(constraint.employeeId)
+        );
+        // Get which ISO day-of-week numbers are occupied
+        const occupiedDays = new Set<number>();
+        for (const a of empAssignments) {
+          const d = new Date(a.Start);
+          const solverDay = d.getDay() === 0 ? 6 : d.getDay() - 1; // JS→ISO
+          occupiedDays.add(solverDay);
+        }
+        const freeDays = dayNamesNL
+          .map((name, idx) => ({ name, idx }))
+          .filter(({ idx }) => !occupiedDays.has(idx));
+
+        const conflictDay = constraint.dayOfWeek !== undefined ? dayNamesNL[constraint.dayOfWeek] : constraint.date || "";
+
+        if (freeDays.length === 0) {
+          setMessages((prev) => [
+            ...prev,
+            {
+              id: Date.now() + 1,
+              role: "assistant",
+              content: `⚠️ **${constraint.employeeName}** is elke dag ingepland in het huidige rooster, er zijn geen vrije dagen beschikbaar om mee te ruilen.`,
+            },
+          ]);
+          setIsTyping(false);
+          return;
+        }
+
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: Date.now() + 1,
+            role: "assistant",
+            content: `🔄 **${constraint.employeeName}** wil ${conflictDay} ruilen met een andere dag.\n\nWelke vrije dag wil ${constraint.employeeName} daarvoor werken?`,
+            swapOptions: freeDays.map(d => ({ dayOfWeek: d.idx, label: d.name.charAt(0).toUpperCase() + d.name.slice(1) })),
+            swapConstraintBase: constraint,
+          },
+        ]);
+        setIsTyping(false);
+        return;
+      }
+
+      // Show understanding message
+      const isSwapWithTarget = intent.isSwap === true;
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: Date.now() + 1,
+          role: "assistant",
+          content: isSwapWithTarget
+            ? `✅ **Begrepen:** ${intent.summary}\n\n🔄 Ik zoek nu de beste ruilopties...`
+            : `✅ **Begrepen:** ${intent.summary}\n\n⏳ Ik zoek nu snel de beste alternatieven...`,
+        },
+      ]);
+
       setLastConstraint(constraint);
 
       // Debug: log target employee's assignments from solver output
@@ -491,6 +555,86 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
     }
   };
 
+  /** Handle user picking a day for an open swap */
+  const handleSwapDaySelected = async (baseConstraint: AlternativeConstraint, dayOfWeek: number, dayLabel: string) => {
+    // Remove swap options from the message
+    setMessages((prev) =>
+      prev.map((m) => m.swapOptions ? { ...m, swapOptions: undefined, swapConstraintBase: undefined } : m)
+    );
+
+    // Show user "choice" as a user message
+    setMessages((prev) => [
+      ...prev,
+      { id: Date.now(), role: "user", content: dayLabel },
+    ]);
+    setIsTyping(true);
+
+    const constraint: AlternativeConstraint = {
+      ...baseConstraint,
+      swapDayOfWeek: dayOfWeek,
+    };
+    setLastConstraint(constraint);
+
+    try {
+      const dayNamesNL = ["maandag", "dinsdag", "woensdag", "donderdag", "vrijdag", "zaterdag", "zondag"];
+      const offDay = constraint.dayOfWeek !== undefined ? dayNamesNL[constraint.dayOfWeek] : constraint.date || "";
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: Date.now() + 1,
+          role: "assistant",
+          content: `🔄 **Begrepen:** ${constraint.employeeName} wil ${offDay} ruilen met ${dayLabel.toLowerCase()}.\n\n⏳ Ik zoek de beste ruilopties...`,
+        },
+      ]);
+
+      // Pre-check
+      const removedShifts = getRemovedAssignments(solverAssignments, constraint, requestData?.Shifts || []);
+      if (removedShifts.length === 0) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: Date.now() + 2,
+            role: "assistant",
+            content: `ℹ️ **${constraint.employeeName}** is niet ingepland op ${offDay}. Er is geen dienst om te ruilen.\n\nProbeer een andere dag.`,
+          },
+        ]);
+        setIsTyping(false);
+        return;
+      }
+
+      const altResponse = await fetchAlternatives(constraint, "narrow");
+      const prepared = prepareAlternatives(altResponse.Alternatives || []);
+
+      if (prepared.visibleAlts.length === 0) {
+        setMessages((prev) => [
+          ...prev,
+          { id: Date.now() + 2, role: "assistant", content: "⚠️ Geen ruilopties gevonden voor deze combinatie." },
+        ]);
+      } else {
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: Date.now() + 2,
+            role: "assistant",
+            content: `Ik heb **${formatAlternativeCount(prepared)}** gevonden:`,
+            alternatives: prepared.visibleAlts,
+            baseline: altResponse.Baseline,
+            constraintSummary: `${constraint.employeeName} ruilt ${offDay} met ${dayLabel.toLowerCase()}`,
+            pendingConstraint: constraint,
+          },
+        ]);
+      }
+    } catch (error) {
+      console.error("Swap day selection error:", error);
+      setMessages((prev) => [
+        ...prev,
+        { id: Date.now() + 1, role: "assistant", content: `❌ Er ging iets mis: ${error instanceof Error ? error.message : "Onbekende fout"}` },
+      ]);
+    } finally {
+      setIsTyping(false);
+    }
+  };
 
 
 
@@ -787,6 +931,24 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
                 </div>
               )}
 
+              {/* Open swap day picker */}
+              {msg.swapOptions && msg.swapOptions.length > 0 && msg.swapConstraintBase && (
+                <div className="mt-3 ml-11 flex flex-wrap gap-2">
+                  {msg.swapOptions.map((opt) => (
+                    <Button
+                      key={opt.dayOfWeek}
+                      variant="outline"
+                      size="sm"
+                      className="gap-2 text-xs"
+                      disabled={isTyping}
+                      onClick={() => handleSwapDaySelected(msg.swapConstraintBase!, opt.dayOfWeek, opt.label)}
+                    >
+                      🔄 {opt.label}
+                    </Button>
+                  ))}
+                </div>
+              )}
+
             </div>
           ))}
 
@@ -805,8 +967,6 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
               </div>
             </div>
           )}
-
-
 
         </div>
 
