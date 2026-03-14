@@ -29,6 +29,8 @@ interface Message {
   candidates?: CandidateEmployee[];
   /** Original user message to retry after disambiguation */
   originalMessage?: string;
+  /** Whether this is a confirmation of an applied alternative (hides action buttons) */
+  applied?: boolean;
 }
 
 export interface PostSolveChatProps {
@@ -388,6 +390,7 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
         role: "assistant",
         content: `✅ **Wijziging doorgevoerd!**`,
         alternatives: [alt],
+        applied: true,
       },
     ]);
   };
@@ -411,6 +414,7 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
         role: "assistant",
         content: `✅ **Alle medewerkers akkoord — wijziging doorgevoerd!**`,
         alternatives: [alt],
+        applied: true,
       },
     ]);
   };
@@ -523,7 +527,8 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
               {/* Alternatives cards */}
               {msg.alternatives && msg.alternatives.length > 0 && (
                 <div className="mt-4 space-y-4 ml-11">
-                  {/* Section header */}
+                  {/* Section header — hidden for applied confirmations */}
+                  {!msg.applied && (
                   <div className="flex items-center justify-between">
                     <h4 className="text-sm font-semibold text-foreground flex items-center gap-2">
                       🔄 Alternatieven
@@ -538,6 +543,7 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
                       </div>
                     )}
                   </div>
+                  )}
                   {msg.alternatives.map((alt, altIdx) => {
                     const classified = classifyAlternative(alt, msg.constraintSummary);
                     const TypeIcon = classified.icon;
@@ -654,7 +660,8 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
                           );
                         })()}
 
-                        {/* Action buttons */}
+                        {/* Action buttons — hidden for applied alternatives */}
+                        {!msg.applied && (
                         <div className={cn(
                           "border-t px-4 py-3 flex justify-end gap-2",
                           isRecommended ? "bg-primary/5" : "bg-muted/20"
@@ -683,6 +690,7 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
                             </Button>
                           )}
                         </div>
+                        )}
                       </div>
                     );
                   })}
