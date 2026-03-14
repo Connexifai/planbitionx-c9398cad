@@ -28,7 +28,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Download, Moon, Sun, MessageCircle, PanelRightClose, LogOut, User } from "lucide-react";
+import { Download, Moon, Sun, MessageCircle, PanelRightClose, LogOut, User, Menu } from "lucide-react";
 import { useEffect, useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
