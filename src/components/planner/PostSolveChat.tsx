@@ -273,7 +273,7 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
         {
           id: Date.now() + 1,
           role: "assistant",
-          content: `✅ **Begrepen:** ${intent.summary}\n\n⏳ Ik zoek nu snel de beste lokale alternatieven...`,
+          content: `✅ **Begrepen:** ${intent.summary}\n\n⏳ Ik zoek nu snel de beste alternatieven...`,
         },
       ]);
 
