@@ -368,41 +368,69 @@ export default function Index() {
       {entranceVisible && (
         <div className="fixed inset-0 z-[200] bg-background pointer-events-none animate-[fade-out_1.2s_ease-out_forwards]" />
       )}
-      <PlannerSidebar 
-        onSolve={handleSolve} 
-        onJsonLoaded={handleJsonLoaded} 
-        collapsed={sidebarCollapsed}
-        onCollapsedChange={setSidebarCollapsed}
-        atw={atw}
-        setAtw={setAtw}
-        soft={soft}
-        setSoft={setSoft}
-        solver={solver}
-        setSolver={setSolver}
-      />
+
+      {/* Sidebar: inline on desktop, Sheet on mobile */}
+      {!isMobile && (
+        <PlannerSidebar 
+          onSolve={handleSolve} 
+          onJsonLoaded={handleJsonLoaded} 
+          collapsed={sidebarCollapsed}
+          onCollapsedChange={setSidebarCollapsed}
+          atw={atw}
+          setAtw={setAtw}
+          soft={soft}
+          setSoft={setSoft}
+          solver={solver}
+          setSolver={setSolver}
+        />
+      )}
 
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="flex items-center justify-between gap-4 border-b bg-card px-4 py-2.5 shadow-sm">
-          <div className="flex items-center gap-3">
-            <h1 className="text-lg font-bold tracking-tight">{t("app.title")}</h1>
+        <header className="flex items-center justify-between gap-2 md:gap-4 border-b bg-card px-3 md:px-4 py-2.5 shadow-sm">
+          <div className="flex items-center gap-2 md:gap-3">
+            {isMobile && (
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
+                    <Menu className="h-5 w-5" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="left" className="p-0 w-[320px]">
+                  <PlannerSidebar 
+                    onSolve={() => { handleSolve(); }}
+                    onJsonLoaded={handleJsonLoaded} 
+                    collapsed={false}
+                    onCollapsedChange={() => {}}
+                    atw={atw}
+                    setAtw={setAtw}
+                    soft={soft}
+                    setSoft={setSoft}
+                    solver={solver}
+                    setSolver={setSolver}
+                    hideIconStrip
+                  />
+                </SheetContent>
+              </Sheet>
+            )}
+            <h1 className="text-base md:text-lg font-bold tracking-tight truncate">{t("app.title")}</h1>
           </div>
-          <div className="flex items-center gap-2">
-            {solved && (
+          <div className="flex items-center gap-1.5 md:gap-2">
+            {solved && !isMobile && (
               <Button variant="outline" size="sm" className="gap-1.5 text-xs">
                 <Download className="h-3.5 w-3.5" />
                 {t("app.downloadJson")}
               </Button>
             )}
-            <PushNotificationManager />
+            {!isMobile && <PushNotificationManager />}
             <LanguageSwitcher />
-            <div className="flex items-center gap-1.5 ml-1">
+            <div className="flex items-center gap-1 md:gap-1.5 ml-0.5 md:ml-1">
               <Sun className="h-3.5 w-3.5 text-muted-foreground" />
               <Switch checked={dark} onCheckedChange={setDark} className="scale-75" />
               <Moon className="h-3.5 w-3.5 text-muted-foreground" />
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Avatar className="h-8 w-8 cursor-pointer ml-2">
+                <Avatar className="h-8 w-8 cursor-pointer ml-1 md:ml-2">
                   <AvatarFallback className="bg-primary text-primary-foreground text-xs font-semibold">
                     {user?.email?.charAt(0).toUpperCase() || "U"}
                   </AvatarFallback>
