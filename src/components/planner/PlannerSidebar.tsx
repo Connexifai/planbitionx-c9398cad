@@ -309,6 +309,7 @@ export function PlannerSidebar({
   setSoft: React.Dispatch<React.SetStateAction<SoftConstraints>>;
   solver: SolverSettings;
   setSolver: React.Dispatch<React.SetStateAction<SolverSettings>>;
+  hideIconStrip?: boolean;
 }) {
   const { t } = useTranslation();
   const [activeSection, setActiveSection] = useState<SectionId>("json");
