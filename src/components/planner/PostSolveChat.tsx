@@ -33,11 +33,18 @@ interface Message {
   applied?: boolean;
 }
 
+export interface RosterFilterState {
+  employeeNames: string[];
+  conflictEmployeeName?: string;
+  conflictDayDate?: string;
+}
+
 export interface PostSolveChatProps {
   requestData: any;
   solverAssignments: any[];
   onApplyAlternative?: (alternative: Alternative) => void;
   onNavigateToEmployee?: (employeeName: string) => void;
+  onFilterRoster?: (filter: RosterFilterState | null) => void;
 }
 
 // ─── Helpers to classify and explain alternatives ──────────────
