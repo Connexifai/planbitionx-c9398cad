@@ -152,7 +152,7 @@ function classifyAlternative(alt: Alternative, constraintEmployee?: string): Cla
 
 // ─── Main component ────────────────────────────────────────────
 
-export function PostSolveChat({ requestData, solverAssignments, onApplyAlternative }: PostSolveChatProps) {
+export function PostSolveChat({ requestData, solverAssignments, onApplyAlternative, onNavigateToEmployee }: PostSolveChatProps) {
   const { t } = useTranslation();
   const [messages, setMessages] = useState<Message[]>([
     {
