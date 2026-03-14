@@ -645,7 +645,7 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
                                   {change.Action === "added" ? "+" : "−"}
                                 </span>
                                 <div className="flex items-center gap-1.5 flex-1 min-w-0">
-                                  {change.EmployeeName && <span className="font-semibold truncate">{change.EmployeeName}</span>}
+                                  {change.EmployeeName && <button type="button" onClick={() => onNavigateToEmployee?.(change.EmployeeName)} className="font-semibold truncate underline decoration-dotted underline-offset-2 hover:text-foreground cursor-pointer transition-colors">{change.EmployeeName}</button>}
                                   {change.EmployeeName && change.ShiftName && <span className="text-muted-foreground shrink-0">→</span>}
                                   {change.ShiftName && <span className="truncate">{change.ShiftName}</span>}
                                 </div>
