@@ -709,7 +709,8 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
                               </div>
                             ))}
                           </div>
-                        )}
+                          );
+                        })()}
 
                         {/* Action buttons */}
                         <div className={cn(
