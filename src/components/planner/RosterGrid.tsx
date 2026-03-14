@@ -333,7 +333,7 @@ export function RosterGrid({ data, employeeConstraints = [], animationState, onR
           className="sticky top-0 z-[5] grid border-b-2 border-border bg-card shadow-sm"
           style={{ gridTemplateColumns: `230px repeat(${numDays}, minmax(85px, 1fr))` }}
         >
-          <div className="flex items-center gap-2 px-4 py-3 border-r">
+          <div className="flex items-center gap-2 px-4 py-3 border-r sticky left-0 z-[6] bg-card">
             <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t("grid.employee")}</span>
           </div>
           {days.map((d, i) => (
