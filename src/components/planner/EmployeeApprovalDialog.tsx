@@ -268,11 +268,15 @@ export function EmployeeApprovalDialog({
     });
 
     if (index === employees.length - 1) {
-      setPhase("done");
+      // All approved — show notification phase to requester
+      setPhase("notifying");
       setTimeout(() => {
-        onOpenChange(false);
-        if (alternative) onAllApproved(alternative);
-      }, 1500);
+        setPhase("done");
+        setTimeout(() => {
+          onOpenChange(false);
+          if (alternative) onAllApproved(alternative);
+        }, 1500);
+      }, 2000);
     } else {
       setTimeout(() => setActiveIndex(index + 1), 800);
     }
