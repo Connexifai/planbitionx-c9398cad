@@ -362,6 +362,7 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
             alternatives: narrowPrepared.visibleAlts,
             baseline: altResponse.Baseline,
             constraintSummary: intent.summary,
+            pendingConstraint: constraint,
           },
         ]);
       }
