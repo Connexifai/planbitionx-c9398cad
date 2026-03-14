@@ -358,6 +358,27 @@ export function RosterGrid({ data, employeeConstraints = [], animationState, fil
   const isLandingPhase = phase === "landing";
 
   return (
+    <div className="space-y-2">
+      {/* Filter banner */}
+      {filter && filterNameSet && (
+        <div className="flex items-center justify-between bg-primary/10 border border-primary/20 rounded-lg px-4 py-2">
+          <div className="flex items-center gap-2 text-sm">
+            <Filter className="h-4 w-4 text-primary" />
+            <span className="font-medium text-foreground">
+              Gefilterd: {employees.length} medewerker{employees.length !== 1 && "s"}
+            </span>
+            {filter.conflictEmployeeName && (
+              <Badge variant="destructive" className="text-[10px]">
+                🚫 {filter.conflictEmployeeName}
+              </Badge>
+            )}
+          </div>
+          <Button variant="ghost" size="sm" className="h-7 gap-1 text-xs text-muted-foreground hover:text-foreground" onClick={onClearFilter}>
+            <X className="h-3 w-3" />
+            Wis filter
+          </Button>
+        </div>
+      )}
     <div
       ref={parentRef}
       className="roster-scroll w-full max-w-full rounded-xl border border-border/50 bg-card shadow-sm overflow-x-auto overflow-y-auto max-h-[calc(100vh-280px)]"
