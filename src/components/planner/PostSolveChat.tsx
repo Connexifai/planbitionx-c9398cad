@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { SendHorizontal, User, CheckCircle2, UserPlus, Repeat2, GitBranch, AlertCircle, Smartphone } from "lucide-react";
-import robotImg from "@/assets/robot-assistant.png";
+import robotImg from "@/assets/robot-head-avatar.png";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
