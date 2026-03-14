@@ -527,7 +527,8 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
               {/* Alternatives cards */}
               {msg.alternatives && msg.alternatives.length > 0 && (
                 <div className="mt-4 space-y-4 ml-11">
-                  {/* Section header */}
+                  {/* Section header — hidden for applied confirmations */}
+                  {!msg.applied && (
                   <div className="flex items-center justify-between">
                     <h4 className="text-sm font-semibold text-foreground flex items-center gap-2">
                       🔄 Alternatieven
