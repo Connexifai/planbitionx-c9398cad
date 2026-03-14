@@ -37,6 +37,7 @@ export interface PostSolveChatProps {
   requestData: any;
   solverAssignments: any[];
   onApplyAlternative?: (alternative: Alternative) => void;
+  onNavigateToEmployee?: (employeeName: string) => void;
 }
 
 // ─── Helpers to classify and explain alternatives ──────────────
