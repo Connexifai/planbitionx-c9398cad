@@ -81,21 +81,49 @@ serve(async (req) => {
     console.log("SoftConstraints in payload:", JSON.stringify(payload.SoftConstraints));
     console.log("Sending solve request to external API...");
 
-    const response = await fetch(SOLVER_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Api-Key": SOLVER_API_KEY,
-      },
-      body: JSON.stringify(payload),
-    });
+    const MAX_RETRIES = 3;
+    let response: Response | null = null;
+    let lastError = "";
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`Solver API error [${response.status}]:`, errorText);
+    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+      try {
+        console.log(`Solve attempt ${attempt}/${MAX_RETRIES}...`);
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 120_000); // 2 min timeout
+
+        response = await fetch(SOLVER_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Api-Key": SOLVER_API_KEY,
+          },
+          body: JSON.stringify(payload),
+          signal: controller.signal,
+        });
+        clearTimeout(timeoutId);
+
+        if (response.ok) break;
+
+        const errorText = await response.text();
+        lastError = `Solver API returned ${response.status}: ${errorText}`;
+        console.error(`Attempt ${attempt} failed: ${lastError}`);
+      } catch (fetchErr) {
+        lastError = fetchErr instanceof Error ? fetchErr.message : String(fetchErr);
+        console.error(`Attempt ${attempt} fetch error: ${lastError}`);
+        response = null;
+      }
+
+      if (attempt < MAX_RETRIES) {
+        const delay = attempt * 2000;
+        console.log(`Retrying in ${delay}ms...`);
+        await new Promise((r) => setTimeout(r, delay));
+      }
+    }
+
+    if (!response || !response.ok) {
       return new Response(
-        JSON.stringify({ error: `Solver API returned ${response.status}`, details: errorText }),
-        { status: response.status, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({ error: lastError || "Solver API unreachable after retries" }),
+        { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
