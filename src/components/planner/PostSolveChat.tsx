@@ -721,7 +721,10 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
                         )}
 
                         {/* Action buttons */}
-                        <div className="border-t px-4 py-3 bg-muted/20 flex justify-end gap-2">
+                        <div className={cn(
+                          "border-t px-4 py-3 flex justify-end gap-2",
+                          isRecommended ? "bg-primary/5" : "bg-muted/20"
+                        )}>
                           {!isOpenShift && (
                             <Button
                               size="sm"
@@ -735,10 +738,10 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
                           )}
                           <Button
                             size="sm"
-                            variant={isOpenShift ? "outline" : alt.Rank === 1 ? "default" : "outline"}
+                            variant={isOpenShift ? "outline" : isRecommended ? "default" : "outline"}
                             className={cn(
                               "text-xs h-8 gap-1.5 px-3",
-                              alt.Rank === 1 && !isOpenShift && "shadow-sm"
+                              isRecommended && "shadow-sm"
                             )}
                             onClick={() => handleApplyAlternative(alt)}
                           >
