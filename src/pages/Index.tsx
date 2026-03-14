@@ -224,6 +224,13 @@ export default function Index() {
     }, 150);
   }, [rosterData, scrollToEmployee]);
 
+  const [rosterFilter, setRosterFilter] = useState<import("@/components/planner/RosterGrid").RosterFilterState | null>(null);
+
+  const handleFilterRoster = useCallback((filter: import("@/components/planner/RosterGrid").RosterFilterState | null) => {
+    setActiveTab("roster");
+    setRosterFilter(filter);
+  }, []);
+
   const handleApplyAlternative = useCallback((alt: any) => {
     const normalizedAlt = normalizeAlternativeShiftIds(alt);
     const changes: AlternativeChange[] = normalizedAlt.Changes || [];
