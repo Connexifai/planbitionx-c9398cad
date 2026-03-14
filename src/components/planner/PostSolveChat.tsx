@@ -450,6 +450,10 @@ export function PostSolveChat({ requestData, solverAssignments, onApplyAlternati
     setApprovalDialogOpen(true);
   };
 
+  /** Get the constraint employee name for the current approval flow */
+  const constraintEmployeeId = lastConstraint?.employeeId;
+  const constraintEmployeeName = lastConstraint?.employeeName;
+
   const handleAllApproved = (alt: Alternative) => {
     onApplyAlternative?.(alt);
     setMessages((prev) => [
