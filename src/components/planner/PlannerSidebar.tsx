@@ -162,6 +162,17 @@ function JsonSection({ onJsonLoaded }: { onJsonLoaded?: (rawJson?: string) => vo
           setLoaded(true);
         }}
       />
+      <Button variant="outline" size="sm" className="w-full text-xs" onClick={async () => {
+        try {
+          const res = await fetch("/data/schedule-request.json");
+          const text = await res.text();
+          setJsonText(text);
+          onJsonLoaded?.(text);
+          setLoaded(true);
+        } catch {}
+      }}>
+        {t("sidebar.example", "Voorbeeld")}
+      </Button>
     </div>
   );
 }
