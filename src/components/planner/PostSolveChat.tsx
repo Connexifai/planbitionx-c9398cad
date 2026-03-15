@@ -98,7 +98,27 @@ function prepareAlternatives(alternatives: Alternative[]): PreparedAlternatives 
     return true;
   });
   const filledAlts = deduped.filter((a) => a.ConflictShiftFilled !== false).slice(0, 5);
-  const openAlt = deduped.find((a) => a.ConflictShiftFilled === false);
+  let openAlt = deduped.find((a) => a.ConflictShiftFilled === false);
+
+  // Always create a synthetic "dienst open laten" option if the solver didn't return one
+  if (!openAlt && filledAlts.length > 0) {
+    const maxRank = Math.max(...deduped.map((a) => a.Rank), 0);
+    openAlt = {
+      Rank: maxRank + 1,
+      ChangesFromBaseline: 0,
+      ConflictShiftFilled: false,
+      Summary: "De dienst wordt niet opgevuld en blijft open.",
+      Score: { FillRatePercentage: filledAlts[0]?.Score?.FillRatePercentage ?? 0, HardViolations: 0 },
+      Changes: [],
+      Assignments: filledAlts[0]?.Assignments || [],
+    };
+  }
+
+  // For open shift alternatives, strip all "removed" changes so only additions are shown
+  if (openAlt) {
+    openAlt = { ...openAlt, Changes: (openAlt.Changes || []).filter((c) => c.Action !== "removed") };
+  }
+
   return {
     filledAlts,
     openAlt,
